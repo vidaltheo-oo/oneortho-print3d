@@ -1,0 +1,2188 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ONE PRINT — Chiffrage SLS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/"
+  }
+}
+</script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  --bg:#F5F2E8;
+  --green:#004B32;
+  --lime:#AAE66E;
+  --orange:#FF6C4F;
+  --white:#ffffff;
+  --border:#E2DED2;
+  --muted:#8A8478;
+  --text:#1C1C1A;
+}
+
+body{font-family:'DM Sans',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+
+/* HEADER */
+header{
+  background:var(--green);
+  padding:1.125rem 2rem;
+  display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;
+}
+.logo h1{
+  font-family:'Sora',sans-serif;font-weight:700;font-size:1.375rem;
+  color:#fff;text-transform:uppercase;letter-spacing:-.025em;line-height:1.2;
+}
+.logo h1 .accent{color:var(--orange)}
+.logo p{font-size:.78rem;color:rgba(170,230,110,.85);margin-top:.15rem;letter-spacing:.02em}
+.hright{display:flex;align-items:center;gap:.75rem;flex-wrap:wrap}
+.hbadge{
+  background:var(--lime);color:var(--green);
+  font-family:'Sora',sans-serif;font-weight:700;font-size:.72rem;
+  text-transform:uppercase;letter-spacing:.03em;
+  padding:.375rem .875rem;border-radius:100px;
+}
+
+/* LANG SELECTOR */
+.lang-pills{display:flex;gap:.375rem;flex-wrap:wrap}
+.lang-btn{
+  background:rgba(255,255,255,.12);border:1.5px solid rgba(255,255,255,.2);
+  border-radius:100px;padding:.3rem .7rem;
+  font-family:'Sora',sans-serif;font-weight:600;font-size:.72rem;
+  color:rgba(255,255,255,.75);cursor:pointer;transition:all .15s;letter-spacing:.04em;
+}
+.lang-btn:hover{background:rgba(255,255,255,.2);color:#fff}
+.lang-btn.active{background:var(--lime);border-color:var(--lime);color:var(--green)}
+
+/* LAYOUT */
+.wrap{
+  max-width:1100px;margin:0 auto;padding:2rem 1.5rem;
+  display:grid;grid-template-columns:1fr 380px;
+  gap:1.5rem;align-items:start;
+}
+.left{display:flex;flex-direction:column;gap:1.25rem}
+.right{display:flex;flex-direction:column;gap:1.25rem}
+.price-top-section{
+  max-width:1100px;margin:0 auto;
+  padding:1.5rem 1.5rem 0;
+  display:flex;justify-content:flex-end;
+}
+#pricecard{width:100%;max-width:380px}
+
+@media(max-width:820px){
+  .wrap{grid-template-columns:1fr}
+  .price-top-section{padding:1rem 1rem 0;justify-content:stretch}
+  #pricecard{max-width:none}
+  header{padding:1rem 1.25rem}
+  .logo h1{font-size:1.15rem}
+}
+
+/* CARDS */
+.card{
+  background:var(--white);border-radius:18px;padding:1.625rem;
+  box-shadow:0 1px 3px rgba(0,0,0,.06),0 4px 16px rgba(0,75,50,.06);
+}
+.stitle{
+  font-family:'Sora',sans-serif;font-weight:700;font-size:.875rem;
+  text-transform:uppercase;color:var(--green);letter-spacing:.05em;
+  margin-bottom:1.25rem;display:flex;align-items:center;gap:.5rem;
+}
+.stitle::before{
+  content:'';display:block;width:8px;height:8px;
+  border-radius:50%;background:var(--lime);flex-shrink:0;
+}
+.stitle.orange::before{background:var(--orange)}
+
+/* DROP ZONE */
+.dz{
+  position:relative;border:2px dashed var(--border);border-radius:14px;
+  background:var(--bg);padding:3rem 2rem;text-align:center;cursor:pointer;
+  transition:border-color .2s,background .2s;
+}
+.dz:hover,.dz.over{border-color:var(--green);background:rgba(0,75,50,.03)}
+.dz input[type=file]{
+  position:absolute;inset:0;opacity:0;cursor:pointer;
+  width:100%;height:100%;font-size:0;
+}
+.dicon{width:60px;height:60px;margin:0 auto 1.125rem}
+.dhead{
+  font-family:'Sora',sans-serif;font-weight:600;font-size:.975rem;
+  color:var(--green);margin-bottom:.4rem;
+}
+.dsub{font-size:.825rem;color:var(--muted)}
+
+/* PARSING */
+.parse-state{
+  display:flex;align-items:center;justify-content:center;
+  gap:.625rem;padding:1.5rem;font-size:.875rem;color:var(--green);
+}
+.spinner{
+  width:18px;height:18px;border:2px solid var(--lime);
+  border-top-color:var(--green);border-radius:50%;
+  animation:spin .65s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* FILE LOADED */
+.finfo{
+  display:flex;align-items:center;gap:1rem;
+  padding:.875rem 1.125rem;
+  background:rgba(170,230,110,.12);border:1.5px solid rgba(170,230,110,.5);
+  border-radius:12px;
+}
+.fthumb{
+  width:44px;height:44px;background:var(--green);border-radius:10px;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.fmeta{flex:1;min-width:0}
+.fmeta .fn{
+  font-family:'Sora',sans-serif;font-weight:600;font-size:.875rem;
+  color:var(--green);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.fmeta .fv{font-size:.82rem;color:var(--muted);margin-top:.2rem}
+.fmeta .fv strong{color:var(--green)}
+.btn-chg{
+  background:none;border:1.5px solid var(--border);border-radius:100px;
+  padding:.35rem .875rem;font-family:'DM Sans',sans-serif;
+  font-size:.8rem;color:var(--muted);cursor:pointer;white-space:nowrap;
+  transition:all .15s;flex-shrink:0;
+}
+.btn-chg:hover{border-color:var(--orange);color:var(--orange)}
+
+/* PIECES LIST */
+.pieces-list{display:flex;flex-direction:column;gap:.5rem;margin-bottom:.75rem;}
+.piece-item{display:flex;align-items:center;gap:.75rem;padding:.625rem .875rem;background:rgba(170,230,110,.1);border:1.5px solid rgba(170,230,110,.4);border-radius:10px;}
+.pdel{margin-left:auto;background:none;border:1.5px solid var(--border);border-radius:50%;width:24px;height:24px;font-size:1rem;line-height:1;color:var(--muted);cursor:pointer;transition:all .15s;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+.pdel:hover{border-color:var(--orange);color:var(--orange);}
+
+/* ERROR */
+.err{
+  margin-top:.875rem;padding:.7rem 1rem;
+  background:#FFF1EE;border:1.5px solid #FFC7BB;
+  border-radius:10px;font-size:.825rem;color:#C53D2A;
+}
+
+/* OPT GROUPS */
+.og{margin-bottom:1.5rem}
+.og:last-child{margin-bottom:0}
+.olbl{
+  font-family:'Sora',sans-serif;font-weight:600;font-size:.72rem;
+  text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:.625rem;
+}
+.olbl.required{color:var(--green)}
+.olbl.required::after{content:' *';color:var(--orange)}
+
+/* APP TYPE — prominent */
+.app-pills .pill label{
+  padding:.55rem 1.1rem;font-size:.875rem;font-weight:500;
+}
+
+/* MATERIAL CHIP */
+.mchip{
+  display:inline-flex;align-items:center;gap:.5rem;
+  background:var(--bg);border:1.5px solid var(--border);border-radius:100px;
+  padding:.5rem 1rem;font-size:.875rem;color:var(--green);font-weight:500;
+}
+.mchip .cc{
+  width:20px;height:20px;background:var(--lime);border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+}
+
+/* PILLS */
+.pills{display:flex;flex-wrap:wrap;gap:.5rem}
+.pill input{display:none}
+.pill label{
+  display:inline-flex;align-items:center;gap:.375rem;
+  padding:.45rem 1rem;border:1.5px solid var(--border);border-radius:100px;
+  font-size:.85rem;color:var(--muted);cursor:pointer;transition:all .15s;
+  user-select:none;background:var(--white);
+}
+.pill label .tag{font-size:.72rem;opacity:.7}
+.pill label .plus{color:var(--lime);opacity:1}
+.pill input:checked+label{background:var(--green);border-color:var(--green);color:var(--white)}
+.pill input:checked+label .plus{color:var(--lime)}
+.pill label:hover{border-color:var(--green);color:var(--green)}
+.pill input:checked+label:hover{color:var(--white)}
+.cdot{width:11px;height:11px;border-radius:50%;border:1.5px solid rgba(0,0,0,.15);flex-shrink:0}
+
+/* QTY */
+.qty-ctrl{display:flex;align-items:center;gap:.5rem}
+.qty-btn{
+  width:32px;height:32px;border:1.5px solid var(--border);border-radius:100px;
+  background:var(--white);display:flex;align-items:center;justify-content:center;
+  cursor:pointer;font-size:1.1rem;color:var(--green);transition:all .15s;flex-shrink:0;
+  font-family:'DM Sans',sans-serif;line-height:1;
+}
+.qty-btn:hover{border-color:var(--green);background:rgba(0,75,50,.05)}
+#qty{
+  width:64px;height:32px;border:1.5px solid var(--border);border-radius:100px;
+  text-align:center;font-family:'Sora',sans-serif;font-size:.9rem;font-weight:600;
+  color:var(--green);background:var(--white);outline:none;
+}
+#qty:focus{border-color:var(--green)}
+
+/* CHECKBOXES */
+.checks{display:flex;flex-direction:column;gap:.625rem}
+.ci{display:flex;align-items:center;gap:.75rem;cursor:pointer}
+.ci input{display:none}
+.cbox{
+  width:22px;height:22px;border:2px solid var(--border);border-radius:6px;
+  background:var(--white);display:flex;align-items:center;justify-content:center;
+  transition:all .15s;flex-shrink:0;
+}
+.ci input:checked~.cbox{background:var(--green);border-color:var(--green)}
+.ck{display:none}
+.ci input:checked~.cbox .ck{display:block}
+.ct{flex:1}
+.ct .cn{font-size:.875rem;color:var(--text)}
+.ct .cp{font-family:'Sora',sans-serif;font-size:.78rem;color:var(--green);font-weight:600;margin-top:.1rem}
+
+/* ── VIEWER ── */
+#viewercard{padding:1.375rem}
+#viewercard .stitle{margin-bottom:.875rem}
+.vcvs{
+  width:100%;height:268px;border-radius:12px;overflow:hidden;
+  background:var(--bg);cursor:grab;
+}
+.vcvs:active{cursor:grabbing}
+.vcvs canvas{display:block!important;width:100%!important;height:100%!important}
+.vhint{
+  display:flex;align-items:center;justify-content:center;
+  gap:.5rem;margin-top:.625rem;font-size:.72rem;color:var(--muted);
+}
+.vsep{opacity:.35}
+.vreset{
+  background:none;border:1px solid var(--border);border-radius:100px;
+  padding:.2rem .625rem;font-size:.72rem;font-family:'DM Sans',sans-serif;
+  color:var(--muted);cursor:pointer;transition:all .15s;
+}
+.vreset:hover{border-color:var(--green);color:var(--green)}
+.viewer-tabs{
+  display:flex;flex-wrap:wrap;gap:.375rem;
+  margin-top:.625rem;padding-top:.625rem;
+  border-top:1px solid var(--border);
+}
+.viewer-tab{
+  font-family:'Sora',sans-serif;font-size:.68rem;font-weight:600;
+  padding:.3rem .65rem;border-radius:100px;
+  border:1.5px solid var(--border);
+  background:rgba(255,255,255,.5);color:var(--muted);
+  cursor:pointer;transition:all .15s;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:130px;
+}
+.viewer-tab:hover{border-color:var(--lime);color:var(--green)}
+.viewer-tab.active{background:var(--lime);border-color:var(--lime);color:var(--green)}
+.vbadge{
+  margin-left:auto;font-family:'DM Sans',sans-serif;
+  font-weight:500;font-size:.72rem;padding:.2rem .6rem;
+  border-radius:100px;border:1px solid;text-transform:none;letter-spacing:0;
+}
+.vbadge.rot{color:var(--lime);border-color:rgba(170,230,110,.4);background:rgba(170,230,110,.08)}
+.vbadge.man{color:var(--muted);border-color:var(--border);background:none}
+
+/* PRICE PANEL */
+.pempty{text-align:center;padding:2.5rem 1rem;color:var(--muted)}
+.pempty svg{margin:0 auto .875rem;display:block;color:var(--border)}
+.pempty p{font-size:.875rem;line-height:1.6}
+
+.vpill{
+  background:linear-gradient(135deg,rgba(0,75,50,.04),rgba(170,230,110,.12));
+  border:1px solid rgba(170,230,110,.6);border-radius:12px;
+  padding:.875rem 1.125rem;margin-bottom:1.25rem;
+  display:flex;align-items:center;
+}
+.vpill .vl{
+  font-size:.72rem;font-family:'Sora',sans-serif;font-weight:600;
+  text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:.2rem;
+}
+.vpill .vv{font-family:'Sora',sans-serif;font-weight:700;font-size:1.25rem;color:var(--green)}
+.vpill .vv small{font-size:.8rem;font-weight:400;color:var(--muted)}
+
+.prows{margin-bottom:1rem}
+.prow{
+  display:flex;justify-content:space-between;align-items:baseline;
+  padding:.55rem 0;border-bottom:1px solid var(--bg);font-size:.875rem;
+}
+.prow .pl{color:var(--muted);flex:1;padding-right:.5rem}
+.prow .pv{font-family:'Sora',sans-serif;font-weight:600;color:var(--text);white-space:nowrap}
+.prow .pv.add{color:var(--green)}
+.prow .pv.disc{color:var(--orange)}
+.pminsub{font-size:.72rem;color:var(--muted);font-style:italic;margin-top:.1rem}
+.pmincolor{font-size:.72rem;color:var(--orange);font-weight:600;margin-top:.1rem}
+
+.totals{border-top:1.5px solid var(--border);padding-top:.875rem}
+.trow{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:.35rem 0;font-size:.875rem;
+}
+.trow .tl{color:var(--muted)}
+.trow .tv{font-family:'Sora',sans-serif;font-weight:600}
+
+.gtotal{
+  background:var(--green);border-radius:14px;
+  padding:1.125rem 1.375rem;margin-top:.875rem;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.gtotal .gtl{font-family:'Sora',sans-serif;font-weight:600;font-size:.875rem;color:var(--lime);text-transform:uppercase;letter-spacing:.03em}
+.gtotal .gtl small{display:block;color:rgba(255,255,255,.5);font-size:.72rem;font-weight:400;text-transform:none;margin-top:.1rem}
+.gtotal .gta{font-family:'Sora',sans-serif;font-weight:800;font-size:2.125rem;color:var(--white);line-height:1}
+.gtotal .gta sup{font-size:1rem;font-weight:600;vertical-align:super;margin-left:.1rem;color:rgba(255,255,255,.75)}
+
+.pnote{text-align:center;font-size:.75rem;color:var(--muted);margin-top:.875rem;line-height:1.5}
+.pvalidity{font-size:.75rem;color:var(--muted);text-align:center;margin-top:.3rem}
+
+/* PDF BUTTON */
+.btn-pdf{
+  display:block;width:100%;margin-top:1rem;
+  background:var(--orange);color:var(--white);
+  border:none;border-radius:100px;padding:.75rem 1.5rem;
+  font-family:'Sora',sans-serif;font-size:.875rem;font-weight:700;
+  letter-spacing:.02em;cursor:pointer;transition:opacity .15s;
+  text-align:center;
+}
+.btn-pdf:hover{opacity:.87}
+
+/* SIMULATION TABLE */
+#simcard table{width:100%;border-collapse:collapse;font-size:.84rem}
+#simcard thead th{
+  font-family:'Sora',sans-serif;font-size:.7rem;font-weight:600;
+  text-transform:uppercase;letter-spacing:.07em;color:var(--muted);
+  padding:.4rem .625rem .625rem;text-align:right;border-bottom:1.5px solid var(--border);
+}
+#simcard thead th:first-child{text-align:left}
+#simcard tbody td{
+  padding:.55rem .625rem;border-bottom:1px solid var(--bg);
+  font-family:'DM Sans',sans-serif;color:var(--text);text-align:right;
+}
+#simcard tbody td:first-child{text-align:left;font-weight:500}
+.disc-chip{
+  font-family:'Sora',sans-serif;font-size:.72rem;font-weight:700;
+  color:var(--orange);background:rgba(255,108,79,.08);
+  border-radius:100px;padding:.15rem .5rem;
+}
+.nexttier-hint{font-size:.65rem;color:var(--orange);display:block;margin-top:.1rem;}
+#simcard tbody tr{cursor:pointer;transition:background .12s;}
+#simcard tbody tr:hover{background:rgba(170,230,110,.15);}
+#simcard tbody tr.active-row{background:rgba(170,230,110,.3);}
+#simcard tbody tr.active-row td{color:var(--green);font-weight:600;}
+
+/* CONTACT */
+.contact-section{max-width:1100px;margin:0 auto;padding:0 1.5rem 2rem}
+.contact-card{
+  background:var(--white);border-radius:14px;padding:1.25rem 1.75rem;
+  display:flex;align-items:center;justify-content:center;gap:.75rem;flex-wrap:wrap;
+  text-align:center;border:1.5px solid var(--border);
+}
+.contact-card p{font-size:.875rem;color:var(--muted)}
+.contact-card a{
+  font-family:'Sora',sans-serif;font-weight:600;font-size:.875rem;
+  color:var(--orange);text-decoration:none;
+}
+.contact-card a:hover{text-decoration:underline}
+
+/* MODAL */
+.modal-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.55);
+  display:flex;align-items:center;justify-content:center;
+  z-index:9999;padding:1rem;
+}
+.modal-box{
+  background:var(--white);border-radius:20px;
+  padding:2rem;max-width:440px;width:100%;
+  box-shadow:0 20px 60px rgba(0,0,0,.2);
+  animation:fadeUp .2s ease;
+}
+.modal-icon{font-size:2rem;text-align:center;margin-bottom:1rem}
+.modal-title{
+  font-family:'Sora',sans-serif;font-weight:700;font-size:1.05rem;
+  color:var(--green);text-align:center;margin-bottom:.75rem;
+}
+.modal-body{font-size:.875rem;color:var(--muted);text-align:center;line-height:1.65;margin-bottom:1.5rem}
+.modal-actions{display:flex;gap:.75rem}
+.modal-actions .btn-yes{
+  flex:1;background:var(--green);color:var(--white);border:none;
+  border-radius:100px;padding:.7rem 1rem;
+  font-family:'Sora',sans-serif;font-size:.875rem;font-weight:700;cursor:pointer;
+  transition:opacity .15s;
+}
+.modal-actions .btn-yes:hover{opacity:.87}
+.modal-actions .btn-no{
+  flex:1;background:none;color:var(--muted);
+  border:1.5px solid var(--border);border-radius:100px;padding:.7rem 1rem;
+  font-family:'Sora',sans-serif;font-size:.875rem;font-weight:600;cursor:pointer;
+  transition:all .15s;
+}
+.modal-actions .btn-no:hover{border-color:var(--orange);color:var(--orange)}
+
+/* UTILS */
+.hidden{display:none!important}
+@keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.fi{animation:fadeUp .25s ease forwards}
+
+footer{text-align:center;padding:1.5rem;font-size:.78rem;color:var(--muted);border-top:1px solid var(--border)}
+footer strong{color:var(--orange)}
+</style>
+</head>
+<body>
+
+<!-- UNIT MODAL -->
+<div class="modal-overlay hidden" id="unitModal">
+  <div class="modal-box">
+    <div class="modal-icon">&#9888;&#65039;</div>
+    <div class="modal-title" id="m_title_el"></div>
+    <div class="modal-body" id="m_body_el"></div>
+    <div class="modal-actions">
+      <button class="btn-yes" id="modalYes"></button>
+      <button class="btn-no" id="modalNo"></button>
+    </div>
+  </div>
+</div>
+
+<header>
+  <div class="logo">
+    <h1>ONE <span class="accent">PRINT</span></h1>
+    <p id="brand_sub_el"></p>
+  </div>
+  <div class="hright">
+    <div class="lang-pills" id="langPills">
+      <button class="lang-btn active" data-lang="fr">FR</button>
+      <button class="lang-btn" data-lang="en">EN</button>
+      <button class="lang-btn" data-lang="es">ES</button>
+      <button class="lang-btn" data-lang="it">IT</button>
+      <button class="lang-btn" data-lang="de">DE</button>
+      <button class="lang-btn" data-lang="pt">PT</button>
+    </div>
+    <div class="hbadge" id="badge_el"></div>
+  </div>
+</header>
+
+<!-- DEVIS INSTANTANÉ — Premier élément visible -->
+<div class="price-top-section">
+  <div class="card" id="pricecard">
+    <div class="stitle orange" id="p_title_el"></div>
+
+    <div class="pempty" id="pempty">
+      <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+        <circle cx="20" cy="20" r="17" stroke="currentColor" stroke-width="1.5"/>
+        <path d="M15 15a5 5 0 0 1 9.33 2c0 3.33-5 5-5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        <circle cx="19.5" cy="28.5" r="1" fill="currentColor"/>
+      </svg>
+      <p id="p_empty_el"></p>
+    </div>
+
+    <div class="hidden fi" id="ppanel">
+      <!-- Qty controls -->
+      <div class="qty-ctrl" style="margin-bottom:1rem;">
+        <button class="qty-btn" id="qtyMinus">&#8722;</button>
+        <input type="number" id="qty" min="1" value="1">
+        <button class="qty-btn" id="qtyPlus">+</button>
+      </div>
+
+      <!-- vpill volume -->
+      <div class="vpill">
+        <div>
+          <div class="vl" id="p_volume_lbl"></div>
+          <div class="vv" id="pvol">&#8212; <small>mm&#179;</small></div>
+        </div>
+      </div>
+
+      <div class="prows" id="prows"></div>
+
+      <div class="totals">
+        <div class="trow hidden" id="rsubt">
+          <span class="tl" id="p_subht_lbl"></span>
+          <span class="tv" id="psubt">&#8212;</span>
+        </div>
+        <div class="trow"><span class="tl" id="p_subht_el"></span><span class="tv" id="pht">&#8212;</span></div>
+        <div class="trow"><span class="tl" id="p_tva_el"></span><span class="tv" id="ptva">&#8212;</span></div>
+      </div>
+
+      <div class="gtotal">
+        <div><div class="gtl" id="p_ttc_lbl">TTC<small id="p_ttc_sub"></small></div></div>
+        <div class="gta" id="pttc">&#8212;<sup>&#8364;</sup></div>
+      </div>
+
+      <p class="pnote" id="p_note_el"></p>
+      <p class="pvalidity" id="p_validity_el"></p>
+
+      <button class="btn-pdf" id="btnPdf"></button>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- LEFT -->
+  <div class="left">
+
+    <div class="card">
+      <div class="stitle" id="u_title_el"></div>
+
+      <div class="dz" id="dz">
+        <input type="file" id="fi" accept=".stl" multiple>
+        <svg class="dicon" viewBox="0 0 60 60" fill="none">
+          <polygon points="30,4 56,18 30,32 4,18"
+            fill="rgba(170,230,110,.2)" stroke="#004B32" stroke-width="2" stroke-linejoin="round"/>
+          <polygon points="4,18 30,32 30,56 4,42"
+            fill="rgba(0,75,50,.1)" stroke="#004B32" stroke-width="2" stroke-linejoin="round"/>
+          <polygon points="56,18 30,32 30,56 56,42"
+            fill="rgba(0,75,50,.07)" stroke="#004B32" stroke-width="2" stroke-linejoin="round"/>
+          <circle cx="30" cy="32" r="5" fill="rgba(170,230,110,.5)" stroke="#004B32" stroke-width="1.5"/>
+          <path d="M28 30.5l2 2 2-2M30 32.5V28" stroke="#004B32" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <p class="dhead" id="u_head_el"></p>
+        <p class="dsub" id="u_sub_el"></p>
+      </div>
+
+      <div class="parse-state hidden" id="ps">
+        <div class="spinner"></div>
+        <span id="u_parsing_el"></span>
+      </div>
+
+      <div class="hidden fi" id="fl">
+        <div id="piecesList" class="pieces-list"></div>
+        <button class="btn-chg" id="btnchg"></button>
+      </div>
+
+      <div class="err hidden" id="err"></div>
+    </div>
+
+    <div class="card hidden fi" id="optcard">
+      <div class="stitle" id="c_title_el"></div>
+
+      <!-- Application type (required) -->
+      <div class="og">
+        <div class="olbl required" id="c_apptype_el"></div>
+        <div class="pills app-pills" id="appPills">
+          <div class="pill">
+            <input type="radio" name="app" id="app_md" value="md">
+            <label for="app_md" id="c_app_md_el"></label>
+          </div>
+          <div class="pill">
+            <input type="radio" name="app" id="app_proto" value="proto">
+            <label for="app_proto" id="c_app_proto_el"></label>
+          </div>
+          <div class="pill">
+            <input type="radio" name="app" id="app_other" value="other">
+            <label for="app_other" id="c_app_other_el"></label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Matériau -->
+      <div class="og">
+        <div class="olbl" id="c_mat_el"></div>
+        <div class="mchip">
+          <div class="cc">
+            <svg width="11" height="11" viewBox="0 0 11 11" fill="none">
+              <path d="M2.5 5.5L4.5 7.5L8.5 3.5" stroke="#004B32" stroke-width="1.75"
+                stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          PA2200 Nylon SLS
+        </div>
+      </div>
+
+      <!-- Finition -->
+      <div class="og">
+        <div class="olbl" id="c_finish_el"></div>
+        <div class="pills">
+          <div class="pill">
+            <input type="radio" name="fin" id="fmicro" value="micro" checked>
+            <label for="fmicro"><span id="c_micro_el"></span> <span class="tag" id="c_included_el"></span></label>
+          </div>
+          <div class="pill">
+            <input type="radio" name="fin" id="flissage" value="lissage">
+            <label for="flissage"><span id="c_lissage_el"></span> <span class="tag plus">2&euro;/pc</span></label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Couleur -->
+      <div class="og">
+        <div class="olbl" id="c_color_el"></div>
+        <div class="pills">
+          <div class="pill">
+            <input type="radio" name="col" id="cblanc" value="blanc" checked>
+            <label for="cblanc"><span class="cdot" style="background:#F0EDE3"></span><span id="c_blanc_el"></span></label>
+          </div>
+          <div class="pill">
+            <input type="radio" name="col" id="cgris" value="gris">
+            <label for="cgris"><span class="cdot" style="background:#888;border-color:transparent"></span><span id="c_gris_el"></span> <span class="tag plus">2&euro;/pc</span></label>
+          </div>
+          <div class="pill">
+            <input type="radio" name="col" id="cbleu" value="bleu">
+            <label for="cbleu"><span class="cdot" style="background:#2563EB;border-color:transparent"></span><span id="c_bleu_el"></span> <span class="tag plus">2&euro;/pc</span></label>
+          </div>
+          <div class="pill">
+            <input type="radio" name="col" id="cnoir" value="noir">
+            <label for="cnoir"><span class="cdot" style="background:#111;border-color:#555"></span><span id="c_noir_el"></span> <span class="tag plus">2&euro;/pc</span></label>
+          </div>
+          <div class="pill">
+            <input type="radio" name="col" id="crouge" value="rouge">
+            <label for="crouge"><span class="cdot" style="background:#DC2626;border-color:transparent"></span><span id="c_rouge_el"></span> <span class="tag plus">2&euro;/pc</span></label>
+          </div>
+          <div class="pill">
+            <input type="radio" name="col" id="cvert" value="vert">
+            <label for="cvert"><span class="cdot" style="background:#004B32;border-color:transparent"></span><span id="c_vert_el"></span> <span class="tag plus">2&euro;/pc</span></label>
+          </div>
+          <div class="pill">
+            <input type="radio" name="col" id="corange" value="orange">
+            <label for="corange"><span class="cdot" style="background:#FF6C4F;border-color:transparent"></span><span id="c_orange_el"></span> <span class="tag plus">2&euro;/pc</span></label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Délai -->
+      <div class="og">
+        <div class="olbl" id="c_delay_el"></div>
+        <div class="pills">
+          <div class="pill">
+            <input type="radio" name="delay" id="dstd" value="std" checked>
+            <label for="dstd"><span id="c_std_el"></span></label>
+          </div>
+          <div class="pill">
+            <input type="radio" name="delay" id="dpri" value="pri">
+            <label for="dpri"><span id="c_pri_el"></span></label>
+          </div>
+          <div class="pill">
+            <input type="radio" name="delay" id="dexp" value="exp">
+            <label for="dexp"><span id="c_exp_el"></span></label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Options -->
+      <div class="og">
+        <div class="olbl" id="c_opts_el"></div>
+        <div class="checks">
+          <label class="ci">
+            <input type="checkbox" id="onett">
+            <div class="cbox">
+              <svg class="ck" width="12" height="12" viewBox="0 0 12 12" fill="none">
+                <path d="M2.5 6L5 8.5L9.5 3.5" stroke="white" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+            <div class="ct"><div class="cn" id="c_nett_el"></div><div class="cp">+25,00 &euro;/pi&egrave;ce</div></div>
+          </label>
+          <label class="ci">
+            <input type="checkbox" id="odossier">
+            <div class="cbox">
+              <svg class="ck" width="12" height="12" viewBox="0 0 12 12" fill="none">
+                <path d="M2.5 6L5 8.5L9.5 3.5" stroke="white" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+            <div class="ct"><div class="cn" id="c_dossier_el"></div><div class="cp">+15,00 &euro;</div></div>
+          </label>
+        </div>
+      </div>
+
+      <!-- Livraison -->
+      <div class="og">
+        <div class="olbl" id="c_delivery_el"></div>
+        <div class="pills">
+          <div class="pill">
+            <input type="radio" name="liv" id="lj1" value="j1">
+            <label for="lj1"><span id="c_j1_el"></span></label>
+          </div>
+          <div class="pill">
+            <input type="radio" name="liv" id="lretrait" value="retrait" checked>
+            <label for="lretrait"><span id="c_retrait_el"></span> <span class="tag plus" id="c_retrait_free_el"></span></label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /left -->
+
+  <!-- RIGHT -->
+  <div class="right">
+
+    <div class="card hidden fi" id="viewercard">
+      <div class="stitle">
+        <span id="v_title_el"></span>
+        <span id="vbadge" class="vbadge rot"></span>
+      </div>
+      <div id="vcvs" class="vcvs"></div>
+      <div class="vhint">
+        <span id="v_hint1_el"></span>
+        <span class="vsep">&#183;</span>
+        <span id="v_hint2_el"></span>
+        <span class="vsep">&#183;</span>
+        <button id="vreset" class="vreset"></button>
+      </div>
+      <div id="viewerTabs" class="viewer-tabs" style="display:none"></div>
+    </div>
+
+    <!-- Simulation multi-quantités (dans la colonne droite) -->
+    <div class="card hidden fi" id="simcard">
+      <div class="stitle" id="s_title_el"></div>
+      <div style="overflow-x:auto">
+        <table>
+          <thead>
+            <tr>
+              <th id="s_qty_el"></th>
+              <th id="s_ht_el"></th>
+              <th id="s_ttc_el"></th>
+            </tr>
+          </thead>
+          <tbody id="simBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+
+  </div><!-- /right -->
+
+</div><!-- /wrap -->
+
+<div class="contact-section">
+  <div class="contact-card">
+    <p id="contact_text_el"></p>
+    <a href="mailto:3Dprinting@oneortho-medical.com">3Dprinting@oneortho-medical.com</a>
+  </div>
+</div>
+
+<footer>
+  <span id="footer_txt_el"></span>
+</footer>
+
+<script type="module">
+import * as THREE from 'three';
+import { STLLoader }     from 'three/addons/loaders/STLLoader.js';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+// ── Quote number unique, généré une seule fois au démarrage ──────────────────
+const QUOTE_NUM = (() => {
+  const d = new Date();
+  const dateStr = d.getFullYear() + String(d.getMonth()+1).padStart(2,'0') + String(d.getDate()).padStart(2,'0');
+  const rand = String(Math.floor(Math.random()*9000)+1000);
+  return 'DEV-' + dateStr + '-' + rand;
+})();
+
+// ── i18n ─────────────────────────────────────────────────────────────────────
+
+const TRANSLATIONS = {
+  fr: {
+    brand_sub:   "Chiffrage SLS instantane -- PA2200 Nylon",
+    badge:       "SLS Estimator",
+    u_title:     "Fichier STL",
+    u_head:      "Deposez vos fichiers STL ici",
+    u_sub:       "Ou cliquer pour parcourir · Plusieurs fichiers, Binary & ASCII supportes",
+    u_parsing:   "Analyse du fichier en cours...",
+    u_vol:       "Volume calcule",
+    u_change:    "Changer",
+    m_title:     "Confirmation d'unite",
+    m_body:      "Confirmez-vous que votre fichier est modelise en millimetres (mm) ? Une erreur d'unite entrainerait un chiffrage incorrect.",
+    m_yes:       "Oui, en mm",
+    m_no:        "Non, annuler",
+    m_reject:    "Fichier annule -- verifiez les unites (mm requis) et rechargez votre fichier.",
+    c_title:     "Configuration",
+    c_apptype:   "Nature de l'application",
+    c_app_md:    "Dispositif medical",
+    c_app_proto: "Prototype",
+    c_app_other: "Autre utilisation",
+    c_app_req:   "Veuillez selectionner la nature de l'application avant de generer le PDF.",
+    c_mat:       "Materiau",
+    c_qty:       "Quantite",
+    c_finish:    "Finition de surface",
+    c_micro:     "Microbillee",
+    c_lissage:   "Lissage vapeur",
+    c_included:  "inclus",
+    c_color:     "Teinte",
+    c_blanc:     "Blanc",
+    c_gris:      "Gris",
+    c_bleu:      "Bleu",
+    c_noir:      "Noir",
+    c_rouge:     "Rouge",
+    c_vert:      "Vert",
+    c_orange:    "Orange",
+    c_delay:     "Delai",
+    c_std:       "Standard 5j (+0%)",
+    c_pri:       "Priority 3j (+10%)",
+    c_exp:       "Express 2j (+25%)",
+    c_opts:      "Options supplementaires",
+    c_nett:      "Nettoyage final / Double-emballage medical (non-sterile)",
+    c_dossier:   "Dossier de lot ISO 13485",
+    c_delivery:  "Livraison",
+    c_j1:        "Livraison J+1 (+15EUR)",
+    c_retrait:   "Retrait en atelier",
+    c_retrait_free: "Gratuit",
+    p_title:     "Devis instantane",
+    p_volume:    "Volume",
+    p_base:      "Prix de base (PA2200)",
+    p_min_applied: "Minimum 6 EUR applique",
+    p_finish:    "Lissage vapeur (2EUR/piece)",
+    p_lissage_min: "Minimum lissage 100 EUR applique",
+    p_color:     "Teinte",
+    p_color_min: "Minimum teinture 100 EUR applique",
+    p_delay:     "Supplement delai",
+    p_nett:      "Nettoyage / Emballage",
+    p_dossier:   "Dossier ISO 13485",
+    p_delivery:  "Livraison J+1",
+    p_disc:      "Remise",
+    p_subht:     "Sous-total HT",
+    p_tva:       "TVA 20%",
+    p_ttc:       "Total TTC",
+    p_note:      "Devis indicatif - sous reserve de validation technique",
+    p_empty:     "Chargez un fichier STL\npour obtenir votre devis",
+    p_validity:  "Validite : 30 jours",
+    s_title:     "Simulation multi-quantites",
+    s_qty:       "Quantite",
+    s_ht:        "Total HT",
+    s_disc:      "Remise",
+    s_ttc:       "Prix TTC",
+    s_unit:      "Prix unitaire HT",
+    pdf_btn:     "Telecharger le devis PDF",
+    pdf_app_req: "Veuillez selectionner la nature de l'application avant de generer le PDF.",
+    contact_text: "Pour passer commande, envoyez votre devis a",
+    v_title:     "Apercu 3D",
+    v_rot:       "Rotation auto",
+    v_man:       "Manuel",
+    v_reset:     "Vue initiale",
+    v_hint1:     "Glisser - pivoter",
+    v_hint2:     "Molette - zoom",
+    footer_txt:  "ONE PRINT -- OneOrtho Medical - PA2200 Nylon - Tarifs indicatifs HT",
+    err_format:  "Format non supporte -- selectionnez un fichier .stl",
+    err_vol:     "Volume nul ou invalide -- verifiez que le mesh est ferme (watertight).",
+    err_corrupt: "Fichier invalide ou corrompu : ",
+    err_read:    "Impossible de lire le fichier.",
+  },
+  en: {
+    brand_sub:   "Instant SLS quoting -- PA2200 Nylon",
+    badge:       "SLS Estimator",
+    u_title:     "STL File",
+    u_head:      "Drop your STL files here",
+    u_sub:       "Or click to browse - Multiple files, Binary & ASCII supported",
+    u_parsing:   "Analysing file...",
+    u_vol:       "Calculated volume",
+    u_change:    "Change",
+    m_title:     "Unit confirmation",
+    m_body:      "Please confirm your file is modelled in millimetres (mm). An incorrect unit would result in a wrong quote.",
+    m_yes:       "Yes, in mm",
+    m_no:        "No, cancel",
+    m_reject:    "File cancelled -- please check units (mm required) and reload your file.",
+    c_title:     "Configuration",
+    c_apptype:   "Application type",
+    c_app_md:    "Medical device",
+    c_app_proto: "Prototype",
+    c_app_other: "Other use",
+    c_app_req:   "Please select the application type before generating the PDF.",
+    c_mat:       "Material",
+    c_qty:       "Quantity",
+    c_finish:    "Surface finish",
+    c_micro:     "Shot-blasted",
+    c_lissage:   "Vapour smoothing",
+    c_included:  "included",
+    c_color:     "Colour",
+    c_blanc:     "White",
+    c_gris:      "Grey",
+    c_bleu:      "Blue",
+    c_noir:      "Black",
+    c_rouge:     "Red",
+    c_vert:      "Green",
+    c_orange:    "Orange",
+    c_delay:     "Lead time",
+    c_std:       "Standard 5d (+0%)",
+    c_pri:       "Priority 3d (+10%)",
+    c_exp:       "Express 2d (+25%)",
+    c_opts:      "Additional options",
+    c_nett:      "Final cleaning / Medical double-packaging (non-sterile)",
+    c_dossier:   "ISO 13485 batch file",
+    c_delivery:  "Delivery",
+    c_j1:        "Next-day delivery (+EUR15)",
+    c_retrait:   "Workshop pick-up",
+    c_retrait_free: "Free",
+    p_title:     "Instant quote",
+    p_volume:    "Volume",
+    p_base:      "Base price (PA2200)",
+    p_min_applied: "Minimum EUR6 applied",
+    p_finish:    "Vapour smoothing (EUR2/pc)",
+    p_lissage_min: "Smoothing minimum EUR100 applied",
+    p_color:     "Colour",
+    p_color_min: "Colour minimum EUR100 applied",
+    p_delay:     "Lead-time surcharge",
+    p_nett:      "Cleaning / Packaging",
+    p_dossier:   "ISO 13485 batch file",
+    p_delivery:  "Next-day delivery",
+    p_disc:      "Discount",
+    p_subht:     "Subtotal excl. VAT",
+    p_tva:       "VAT 20%",
+    p_ttc:       "Total incl. VAT",
+    p_note:      "Indicative quote - subject to technical validation",
+    p_empty:     "Upload an STL file\nto get your quote",
+    p_validity:  "Valid for 30 days",
+    s_title:     "Multi-quantity simulation",
+    s_qty:       "Qty",
+    s_ht:        "Total excl. VAT",
+    s_disc:      "Discount",
+    s_ttc:       "Total incl. VAT",
+    s_unit:      "Unit price excl. VAT",
+    pdf_btn:     "Download PDF quote",
+    pdf_app_req: "Please select the application type before generating the PDF.",
+    contact_text: "To place an order, send your quote to",
+    v_title:     "3D Preview",
+    v_rot:       "Auto-rotate",
+    v_man:       "Manual",
+    v_reset:     "Reset view",
+    v_hint1:     "Drag - rotate",
+    v_hint2:     "Scroll - zoom",
+    footer_txt:  "ONE PRINT -- OneOrtho Medical - PA2200 Nylon - Indicative prices excl. VAT",
+    err_format:  "Unsupported format -- please select a .stl file",
+    err_vol:     "Zero or invalid volume -- check the mesh is watertight.",
+    err_corrupt: "Invalid or corrupt file: ",
+    err_read:    "Unable to read file.",
+  },
+  es: {
+    brand_sub:   "Presupuesto SLS instantaneo -- PA2200 Nylon",
+    badge:       "SLS Estimador",
+    u_title:     "Archivo STL",
+    u_head:      "Suelte sus archivos STL aqui",
+    u_sub:       "O haga clic para buscar - Varios archivos, Binario y ASCII admitidos",
+    u_parsing:   "Analizando el archivo...",
+    u_vol:       "Volumen calculado",
+    u_change:    "Cambiar",
+    m_title:     "Confirmacion de unidad",
+    m_body:      "Confirma que su archivo esta modelado en milimetros (mm)? Un error de unidad daria lugar a un presupuesto incorrecto.",
+    m_yes:       "Si, en mm",
+    m_no:        "No, cancelar",
+    m_reject:    "Archivo cancelado -- verifique las unidades (se requiere mm) y recargue su archivo.",
+    c_title:     "Configuracion",
+    c_apptype:   "Tipo de aplicacion",
+    c_app_md:    "Dispositivo medico",
+    c_app_proto: "Prototipo",
+    c_app_other: "Otro uso",
+    c_app_req:   "Seleccione el tipo de aplicacion antes de generar el PDF.",
+    c_mat:       "Material",
+    c_qty:       "Cantidad",
+    c_finish:    "Acabado superficial",
+    c_micro:     "Granallado",
+    c_lissage:   "Pulido por vapor",
+    c_included:  "incluido",
+    c_color:     "Color",
+    c_blanc:     "Blanco",
+    c_gris:      "Gris",
+    c_bleu:      "Azul",
+    c_noir:      "Negro",
+    c_rouge:     "Rojo",
+    c_vert:      "Verde",
+    c_orange:    "Naranja",
+    c_delay:     "Plazo",
+    c_std:       "Estandar 5d (+0%)",
+    c_pri:       "Prioritario 3d (+10%)",
+    c_exp:       "Expres 2d (+25%)",
+    c_opts:      "Opciones adicionales",
+    c_nett:      "Limpieza final / Doble embalaje medico (no esteril)",
+    c_dossier:   "Expediente de lote ISO 13485",
+    c_delivery:  "Entrega",
+    c_j1:        "Entrega J+1 (+15EUR)",
+    c_retrait:   "Recogida en taller",
+    c_retrait_free: "Gratis",
+    p_title:     "Presupuesto instantaneo",
+    p_volume:    "Volumen",
+    p_base:      "Precio base (PA2200)",
+    p_min_applied: "Minimo 6 EUR aplicado",
+    p_finish:    "Pulido por vapor (2EUR/pieza)",
+    p_lissage_min: "Minimo alisado 100 EUR aplicado",
+    p_color:     "Color",
+    p_color_min: "Minimo tintura 100 EUR aplicado",
+    p_delay:     "Suplemento plazo",
+    p_nett:      "Limpieza / Embalaje",
+    p_dossier:   "Expediente ISO 13485",
+    p_delivery:  "Entrega J+1",
+    p_disc:      "Descuento",
+    p_subht:     "Subtotal sin IVA",
+    p_tva:       "IVA 20%",
+    p_ttc:       "Total con IVA",
+    p_note:      "Presupuesto indicativo - sujeto a validacion tecnica",
+    p_empty:     "Cargue un archivo STL\npara obtener su presupuesto",
+    p_validity:  "Validez: 30 dias",
+    s_title:     "Simulacion multi-cantidad",
+    s_qty:       "Cantidad",
+    s_ht:        "Total sin IVA",
+    s_disc:      "Descuento",
+    s_ttc:       "Total IVA inc.",
+    s_unit:      "Precio unitario sin IVA",
+    pdf_btn:     "Descargar presupuesto PDF",
+    pdf_app_req: "Seleccione el tipo de aplicacion antes de generar el PDF.",
+    contact_text: "Para realizar un pedido, envie su presupuesto a",
+    v_title:     "Vista previa 3D",
+    v_rot:       "Rotacion auto",
+    v_man:       "Manual",
+    v_reset:     "Vista inicial",
+    v_hint1:     "Arrastrar - rotar",
+    v_hint2:     "Rueda - zoom",
+    footer_txt:  "ONE PRINT -- OneOrtho Medical - PA2200 Nylon - Precios indicativos sin IVA",
+    err_format:  "Formato no admitido -- seleccione un archivo .stl",
+    err_vol:     "Volumen nulo o invalido -- compruebe que el mesh es estanco.",
+    err_corrupt: "Archivo invalido o corrupto: ",
+    err_read:    "No se puede leer el archivo.",
+  },
+  it: {
+    brand_sub:   "Preventivo SLS istantaneo -- PA2200 Nylon",
+    badge:       "SLS Stimatore",
+    u_title:     "File STL",
+    u_head:      "Rilascia i tuoi file STL qui",
+    u_sub:       "O clicca per sfogliare - Piu file, Binario e ASCII supportati",
+    u_parsing:   "Analisi del file in corso...",
+    u_vol:       "Volume calcolato",
+    u_change:    "Cambia",
+    m_title:     "Conferma unita",
+    m_body:      "Confermi che il file e modellato in millimetri (mm)? Un'unita errata comporterebbe un preventivo scorretto.",
+    m_yes:       "Si, in mm",
+    m_no:        "No, annulla",
+    m_reject:    "File annullato -- verifica le unita (mm richiesti) e ricarica il file.",
+    c_title:     "Configurazione",
+    c_apptype:   "Tipo di applicazione",
+    c_app_md:    "Dispositivo medico",
+    c_app_proto: "Prototipo",
+    c_app_other: "Altro uso",
+    c_app_req:   "Seleziona il tipo di applicazione prima di generare il PDF.",
+    c_mat:       "Materiale",
+    c_qty:       "Quantita",
+    c_finish:    "Finitura superficiale",
+    c_micro:     "Pallinatura",
+    c_lissage:   "Levigatura a vapore",
+    c_included:  "incluso",
+    c_color:     "Colore",
+    c_blanc:     "Bianco",
+    c_gris:      "Grigio",
+    c_bleu:      "Blu",
+    c_noir:      "Nero",
+    c_rouge:     "Rosso",
+    c_vert:      "Verde",
+    c_orange:    "Arancione",
+    c_delay:     "Tempi",
+    c_std:       "Standard 5g (+0%)",
+    c_pri:       "Prioritario 3g (+10%)",
+    c_exp:       "Espresso 2g (+25%)",
+    c_opts:      "Opzioni aggiuntive",
+    c_nett:      "Pulizia finale / Doppio imballaggio medico (non sterile)",
+    c_dossier:   "Dossier di lotto ISO 13485",
+    c_delivery:  "Consegna",
+    c_j1:        "Consegna J+1 (+15EUR)",
+    c_retrait:   "Ritiro in officina",
+    c_retrait_free: "Gratuito",
+    p_title:     "Preventivo istantaneo",
+    p_volume:    "Volume",
+    p_base:      "Prezzo base (PA2200)",
+    p_min_applied: "Minimo 6 EUR applicato",
+    p_finish:    "Levigatura a vapore (2EUR/pz)",
+    p_lissage_min: "Minimo levigatura 100 EUR applicato",
+    p_color:     "Colore",
+    p_color_min: "Minimo tintura 100 EUR applicato",
+    p_delay:     "Supplemento tempi",
+    p_nett:      "Pulizia / Imballaggio",
+    p_dossier:   "Dossier ISO 13485",
+    p_delivery:  "Consegna J+1",
+    p_disc:      "Sconto",
+    p_subht:     "Subtotale IVA esclusa",
+    p_tva:       "IVA 20%",
+    p_ttc:       "Totale IVA inclusa",
+    p_note:      "Preventivo indicativo - soggetto a convalida tecnica",
+    p_empty:     "Carica un file STL\nper ottenere il tuo preventivo",
+    p_validity:  "Validita: 30 giorni",
+    s_title:     "Simulazione multi-quantita",
+    s_qty:       "Qta",
+    s_ht:        "Totale IVA esclusa",
+    s_disc:      "Sconto",
+    s_ttc:       "Totale IVA inclusa",
+    s_unit:      "Prezzo unitario IVA esclusa",
+    pdf_btn:     "Scarica preventivo PDF",
+    pdf_app_req: "Seleziona il tipo di applicazione prima di generare il PDF.",
+    contact_text: "Per effettuare un ordine, invia il preventivo a",
+    v_title:     "Anteprima 3D",
+    v_rot:       "Rotazione auto",
+    v_man:       "Manuale",
+    v_reset:     "Vista iniziale",
+    v_hint1:     "Trascina - ruota",
+    v_hint2:     "Rotella - zoom",
+    footer_txt:  "ONE PRINT -- OneOrtho Medical - PA2200 Nylon - Prezzi indicativi IVA esclusa",
+    err_format:  "Formato non supportato -- seleziona un file .stl",
+    err_vol:     "Volume nullo o non valido -- controlla che il mesh sia chiuso (watertight).",
+    err_corrupt: "File non valido o corrotto: ",
+    err_read:    "Impossibile leggere il file.",
+  },
+  de: {
+    brand_sub:   "Sofortangebot SLS -- PA2200 Nylon",
+    badge:       "SLS-Kalkulator",
+    u_title:     "STL-Datei",
+    u_head:      "STL-Dateien hier ablegen",
+    u_sub:       "Oder zum Durchsuchen klicken - Mehrere Dateien, Binar & ASCII unterstuetzt",
+    u_parsing:   "Datei wird analysiert...",
+    u_vol:       "Berechnetes Volumen",
+    u_change:    "Andern",
+    m_title:     "Einheitenbestatigung",
+    m_body:      "Bitte bestatigen Sie, dass Ihre Datei in Millimetern (mm) modelliert ist. Eine falsche Einheit wurde zu einem falschen Angebot fuhren.",
+    m_yes:       "Ja, in mm",
+    m_no:        "Nein, abbrechen",
+    m_reject:    "Datei abgebrochen -- bitte Einheiten prufen (mm erforderlich) und Datei neu laden.",
+    c_title:     "Konfiguration",
+    c_apptype:   "Anwendungsart",
+    c_app_md:    "Medizinprodukt",
+    c_app_proto: "Prototyp",
+    c_app_other: "Sonstige Verwendung",
+    c_app_req:   "Bitte Anwendungsart auswahlen, bevor Sie das PDF erstellen.",
+    c_mat:       "Material",
+    c_qty:       "Menge",
+    c_finish:    "Oberflachenfinish",
+    c_micro:     "Kugelgestrahlt",
+    c_lissage:   "Dampfglattung",
+    c_included:  "inklusive",
+    c_color:     "Farbe",
+    c_blanc:     "Weiss",
+    c_gris:      "Grau",
+    c_bleu:      "Blau",
+    c_noir:      "Schwarz",
+    c_rouge:     "Rot",
+    c_vert:      "Grun",
+    c_orange:    "Orange",
+    c_delay:     "Lieferzeit",
+    c_std:       "Standard 5T (+0%)",
+    c_pri:       "Prioritat 3T (+10%)",
+    c_exp:       "Express 2T (+25%)",
+    c_opts:      "Zusatzoptionen",
+    c_nett:      "Endreinigung / Medizinische Doppelverpackung (nicht steril)",
+    c_dossier:   "ISO 13485 Chargenmappe",
+    c_delivery:  "Lieferung",
+    c_j1:        "Express-Lieferung (+15EUR)",
+    c_retrait:   "Abholung im Betrieb",
+    c_retrait_free: "Kostenlos",
+    p_title:     "Sofortangebot",
+    p_volume:    "Volumen",
+    p_base:      "Grundpreis (PA2200)",
+    p_min_applied: "Mindestpreis 6 EUR angewandt",
+    p_finish:    "Dampfglattung (2EUR/Stk)",
+    p_lissage_min: "Glattungs-Minimum 100 EUR angewendet",
+    p_color:     "Farbe",
+    p_color_min: "Mindestfarbung 100 EUR angewandt",
+    p_delay:     "Lieferzeitvariante",
+    p_nett:      "Reinigung / Verpackung",
+    p_dossier:   "ISO 13485 Chargenmappe",
+    p_delivery:  "Express-Lieferung",
+    p_disc:      "Rabatt",
+    p_subht:     "Zwischensumme netto",
+    p_tva:       "MwSt. 20%",
+    p_ttc:       "Gesamtbetrag inkl. MwSt.",
+    p_note:      "Richtpreisangebot - vorbehaltlich technischer Prufung",
+    p_empty:     "Laden Sie eine STL-Datei hoch\num Ihr Angebot zu erhalten",
+    p_validity:  "Gultigkeit: 30 Tage",
+    s_title:     "Mehrmengen-Simulation",
+    s_qty:       "Menge",
+    s_ht:        "Gesamt netto",
+    s_disc:      "Rabatt",
+    s_ttc:       "Gesamt inkl. MwSt.",
+    s_unit:      "Stuckpreis netto",
+    pdf_btn:     "PDF-Angebot herunterladen",
+    pdf_app_req: "Bitte Anwendungsart auswahlen, bevor Sie das PDF erstellen.",
+    contact_text: "Um eine Bestellung aufzugeben, senden Sie Ihr Angebot an",
+    v_title:     "3D-Vorschau",
+    v_rot:       "Autorotation",
+    v_man:       "Manuell",
+    v_reset:     "Ansicht zurucksetzen",
+    v_hint1:     "Ziehen - drehen",
+    v_hint2:     "Rad - zoomen",
+    footer_txt:  "ONE PRINT -- OneOrtho Medical - PA2200 Nylon - Richtwerte netto",
+    err_format:  "Format nicht unterstutzt -- bitte eine .stl-Datei auswahlen",
+    err_vol:     "Volumen null oder ungultig -- prufen Sie, ob das Mesh geschlossen ist (watertight).",
+    err_corrupt: "Ungultige oder beschadigte Datei: ",
+    err_read:    "Datei kann nicht gelesen werden.",
+  },
+  pt: {
+    brand_sub:   "Orcamento SLS instantaneo -- PA2200 Nylon",
+    badge:       "SLS Estimador",
+    u_title:     "Ficheiro STL",
+    u_head:      "Solte os seus ficheiros STL aqui",
+    u_sub:       "Ou clique para procurar - Varios ficheiros, Binario e ASCII suportados",
+    u_parsing:   "A analisar o ficheiro...",
+    u_vol:       "Volume calculado",
+    u_change:    "Alterar",
+    m_title:     "Confirmacao de unidade",
+    m_body:      "Confirma que o seu ficheiro esta modelado em milimetros (mm)? Um erro de unidade resultaria num orcamento incorreto.",
+    m_yes:       "Sim, em mm",
+    m_no:        "Nao, cancelar",
+    m_reject:    "Ficheiro cancelado -- verifique as unidades (mm obrigatorio) e recarregue o ficheiro.",
+    c_title:     "Configuracao",
+    c_apptype:   "Tipo de aplicacao",
+    c_app_md:    "Dispositivo medico",
+    c_app_proto: "Prototipo",
+    c_app_other: "Outro uso",
+    c_app_req:   "Selecione o tipo de aplicacao antes de gerar o PDF.",
+    c_mat:       "Material",
+    c_qty:       "Quantidade",
+    c_finish:    "Acabamento superficial",
+    c_micro:     "Granalhagem",
+    c_lissage:   "Polimento a vapor",
+    c_included:  "incluido",
+    c_color:     "Cor",
+    c_blanc:     "Branco",
+    c_gris:      "Cinza",
+    c_bleu:      "Azul",
+    c_noir:      "Preto",
+    c_rouge:     "Vermelho",
+    c_vert:      "Verde",
+    c_orange:    "Laranja",
+    c_delay:     "Prazo",
+    c_std:       "Standard 5d (+0%)",
+    c_pri:       "Prioritario 3d (+10%)",
+    c_exp:       "Expresso 2d (+25%)",
+    c_opts:      "Opcoes adicionais",
+    c_nett:      "Limpeza final / Embalagem medica dupla (nao esteril)",
+    c_dossier:   "Dossier de lote ISO 13485",
+    c_delivery:  "Entrega",
+    c_j1:        "Entrega J+1 (+15EUR)",
+    c_retrait:   "Levantamento em oficina",
+    c_retrait_free: "Gratis",
+    p_title:     "Orcamento instantaneo",
+    p_volume:    "Volume",
+    p_base:      "Preco base (PA2200)",
+    p_min_applied: "Minimo 6 EUR aplicado",
+    p_finish:    "Polimento a vapor (2EUR/peca)",
+    p_lissage_min: "Minimo alisamento 100 EUR aplicado",
+    p_color:     "Cor",
+    p_color_min: "Minimo tintura 100 EUR aplicado",
+    p_delay:     "Suplemento prazo",
+    p_nett:      "Limpeza / Embalagem",
+    p_dossier:   "Dossier ISO 13485",
+    p_delivery:  "Entrega J+1",
+    p_disc:      "Desconto",
+    p_subht:     "Subtotal s/ IVA",
+    p_tva:       "IVA 20%",
+    p_ttc:       "Total c/ IVA",
+    p_note:      "Orcamento indicativo - sujeito a validacao tecnica",
+    p_empty:     "Carregue um ficheiro STL\npara obter o seu orcamento",
+    p_validity:  "Validade: 30 dias",
+    s_title:     "Simulacao multi-quantidade",
+    s_qty:       "Qtd",
+    s_ht:        "Total s/ IVA",
+    s_disc:      "Desconto",
+    s_ttc:       "Total c/ IVA",
+    s_unit:      "Preco unitario s/ IVA",
+    pdf_btn:     "Descarregar orcamento PDF",
+    pdf_app_req: "Selecione o tipo de aplicacao antes de gerar o PDF.",
+    contact_text: "Para fazer uma encomenda, envie o seu orcamento para",
+    v_title:     "Pre-visualizacao 3D",
+    v_rot:       "Rotacao auto",
+    v_man:       "Manual",
+    v_reset:     "Vista inicial",
+    v_hint1:     "Arrastar - rodar",
+    v_hint2:     "Roda - zoom",
+    footer_txt:  "ONE PRINT -- OneOrtho Medical - PA2200 Nylon - Precos indicativos s/ IVA",
+    err_format:  "Formato nao suportado -- selecione um ficheiro .stl",
+    err_vol:     "Volume nulo ou invalido -- verifique se o mesh esta fechado (watertight).",
+    err_corrupt: "Ficheiro invalido ou corrompido: ",
+    err_read:    "Nao e possivel ler o ficheiro.",
+  }
+};
+
+let currentLang = 'fr';
+
+function t(key) {
+  return (TRANSLATIONS[currentLang] && TRANSLATIONS[currentLang][key]) || TRANSLATIONS['fr'][key] || key;
+}
+
+// COL_NAMES dynamique selon la langue courante
+function getColName(col) {
+  const map = {
+    blanc: 'c_blanc', gris: 'c_gris', bleu: 'c_bleu',
+    noir: 'c_noir', rouge: 'c_rouge', vert: 'c_vert', orange: 'c_orange'
+  };
+  return t(map[col] || col);
+}
+
+const I18N_MAP = [
+  ['brand_sub','brand_sub_el'],['badge','badge_el'],
+  ['u_title','u_title_el'],['u_head','u_head_el'],['u_sub','u_sub_el'],
+  ['u_parsing','u_parsing_el'],['u_vol','u_vol_el'],
+  ['c_title','c_title_el'],['c_apptype','c_apptype_el'],
+  ['c_app_md','c_app_md_el'],['c_app_proto','c_app_proto_el'],['c_app_other','c_app_other_el'],
+  ['c_mat','c_mat_el'],
+  ['c_finish','c_finish_el'],['c_micro','c_micro_el'],['c_lissage','c_lissage_el'],['c_included','c_included_el'],
+  ['c_color','c_color_el'],['c_blanc','c_blanc_el'],
+  ['c_gris','c_gris_el'],['c_bleu','c_bleu_el'],['c_noir','c_noir_el'],
+  ['c_rouge','c_rouge_el'],['c_vert','c_vert_el'],['c_orange','c_orange_el'],
+  ['c_delay','c_delay_el'],['c_std','c_std_el'],['c_pri','c_pri_el'],['c_exp','c_exp_el'],
+  ['c_opts','c_opts_el'],['c_nett','c_nett_el'],['c_dossier','c_dossier_el'],
+  ['c_delivery','c_delivery_el'],['c_j1','c_j1_el'],
+  ['c_retrait','c_retrait_el'],['c_retrait_free','c_retrait_free_el'],
+  ['p_title','p_title_el'],['p_volume','p_volume_lbl'],
+  ['p_subht','p_subht_el'],['p_tva','p_tva_el'],
+  ['p_note','p_note_el'],['p_validity','p_validity_el'],
+  ['pdf_btn','btnPdf'],
+  ['s_title','s_title_el'],['s_qty','s_qty_el'],['s_ht','s_ht_el'],['s_ttc','s_ttc_el'],
+  ['v_title','v_title_el'],['v_hint1','v_hint1_el'],['v_hint2','v_hint2_el'],
+  ['contact_text','contact_text_el'],
+  ['footer_txt','footer_txt_el'],
+];
+
+function applyLang(l) {
+  currentLang = l;
+  document.documentElement.lang = l;
+
+  document.querySelectorAll('.lang-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.lang === l);
+  });
+
+  I18N_MAP.forEach(([key, id]) => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = t(key);
+  });
+
+  const btnchg = document.getElementById('btnchg');
+  if (btnchg) btnchg.textContent = t('u_change');
+
+  const pemptyEl = document.getElementById('p_empty_el');
+  if (pemptyEl) pemptyEl.innerHTML = t('p_empty').replace(/\n/g, '<br>');
+
+  const ttcLbl = document.getElementById('p_ttc_lbl');
+  if (ttcLbl) ttcLbl.childNodes[0].textContent = t('p_ttc');
+  const ttcSub = document.getElementById('p_ttc_sub');
+  if (ttcSub) ttcSub.textContent = t('p_tva');
+
+  if (controls && controls.autoRotate) setBadge('rot');
+  else setBadge('man');
+
+  const vresetEl = document.getElementById('vreset');
+  if (vresetEl) vresetEl.textContent = t('v_reset');
+
+  if (pieces.length) {
+    refresh();
+    renderSim();
+  }
+}
+
+// ── STL volume parser ────────────────────────────────────────────────────────
+
+function svt(ax,ay,az,bx,by,bz,cx,cy,cz){
+  return(ax*(by*cz-bz*cy)+ay*(bz*cx-bx*cz)+az*(bx*cy-by*cx))/6;
+}
+function parseBin(buf){
+  const dv=new DataView(buf);
+  const n=dv.getUint32(80,true);
+  if(buf.byteLength<84+n*50) throw new Error('Fichier tronque');
+  let v=0;
+  for(let i=0;i<n;i++){
+    const o=84+i*50+12;
+    v+=svt(dv.getFloat32(o,true),dv.getFloat32(o+4,true),dv.getFloat32(o+8,true),
+           dv.getFloat32(o+12,true),dv.getFloat32(o+16,true),dv.getFloat32(o+20,true),
+           dv.getFloat32(o+24,true),dv.getFloat32(o+28,true),dv.getFloat32(o+32,true));
+  }
+  return Math.abs(v);
+}
+function parseAscii(buf){
+  const txt=new TextDecoder().decode(buf);
+  const re=/vertex\s+([-\d.eE+]+)\s+([-\d.eE+]+)\s+([-\d.eE+]+)/g;
+  const pts=[];let m;
+  while((m=re.exec(txt))!==null) pts.push(+m[1],+m[2],+m[3]);
+  let v=0;
+  for(let i=0;i<pts.length;i+=9)
+    v+=svt(pts[i],pts[i+1],pts[i+2],pts[i+3],pts[i+4],pts[i+5],pts[i+6],pts[i+7],pts[i+8]);
+  return Math.abs(v);
+}
+function getVol(buf){
+  if(buf.byteLength>=84){
+    const n=new DataView(buf).getUint32(80,true);
+    if(n>0&&buf.byteLength===84+n*50) return parseBin(buf);
+  }
+  return parseAscii(buf);
+}
+
+// ── DOM helpers ──────────────────────────────────────────────────────────────
+
+const $=id=>document.getElementById(id);
+const show=el=>el.classList.remove('hidden');
+const hide=el=>el.classList.add('hidden');
+function eur(n){ return n.toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2})+' EUR'; }
+function fvol(v){ return Math.round(v).toLocaleString('fr-FR'); }
+
+// ── 3D Viewer ────────────────────────────────────────────────────────────────
+
+let renderer=null, scene=null, camera=null, controls=null;
+let animId=null, resizeObs=null;
+let savedDist=0;
+
+function initViewer(buffer){
+  const container=$('vcvs');
+  cleanupViewer();
+  const W=container.clientWidth, H=container.clientHeight;
+  scene=new THREE.Scene();
+  scene.background=new THREE.Color(0xF5F2E8);
+  renderer=new THREE.WebGLRenderer({antialias:true});
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
+  renderer.setSize(W,H);
+  renderer.outputColorSpace=THREE.SRGBColorSpace;
+  container.appendChild(renderer.domElement);
+  camera=new THREE.PerspectiveCamera(45,W/H,0.001,1e9);
+  scene.add(new THREE.HemisphereLight(0xffffff,0xEDE9DC,0.85));
+  const sun=new THREE.DirectionalLight(0xffffff,1.7);
+  sun.position.set(4,8,5);
+  scene.add(sun);
+  const rim=new THREE.DirectionalLight(0xAAE66E,0.22);
+  rim.position.set(-3,-1,-5);
+  scene.add(rim);
+  const geo=new STLLoader().parse(buffer);
+  geo.computeVertexNormals();
+  const mat=new THREE.MeshStandardMaterial({color:0xE8E3D8,roughness:0.65,metalness:0});
+  const mesh=new THREE.Mesh(geo,mat);
+  geo.computeBoundingBox();
+  const center=new THREE.Vector3();
+  geo.boundingBox.getCenter(center);
+  mesh.position.copy(center).negate();
+  scene.add(mesh);
+  geo.computeBoundingSphere();
+  const r=geo.boundingSphere.radius;
+  const fov=camera.fov*Math.PI/180;
+  const dist=(r*2.2)/Math.tan(fov/2);
+  savedDist=dist;
+  camera.position.set(dist*0.65,dist*0.42,dist*0.82);
+  camera.lookAt(0,0,0);
+  controls=new OrbitControls(camera,renderer.domElement);
+  controls.enableDamping=true;
+  controls.dampingFactor=0.07;
+  controls.autoRotate=true;
+  controls.autoRotateSpeed=1.4;
+  controls.minDistance=r*0.3;
+  controls.maxDistance=r*14;
+  controls.addEventListener('start',()=>{ controls.autoRotate=false; setBadge('man'); });
+  resizeObs=new ResizeObserver(()=>{
+    if(!renderer||!camera) return;
+    const W2=container.clientWidth, H2=container.clientHeight;
+    renderer.setSize(W2,H2);
+    camera.aspect=W2/H2;
+    camera.updateProjectionMatrix();
+  });
+  resizeObs.observe(container);
+  (function loop(){
+    animId=requestAnimationFrame(loop);
+    controls.update();
+    renderer.render(scene,camera);
+  })();
+}
+
+function cleanupViewer(){
+  if(animId){ cancelAnimationFrame(animId); animId=null; }
+  if(resizeObs){ resizeObs.disconnect(); resizeObs=null; }
+  if(renderer){
+    renderer.dispose();
+    const c=renderer.domElement;
+    if(c.parentNode) c.parentNode.removeChild(c);
+    renderer=null;
+  }
+  if(scene){
+    scene.traverse(obj=>{
+      if(!obj.isMesh) return;
+      obj.geometry.dispose();
+      const m=obj.material;
+      (Array.isArray(m)?m:[m]).forEach(x=>x.dispose());
+    });
+    scene=null;
+  }
+  if(controls){ controls.dispose(); controls=null; }
+  camera=null;
+}
+
+function setBadge(state){
+  const b=$('vbadge');
+  if(!b) return;
+  if(state==='rot'){ b.textContent=t('v_rot'); b.className='vbadge rot'; }
+  else             { b.textContent=t('v_man'); b.className='vbadge man'; }
+}
+
+$('vreset').addEventListener('click',()=>{
+  if(!controls||!camera) return;
+  controls.autoRotate=true;
+  setBadge('rot');
+  const d=savedDist;
+  camera.position.set(d*0.65,d*0.42,d*0.82);
+  camera.lookAt(0,0,0);
+  controls.target.set(0,0,0);
+  controls.update();
+});
+
+// ── State ────────────────────────────────────────────────────────────────────
+
+let pieces = []; // { name, vol, buf }[]
+let activeViewerIdx = 0;
+let pendingFiles = []; // temporaire pendant le modal
+let pendingFileIndex = 0; // index du fichier en cours de confirmation
+
+// ── Pricing ──────────────────────────────────────────────────────────────────
+
+const TIERS = [
+  { min: 10000, rate: 0.15 },
+  { min: 5000,  rate: 0.125 },
+  { min: 1000,  rate: 0.10 },
+  { min: 500,   rate: 0.05 },
+  { min: 0,     rate: 0 },
+];
+const SIM_QTYS = [1, 10, 50, 100, 250];
+
+function getDiscount(sub) {
+  for (const tier of TIERS) {
+    if (sub >= tier.min) return tier.rate;
+  }
+  return 0;
+}
+function getNextTier(sub) {
+  const sorted = [...TIERS].reverse(); // ascending
+  for (let i = 0; i < sorted.length; i++) {
+    if (sub < sorted[i].min) return sorted[i];
+  }
+  return null;
+}
+
+function getOptions() {
+  const appEl = document.querySelector('input[name=app]:checked');
+  const fin = document.querySelector('input[name=fin]:checked').value;
+  const col = document.querySelector('input[name=col]:checked').value;
+  const delay = document.querySelector('input[name=delay]:checked').value;
+  const liv = document.querySelector('input[name=liv]:checked').value;
+  const nett = $('onett').checked;
+  const dossier = $('odossier').checked;
+  const qty = Math.max(1, parseInt($('qty').value) || 1);
+  const app = appEl ? appEl.value : null;
+  return { fin, col, delay, liv, nett, dossier, qty, app };
+}
+
+function calcPrice(qty) {
+  if (!pieces.length) return null;
+  const opts = getOptions();
+  const numPieces = pieces.length;
+
+  let totalPricePP = 0, minApplied = false;
+  const pieceDetails = [];
+  for (const piece of pieces) {
+    const raw = piece.vol * 0.001;
+    const basePP = Math.max(raw, 6);
+    if (raw < 6) minApplied = true;
+    const delayRate = opts.delay === 'pri' ? 0.10 : opts.delay === 'exp' ? 0.25 : 0;
+    const delayPP = basePP * delayRate;
+    const nettPP = opts.nett ? 25 : 0;
+    const pricePP = basePP + delayPP + nettPP;
+    totalPricePP += pricePP;
+    pieceDetails.push({ name: piece.name, vol: piece.vol, basePP, pricePP });
+  }
+  const piecesTotal = totalPricePP * qty;
+
+  const rawFinish = opts.fin === 'lissage' ? numPieces * qty * 2 : 0;
+  const finishMinApplied = rawFinish > 0 && rawFinish < 100;
+  const finishTotal = rawFinish > 0 ? Math.max(rawFinish, 100) : 0;
+
+  const rawColor = opts.col !== 'blanc' ? numPieces * qty * 2 : 0;
+  const colorMinApplied = rawColor > 0 && rawColor < 100;
+  const colorTotal = rawColor > 0 ? Math.max(rawColor, 100) : 0;
+
+  const dossierTotal = opts.dossier ? 15 : 0;
+  const livTotal = opts.liv === 'j1' ? 15 : 0;
+  const subBefore = piecesTotal + finishTotal + colorTotal + dossierTotal + livTotal;
+  const discRate = getDiscount(subBefore);
+  const discAmount = subBefore * discRate;
+  const ht = subBefore - discAmount;
+  return {
+    minApplied, piecesTotal, finishTotal, finishMinApplied,
+    colorTotal, colorMinApplied, dossierTotal, livTotal,
+    subBefore, discRate, discAmount, ht,
+    tva: ht * 0.20, ttc: ht * 1.20,
+    nextTier: getNextTier(subBefore), qty, opts, pieceDetails, numPieces
+  };
+}
+
+function makeRow(label, value, cls='') {
+  const row = document.createElement('div');
+  row.className = 'prow';
+  row.innerHTML = '<span class="pl">' + label + '</span><span class="pv ' + cls + '">' + value + '</span>';
+  return row;
+}
+
+function refresh() {
+  if (!pieces.length) return;
+  const opts = getOptions();
+  const qty = opts.qty;
+  const p = calcPrice(qty);
+  if (!p) return;
+
+  // Volume total = somme de toutes les pieces
+  const totalVol = pieces.reduce((s, pc) => s + pc.vol, 0);
+  $('pvol').innerHTML = fvol(totalVol) + ' <small>mm3</small>';
+
+  const prows = $('prows');
+  prows.innerHTML = '';
+
+  // Base price
+  const baseRow = document.createElement('div');
+  baseRow.className = 'prow';
+  const minNote = p.minApplied ? '<br><span class="pminsub">' + t('p_min_applied') + '</span>' : '';
+  baseRow.innerHTML = '<div class="pl">' + t('p_base') + minNote + '</div><span class="pv">' + eur(p.piecesTotal) + '</span>';
+  prows.appendChild(baseRow);
+
+  // Finition lissage vapeur
+  if (p.finishTotal > 0) {
+    const finRow = document.createElement('div');
+    finRow.className = 'prow';
+    const finNote = p.finishMinApplied ? '<br><span class="pmincolor">' + t('p_lissage_min') + '</span>' : '';
+    finRow.innerHTML = '<div class="pl">' + t('p_finish') + finNote + '</div><span class="pv add">+' + eur(p.finishTotal) + '</span>';
+    prows.appendChild(finRow);
+  }
+
+  // Délai
+  const delayPPTotal = p.pieceDetails.reduce((s, pd) => {
+    const delayRate = opts.delay === 'pri' ? 0.10 : opts.delay === 'exp' ? 0.25 : 0;
+    return s + pd.basePP * delayRate;
+  }, 0) * qty;
+  if (delayPPTotal > 0) {
+    const delayLabel = opts.delay === 'pri' ? t('p_delay') + ' (+10%)' : t('p_delay') + ' (+25%)';
+    prows.appendChild(makeRow(delayLabel, '+' + eur(delayPPTotal), 'add'));
+  }
+
+  // Nettoyage
+  const nettTotal = p.pieceDetails.reduce((s) => s + (opts.nett ? 25 : 0), 0) * qty;
+  if (nettTotal > 0) {
+    prows.appendChild(makeRow(t('p_nett'), '+' + eur(nettTotal), 'add'));
+  }
+
+  // Couleur
+  if (p.colorTotal > 0) {
+    const colorRow = document.createElement('div');
+    colorRow.className = 'prow';
+    const colorNote = p.colorMinApplied ? '<br><span class="pmincolor">' + t('p_color_min') + '</span>' : '';
+    colorRow.innerHTML = '<div class="pl">' + t('p_color') + ' ' + getColName(opts.col) + ' 2EUR/pc' + colorNote + '</div><span class="pv add">+' + eur(p.colorTotal) + '</span>';
+    prows.appendChild(colorRow);
+  }
+
+  // Dossier
+  if (p.dossierTotal > 0) {
+    prows.appendChild(makeRow(t('p_dossier'), '+' + eur(p.dossierTotal), 'add'));
+  }
+
+  // Livraison
+  if (p.livTotal > 0) {
+    prows.appendChild(makeRow(t('p_delivery'), '+' + eur(p.livTotal), 'add'));
+  }
+
+  // Discount
+  if (p.discRate > 0) {
+    const discPct = Math.round(p.discRate * 100);
+    prows.appendChild(makeRow(t('p_disc') + ' ' + discPct + '%', '-' + eur(p.discAmount), 'disc'));
+  }
+
+  // Totals
+  const rsubt = $('rsubt');
+  if (p.discRate > 0) {
+    $('psubt').textContent = eur(p.subBefore);
+    show(rsubt);
+  } else {
+    hide(rsubt);
+  }
+
+  $('pht').textContent = eur(p.ht);
+  $('ptva').textContent = eur(p.tva);
+  $('pttc').innerHTML = p.ttc.toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2}) + '<sup>EUR</sup>';
+}
+
+// ── Simulation ────────────────────────────────────────────────────────────────
+
+function renderSim() {
+  if (!pieces.length) return;
+  const currentQty = Math.max(1, parseInt($('qty').value) || 1);
+  const tbody = $('simBody');
+  tbody.innerHTML = '';
+  SIM_QTYS.forEach(q => {
+    const p = calcPrice(q);
+    if (!p) return;
+    const tr = document.createElement('tr');
+    if (q === currentQty) tr.className = 'active-row';
+    tr.style.cursor = 'pointer';
+    tr.innerHTML = '<td>' + q + '</td><td>' + eur(p.ht) + '</td><td>' + eur(p.ttc) + '</td>';
+    tr.addEventListener('click', () => {
+      $('qty').value = q;
+      refresh();
+      renderSim();
+    });
+    tbody.appendChild(tr);
+  });
+}
+
+// ── Viewer tabs ───────────────────────────────────────────────────────────────
+
+function renderViewerTabs() {
+  const container = document.getElementById('viewerTabs');
+  if (!container) return;
+  if (pieces.length <= 1) {
+    container.style.display = 'none';
+    container.innerHTML = '';
+    return;
+  }
+  container.style.display = 'flex';
+  container.innerHTML = '';
+  pieces.forEach((piece, idx) => {
+    const btn = document.createElement('button');
+    btn.className = 'viewer-tab' + (idx === activeViewerIdx ? ' active' : '');
+    btn.title = piece.name;
+    const name = piece.name.replace(/\.stl$/i, '');
+    btn.textContent = name.length > 16 ? name.slice(0, 13) + '…' : name;
+    btn.addEventListener('click', () => {
+      activeViewerIdx = idx;
+      initViewer(pieces[idx].buf);
+      setBadge('rot');
+      renderViewerTabs();
+    });
+    container.appendChild(btn);
+  });
+}
+
+// ── Pieces list rendering ─────────────────────────────────────────────────────
+
+function renderPiecesList() {
+  const list = $('piecesList');
+  list.innerHTML = '';
+  pieces.forEach((piece, idx) => {
+    const item = document.createElement('div');
+    item.className = 'piece-item';
+    item.innerHTML =
+      '<svg width="18" height="18" viewBox="0 0 22 22" fill="none" style="flex-shrink:0">' +
+        '<path d="M13 2H6a2 2 0 00-2 2v14a2 2 0 002 2h10a2 2 0 002-2V8l-5-6z" fill="rgba(0,75,50,.15)" stroke="#004B32" stroke-width="1.5" stroke-linejoin="round"/>' +
+        '<path d="M13 2v6h5" stroke="#004B32" stroke-width="1.5" stroke-linecap="round"/>' +
+      '</svg>' +
+      '<div style="flex:1;min-width:0">' +
+        '<div style="font-family:\'Sora\',sans-serif;font-weight:600;font-size:.82rem;color:var(--green);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + piece.name + '</div>' +
+        '<div style="font-size:.75rem;color:var(--muted);margin-top:.1rem">' + fvol(piece.vol) + ' mm3</div>' +
+      '</div>' +
+      '<button class="pdel" title="Supprimer">&#215;</button>';
+    item.querySelector('.pdel').addEventListener('click', () => {
+      pieces.splice(idx, 1);
+      if (pieces.length === 0) {
+        resetAll();
+      } else {
+        if (activeViewerIdx >= pieces.length) activeViewerIdx = pieces.length - 1;
+        renderPiecesList();
+        initViewer(pieces[activeViewerIdx].buf);
+        setBadge('rot');
+        renderViewerTabs();
+        refresh();
+        renderSim();
+      }
+    });
+    list.appendChild(item);
+  });
+}
+
+// ── File handling ─────────────────────────────────────────────────────────────
+
+function showModal() {
+  const pf = pendingFiles[pendingFileIndex];
+  $('m_title_el').textContent = t('m_title');
+  $('m_body_el').textContent = t('m_body') + (pendingFiles.length > 1 ? ' (' + (pendingFileIndex + 1) + '/' + pendingFiles.length + ')' : '');
+  $('modalYes').textContent = t('m_yes');
+  $('modalNo').textContent = t('m_no');
+  show($('unitModal'));
+}
+
+function confirmFiles() {
+  hide($('unitModal'));
+  // push all pending into pieces
+  for (const pf of pendingFiles) {
+    pieces.push({ name: pf.name, vol: pf.vol, buf: pf.buf });
+  }
+  pendingFiles = [];
+  pendingFileIndex = 0;
+
+  activeViewerIdx = 0;
+  initViewer(pieces[0].buf);
+  setBadge('rot');
+  renderViewerTabs();
+  renderPiecesList();
+  show($('fl'));
+  show($('optcard'));
+  show($('simcard'));
+  hide($('pempty'));
+  show($('ppanel'));
+  show($('viewercard'));
+  refresh();
+  renderSim();
+}
+
+function rejectFiles() {
+  hide($('unitModal'));
+  pendingFiles = [];
+  pendingFileIndex = 0;
+  if (!pieces.length) {
+    resetDrop();
+  }
+  showErr(t('m_reject'));
+}
+
+$('modalYes').addEventListener('click', confirmFiles);
+$('modalNo').addEventListener('click', rejectFiles);
+
+async function processFiles(files) {
+  if (!files || !files.length) return;
+  const stlFiles = Array.from(files).filter(f => f.name.toLowerCase().endsWith('.stl'));
+  if (!stlFiles.length) {
+    showErr(t('err_format'));
+    return;
+  }
+  hide($('dz'));
+  show($('ps'));
+  hide($('err'));
+
+  const loaded = [];
+  for (const file of stlFiles) {
+    try {
+      const buf = await readFileAsBuffer(file);
+      const v = getVol(buf);
+      if (!isFinite(v) || v <= 0) {
+        showErr(t('err_vol'));
+        resetDrop();
+        return;
+      }
+      loaded.push({ name: file.name, vol: v, buf });
+    } catch(ex) {
+      showErr(t('err_corrupt') + ex.message);
+      resetDrop();
+      return;
+    }
+  }
+
+  hide($('ps'));
+  show($('dz'));
+  pendingFiles = loaded;
+  pendingFileIndex = 0;
+  showModal();
+}
+
+function readFileAsBuffer(file) {
+  return new Promise((resolve, reject) => {
+    const r = new FileReader();
+    r.onload = e => resolve(e.target.result);
+    r.onerror = () => reject(new Error(t('err_read')));
+    r.readAsArrayBuffer(file);
+  });
+}
+
+function showErr(msg) { $('err').textContent = msg; show($('err')); }
+function resetDrop() { show($('dz')); hide($('ps')); }
+
+function resetAll() {
+  cleanupViewer();
+  pieces = [];
+  pendingFiles = [];
+  activeViewerIdx = 0;
+  const vt = document.getElementById('viewerTabs');
+  if (vt) { vt.innerHTML = ''; vt.style.display = 'none'; }
+  pendingFileIndex = 0;
+  $('fi').value = '';
+  show($('dz'));
+  hide($('ps'));
+  hide($('fl'));
+  hide($('err'));
+  hide($('optcard'));
+  hide($('simcard'));
+  hide($('viewercard'));
+  show($('pempty'));
+  hide($('ppanel'));
+  setBadge('rot');
+  $('fmicro').checked = true;
+  $('cblanc').checked = true;
+  $('onett').checked = false;
+  $('odossier').checked = false;
+  $('dstd').checked = true;
+  $('lretrait').checked = true;
+  $('qty').value = 1;
+  hide($('unitModal'));
+}
+
+// ── PDF Generation ────────────────────────────────────────────────────────────
+
+function generatePDF() {
+  const opts = getOptions();
+  if (!opts.app) {
+    alert(t('pdf_app_req'));
+    return;
+  }
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+  const W = 210;
+  const green = [0, 75, 50], orange = [255, 108, 79], lime = [170, 230, 110];
+  const white = [255, 255, 255], muted = [138, 132, 120], text = [28, 28, 26];
+
+  const today = new Date().toLocaleDateString('fr-FR');
+  const validity = new Date(Date.now() + 30 * 86400000).toLocaleDateString('fr-FR');
+
+  // Header background
+  doc.setFillColor(...green);
+  doc.rect(0, 0, W, 38, 'F');
+
+  // Brand: ONE PRINT
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(22);
+  doc.setTextColor(...white);
+  doc.text('ONE', 15, 18);
+  const oneW = doc.getTextWidth('ONE');
+  doc.setTextColor(...orange);
+  doc.setFont('helvetica', 'bold');
+  doc.text(' PRINT', 15 + oneW, 18);
+
+  // Sub-title
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(9);
+  doc.setTextColor(...lime);
+  doc.text('Chiffrage SLS instantane - PA2200 Nylon', 15, 26);
+
+  // Top right: quote info
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(...white);
+  doc.setFontSize(8);
+  doc.text(QUOTE_NUM, W - 15, 12, { align: 'right' });
+  doc.setFont('helvetica', 'normal');
+  doc.text(today, W - 15, 18, { align: 'right' });
+  doc.setTextColor(...lime);
+  doc.text('Validite : 30 jours', W - 15, 24, { align: 'right' });
+
+  let y = 48;
+
+  // Application type banner
+  const appLabels = { md: 'Dispositif medical', proto: 'Prototype', other: 'Autre utilisation' };
+  doc.setFillColor(245, 242, 232);
+  doc.roundedRect(12, y - 6, W - 24, 16, 4, 4, 'F');
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(11);
+  doc.setTextColor(...green);
+  doc.text((appLabels[opts.app] || '').toUpperCase(), W / 2, y + 3, { align: 'center' });
+  y += 18;
+
+  // File info — deux lignes séparées
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(9);
+  doc.setTextColor(...muted);
+  const totalVol = pieces.reduce((s, pc) => s + pc.vol, 0);
+  if (pieces.length === 1) {
+    doc.text('Fichier : ' + pieces[0].name, 15, y);
+    y += 5;
+    doc.setFont('helvetica', 'normal');
+    doc.text('Volume : ' + fvol(totalVol) + ' mm3   Qte : ' + opts.qty, 15, y);
+  } else {
+    doc.text('Fichiers : ' + pieces.length + ' pieces   Volume total : ' + fvol(totalVol) + ' mm3   Qte : ' + opts.qty, 15, y);
+  }
+  y += 10;
+
+  const p = calcPrice(opts.qty);
+
+  // Si plusieurs pièces, tableau des pièces
+  if (pieces.length > 1) {
+    doc.setFillColor(...green);
+    doc.rect(12, y, W - 24, 7, 'F');
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(7.5);
+    doc.setTextColor(...white);
+    doc.text('Piece', 16, y + 4.8);
+    doc.text('Volume (mm3)', 80, y + 4.8);
+    doc.text('Vol x Qte', 120, y + 4.8);
+    doc.text('Prix unit. HT', W - 16, y + 4.8, { align: 'right' });
+    y += 7;
+    p.pieceDetails.forEach((pd, i) => {
+      doc.setFillColor(i % 2 === 0 ? 250 : 245, i % 2 === 0 ? 250 : 245, i % 2 === 0 ? 250 : 245);
+      doc.rect(12, y, W - 24, 6, 'F');
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(7.5);
+      doc.setTextColor(...text);
+      const nameShort = pd.name.length > 28 ? pd.name.substring(0, 25) + '...' : pd.name;
+      doc.text(nameShort, 16, y + 4.2);
+      doc.text(fvol(pd.vol), 80, y + 4.2);
+      doc.text(String(opts.qty), 120, y + 4.2);
+      doc.text(eur(pd.pricePP * opts.qty), W - 16, y + 4.2, { align: 'right' });
+      y += 6;
+    });
+    y += 4;
+  }
+
+  // Price table
+  const rows = [];
+  rows.push([t('p_base') + (p.minApplied ? ' *' : ''), eur(p.piecesTotal)]);
+  if (p.finishTotal > 0) rows.push([t('p_finish') + (p.finishMinApplied ? ' *' : ''), '+' + eur(p.finishTotal)]);
+  if (p.colorTotal > 0) rows.push([t('p_color') + ' ' + getColName(opts.col) + (p.colorMinApplied ? ' *' : ''), '+' + eur(p.colorTotal)]);
+
+  // Delay
+  const delayPPTotal = p.pieceDetails.reduce((s, pd) => {
+    const delayRate = opts.delay === 'pri' ? 0.10 : opts.delay === 'exp' ? 0.25 : 0;
+    return s + pd.basePP * delayRate;
+  }, 0) * opts.qty;
+  if (delayPPTotal > 0) rows.push([t('p_delay'), '+' + eur(delayPPTotal)]);
+
+  // Nett
+  const nettTotalPDF = p.pieceDetails.reduce((s) => s + (opts.nett ? 25 : 0), 0) * opts.qty;
+  if (nettTotalPDF > 0) rows.push([t('p_nett'), '+' + eur(nettTotalPDF)]);
+
+  if (p.dossierTotal > 0) rows.push([t('p_dossier'), '+' + eur(p.dossierTotal)]);
+  if (p.livTotal > 0) rows.push([t('p_delivery'), '+' + eur(p.livTotal)]);
+  if (p.discRate > 0) rows.push([t('p_disc') + ' ' + Math.round(p.discRate * 100) + '%', '-' + eur(p.discAmount)]);
+
+  // Table header
+  doc.setFillColor(...green);
+  doc.rect(12, y, W - 24, 8, 'F');
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(8);
+  doc.setTextColor(...white);
+  doc.text('Designation', 16, y + 5.5);
+  doc.text('Montant', W - 16, y + 5.5, { align: 'right' });
+  y += 8;
+
+  rows.forEach((row, i) => {
+    doc.setFillColor(i % 2 === 0 ? 250 : 245, i % 2 === 0 ? 250 : 245, i % 2 === 0 ? 250 : 245);
+    doc.rect(12, y, W - 24, 7, 'F');
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(8.5);
+    doc.setTextColor(...text);
+    doc.text(row[0], 16, y + 5);
+    doc.setFont('helvetica', 'normal');
+    doc.text(row[1], W - 16, y + 5, { align: 'right' });
+    y += 7;
+  });
+
+  y += 4;
+
+  // Totals
+  const totals = [
+    [t('p_subht'), eur(p.ht)],
+    [t('p_tva'), eur(p.tva)],
+  ];
+  totals.forEach(row => {
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(9);
+    doc.setTextColor(...muted);
+    doc.text(row[0], W - 70, y);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(...text);
+    doc.text(row[1], W - 16, y, { align: 'right' });
+    y += 7;
+  });
+
+  // TTC box
+  y += 2;
+  doc.setFillColor(...green);
+  doc.roundedRect(12, y, W - 24, 14, 4, 4, 'F');
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(10);
+  doc.setTextColor(...lime);
+  doc.text(t('p_ttc'), 20, y + 9);
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(14);
+  doc.setTextColor(...white);
+  doc.text(eur(p.ttc), W - 16, y + 9, { align: 'right' });
+  y += 22;
+
+  // Notes
+  if (p.minApplied) {
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(7.5);
+    doc.setTextColor(...muted);
+    doc.text('* ' + t('p_min_applied'), 15, y);
+    y += 5;
+  }
+  if (p.colorMinApplied) {
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(7.5);
+    doc.setTextColor(...muted);
+    doc.text('* ' + t('p_color_min'), 15, y);
+    y += 5;
+  }
+  if (p.finishMinApplied) {
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(7.5);
+    doc.setTextColor(...muted);
+    doc.text('* ' + t('p_lissage_min'), 15, y);
+    y += 5;
+  }
+
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(7.5);
+  doc.setTextColor(...muted);
+  doc.text(t('p_note'), 15, y);
+  y += 8;
+
+  // Contact section
+  doc.setDrawColor(...green);
+  doc.setLineWidth(0.3);
+  doc.line(12, y, W - 12, y);
+  y += 7;
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(9);
+  doc.setTextColor(...text);
+  doc.text(t('contact_text') + ' :', 15, y);
+  y += 6;
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(...orange);
+  doc.text('3Dprinting@oneortho-medical.com', 15, y);
+
+  // Footer
+  doc.setFillColor(...green);
+  doc.rect(0, 287, W, 10, 'F');
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(8);
+  doc.setTextColor(...white);
+  doc.text('ONE', 15, 293.5);
+  const oneWf = doc.getTextWidth('ONE');
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(...orange);
+  doc.text(' PRINT', 15 + oneWf, 293.5);
+  doc.setFont('helvetica', 'normal');
+  doc.setTextColor(200, 200, 200);
+  doc.text('OneOrtho Medical - PA2200 Nylon SLS', W / 2, 293.5, { align: 'center' });
+  doc.setFont('helvetica', 'normal');
+  doc.setTextColor(...lime);
+  doc.text(QUOTE_NUM, W - 15, 293.5, { align: 'right' });
+
+  doc.save('ONEPRINT-' + QUOTE_NUM + '.pdf');
+}
+
+$('btnPdf').addEventListener('click', generatePDF);
+
+// ── Events ────────────────────────────────────────────────────────────────────
+
+$('fi').addEventListener('change', e => processFiles(e.target.files));
+$('btnchg').addEventListener('click', resetAll);
+
+const dzel = $('dz');
+dzel.addEventListener('dragover', e => { e.preventDefault(); dzel.classList.add('over'); });
+dzel.addEventListener('dragleave', () => dzel.classList.remove('over'));
+dzel.addEventListener('drop', e => {
+  e.preventDefault();
+  dzel.classList.remove('over');
+  processFiles(e.dataTransfer.files);
+});
+
+document.querySelectorAll('input[name=fin],input[name=col],input[name=delay],input[name=liv],input[name=app]').forEach(el => {
+  el.addEventListener('change', () => { refresh(); renderSim(); });
+});
+$('onett').addEventListener('change', () => { refresh(); renderSim(); });
+$('odossier').addEventListener('change', () => { refresh(); renderSim(); });
+
+$('qty').addEventListener('input', () => { refresh(); renderSim(); });
+$('qtyMinus').addEventListener('click', () => {
+  const v = Math.max(1, (parseInt($('qty').value) || 1) - 1);
+  $('qty').value = v;
+  refresh(); renderSim();
+});
+$('qtyPlus').addEventListener('click', () => {
+  $('qty').value = (parseInt($('qty').value) || 1) + 1;
+  refresh(); renderSim();
+});
+
+// Language buttons
+document.querySelectorAll('.lang-btn').forEach(btn => {
+  btn.addEventListener('click', () => applyLang(btn.dataset.lang));
+});
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+applyLang('fr');
+</script>
+</body>
+</html>
