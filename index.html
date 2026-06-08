@@ -390,6 +390,9 @@ header{
 #simcard tbody tr.active-row{background:rgba(170,230,110,.3);}
 #simcard tbody tr.active-row td{color:var(--green);font-weight:600;}
 
+.sim-piece-title{font-family:'Sora',sans-serif;font-size:.72rem;font-weight:600;color:var(--green);padding:.5rem 0 .25rem;border-top:1.5px solid var(--border);margin-top:.5rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.sim-piece-title:first-child{border-top:none;margin-top:0;padding-top:0;}
+
 /* CONTACT */
 .contact-section{max-width:1100px;margin:0 auto;padding:0 1.5rem 2rem}
 .contact-card{
@@ -750,18 +753,7 @@ footer strong{color:var(--orange)}
     <!-- Simulation multi-quantités -->
     <div class="card hidden fi" id="simcard">
       <div class="stitle" id="s_title_el"></div>
-      <div style="overflow-x:auto">
-        <table>
-          <thead>
-            <tr>
-              <th id="s_qty_el"></th>
-              <th id="s_ht_el"></th>
-              <th id="s_ttc_el"></th>
-            </tr>
-          </thead>
-          <tbody id="simBody"></tbody>
-        </table>
-      </div>
+      <div id="simContent"></div>
     </div>
 
 
@@ -1716,25 +1708,83 @@ function refresh() {
 
 // ── Simulation ────────────────────────────────────────────────────────────────
 
+function calcPiecePrice(piece, qty) {
+  const opts = getOptions();
+  const raw = piece.vol * 0.001;
+  const basePP = Math.max(raw, 6);
+  const delayRate = opts.delay === 'pri' ? 0.10 : opts.delay === 'exp' ? 0.25 : 0;
+  const nettPP = opts.nett ? 25 : 0;
+  const pricePP = basePP * (1 + delayRate) + nettPP;
+  const piecesTotal = pricePP * qty;
+  const rawFinish = opts.fin === 'lissage' ? qty * 2 : 0;
+  const finishTotal = rawFinish > 0 ? Math.max(rawFinish, 100) : 0;
+  const rawColor = opts.col !== 'blanc' ? qty * 2 : 0;
+  const colorTotal = rawColor > 0 ? Math.max(rawColor, 100) : 0;
+  const dossierTotal = opts.dossier ? 15 : 0;
+  const livTotal = opts.liv === 'j1' ? 15 : 0;
+  const subBefore = piecesTotal + finishTotal + colorTotal + dossierTotal + livTotal;
+  const discRate = getDiscount(subBefore);
+  const ht = subBefore * (1 - discRate);
+  return { ht, ttc: ht * 1.20 };
+}
+
+function makeSimTable(thQty, thHT, thTTC) {
+  const wrap = document.createElement('div');
+  wrap.style.overflowX = 'auto';
+  const table = document.createElement('table');
+  const thead = document.createElement('thead');
+  thead.innerHTML = '<tr><th>' + thQty + '</th><th>' + thHT + '</th><th>' + thTTC + '</th></tr>';
+  table.appendChild(thead);
+  const tbody = document.createElement('tbody');
+  table.appendChild(tbody);
+  wrap.appendChild(table);
+  return { wrap, tbody };
+}
+
 function renderSim() {
   if (!pieces.length) return;
-  const currentQty = Math.max(1, parseInt($('qty').value) || 1);
-  const tbody = $('simBody');
-  tbody.innerHTML = '';
-  SIM_QTYS.forEach(q => {
-    const p = calcPrice(q);
-    if (!p) return;
-    const tr = document.createElement('tr');
-    if (q === currentQty) tr.className = 'active-row';
-    tr.style.cursor = 'pointer';
-    tr.innerHTML = '<td>' + q + '</td><td>' + eur(p.ht) + '</td><td>' + eur(p.ttc) + '</td>';
-    tr.addEventListener('click', () => {
-      $('qty').value = q;
-      refresh();
-      renderSim();
+  const container = $('simContent');
+  container.innerHTML = '';
+  const multi = pieces.length > 1;
+  const thQty = t('s_qty'); const thHT = t('s_ht'); const thTTC = t('s_ttc');
+
+  if (!multi) {
+    const currentQty = Math.max(1, parseInt($('qty').value) || 1);
+    const { wrap, tbody } = makeSimTable(thQty, thHT, thTTC);
+    SIM_QTYS.forEach(q => {
+      const p = calcPrice(q);
+      if (!p) return;
+      const tr = document.createElement('tr');
+      if (q === currentQty) tr.className = 'active-row';
+      tr.innerHTML = '<td>' + q + '</td><td>' + eur(p.ht) + '</td><td>' + eur(p.ttc) + '</td>';
+      tr.addEventListener('click', () => { $('qty').value = q; refresh(); renderSim(); });
+      tbody.appendChild(tr);
     });
-    tbody.appendChild(tr);
-  });
+    container.appendChild(wrap);
+  } else {
+    pieces.forEach((piece, idx) => {
+      const title = document.createElement('div');
+      title.className = 'sim-piece-title';
+      const name = piece.name.replace(/\.stl$/i, '');
+      title.textContent = name.length > 30 ? name.slice(0, 27) + '…' : name;
+      container.appendChild(title);
+      const { wrap, tbody } = makeSimTable(thQty, thHT, thTTC);
+      SIM_QTYS.forEach(q => {
+        const pp = calcPiecePrice(piece, q);
+        const tr = document.createElement('tr');
+        if (q === (piece.qty || 1)) tr.className = 'active-row';
+        tr.innerHTML = '<td>' + q + '</td><td>' + eur(pp.ht) + '</td><td>' + eur(pp.ttc) + '</td>';
+        tr.addEventListener('click', () => {
+          pieces[idx].qty = q;
+          renderPiecesList();
+          refresh();
+          renderSim();
+        });
+        tbody.appendChild(tr);
+      });
+      container.appendChild(wrap);
+    });
+  }
 }
 
 // ── Viewer tabs ───────────────────────────────────────────────────────────────
