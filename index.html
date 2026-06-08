@@ -71,6 +71,15 @@ header{
 }
 .left{display:flex;flex-direction:column;gap:1.25rem}
 .right{display:flex;flex-direction:column;gap:1.25rem}
+.page-top{
+  max-width:1100px;margin:0 auto;
+  padding:2rem 1.5rem 0;
+  display:flex;gap:1.5rem;align-items:flex-start;
+}
+.top-left{flex:1;min-width:0}
+.top-right{width:380px;flex-shrink:0}
+.page-top.no-viewer .top-left{display:none}
+.page-top.no-viewer .top-right{width:100%}
 .price-top-section{
   max-width:1100px;margin:0 auto;
   padding:1.5rem 1.5rem 0;
@@ -80,6 +89,9 @@ header{
 
 @media(max-width:820px){
   .wrap{grid-template-columns:1fr}
+  .page-top{flex-direction:column;padding:1rem 1rem 0}
+  .top-left,.top-right{width:100%}
+  .page-top.no-viewer .top-right{width:100%}
   .price-top-section{padding:1rem 1rem 0;justify-content:stretch}
   #pricecard{max-width:none}
   header{padding:1rem 1.25rem}
@@ -519,11 +531,28 @@ footer strong{color:var(--orange)}
   </div>
 </div>
 
-<div class="wrap">
+<!-- VIEWER + UPLOAD : deux colonnes -->
+<div class="page-top no-viewer" id="pageTop">
 
-  <!-- LEFT -->
-  <div class="left">
+  <div class="top-left">
+    <div class="card hidden fi" id="viewercard">
+      <div class="stitle">
+        <span id="v_title_el"></span>
+        <span id="vbadge" class="vbadge rot"></span>
+      </div>
+      <div id="vcvs" class="vcvs"></div>
+      <div class="vhint">
+        <span id="v_hint1_el"></span>
+        <span class="vsep">&#183;</span>
+        <span id="v_hint2_el"></span>
+        <span class="vsep">&#183;</span>
+        <button id="vreset" class="vreset"></button>
+      </div>
+      <div id="viewerTabs" class="viewer-tabs" style="display:none"></div>
+    </div>
+  </div>
 
+  <div class="top-right">
     <div class="card">
       <div class="stitle" id="u_title_el"></div>
 
@@ -555,6 +584,14 @@ footer strong{color:var(--orange)}
 
       <div class="err hidden" id="err"></div>
     </div>
+  </div>
+
+</div><!-- /page-top -->
+
+<div class="wrap">
+
+  <!-- LEFT : configuration -->
+  <div class="left">
 
     <div class="card hidden fi" id="optcard">
       <div class="stitle" id="c_title_el"></div>
@@ -704,26 +741,10 @@ footer strong{color:var(--orange)}
 
   </div><!-- /left -->
 
-  <!-- RIGHT -->
+  <!-- RIGHT : simulation -->
   <div class="right">
 
-    <div class="card hidden fi" id="viewercard">
-      <div class="stitle">
-        <span id="v_title_el"></span>
-        <span id="vbadge" class="vbadge rot"></span>
-      </div>
-      <div id="vcvs" class="vcvs"></div>
-      <div class="vhint">
-        <span id="v_hint1_el"></span>
-        <span class="vsep">&#183;</span>
-        <span id="v_hint2_el"></span>
-        <span class="vsep">&#183;</span>
-        <button id="vreset" class="vreset"></button>
-      </div>
-      <div id="viewerTabs" class="viewer-tabs" style="display:none"></div>
-    </div>
-
-    <!-- Simulation multi-quantités (dans la colonne droite) -->
+    <!-- Simulation multi-quantités -->
     <div class="card hidden fi" id="simcard">
       <div class="stitle" id="s_title_el"></div>
       <div style="overflow-x:auto">
@@ -1806,6 +1827,7 @@ function confirmFiles() {
   hide($('pempty'));
   show($('ppanel'));
   show($('viewercard'));
+  document.getElementById('pageTop').classList.remove('no-viewer');
   refresh();
   renderSim();
 }
@@ -1887,6 +1909,7 @@ function resetAll() {
   hide($('optcard'));
   hide($('simcard'));
   hide($('viewercard'));
+  document.getElementById('pageTop').classList.add('no-viewer');
   show($('pempty'));
   hide($('ppanel'));
   setBadge('rot');
