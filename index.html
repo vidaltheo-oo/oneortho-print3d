@@ -1900,6 +1900,31 @@ function resetAll() {
   hide($('unitModal'));
 }
 
+// ── PDF helpers (ASCII-safe strings for jsPDF) ───────────────────────────────
+
+function pdfStr(s) {
+  // Replace accented chars and non-ASCII for jsPDF compatibility
+  var map = {
+    0xE0:'a',0xE2:'a',0xE4:'a', 0xE9:'e',0xE8:'e',0xEA:'e',0xEB:'e',
+    0xEE:'i',0xEF:'i', 0xF4:'o',0xF6:'o', 0xF9:'u',0xFB:'u',0xFC:'u',
+    0xE7:'c', 0xF1:'n',
+    0xC0:'A',0xC2:'A',0xC4:'A', 0xC9:'E',0xC8:'E',0xCA:'E',0xCB:'E',
+    0xCE:'I',0xCF:'I', 0xD4:'O',0xD6:'O', 0xD9:'U',0xDB:'U',0xDC:'U',
+    0xC7:'C', 0xD1:'N',
+    0xB3:'3' // superscript 3
+  };
+  var out = '';
+  for (var i = 0; i < s.length; i++) {
+    var code = s.charCodeAt(i);
+    if (map[code] !== undefined) { out += map[code]; }
+    else if (code >= 0x20 && code <= 0x7E) { out += s[i]; }
+    // else: skip (non-breaking spaces, other non-ASCII)
+  }
+  return out;
+}
+function fvolPDF(v) { return Math.round(v).toString(); }
+function eurPDF(v)  { return v.toFixed(2) + ' EUR'; }
+
 // ── PDF Generation ────────────────────────────────────────────────────────────
 
 function generatePDF() {
@@ -1965,16 +1990,17 @@ function generatePDF() {
   doc.setTextColor(...muted);
   const totalVol = pieces.reduce((s, pc) => s + pc.vol, 0);
   if (pieces.length === 1) {
-    doc.text('Fichier : ' + pieces[0].name, 15, y);
+    doc.text(pdfStr('Fichier : ' + pieces[0].name), 15, y);
     y += 5;
     doc.setFont('helvetica', 'normal');
-    doc.text('Volume : ' + fvol(totalVol) + ' mm3   Qte : ' + opts.qty, 15, y);
+    doc.text(pdfStr('Volume : ' + fvolPDF(totalVol) + ' mm3  Qte : ' + opts.qty), 15, y);
   } else {
-    doc.text('Fichiers : ' + pieces.length + ' pieces   Volume total : ' + fvol(totalVol) + ' mm3   Qte : ' + opts.qty, 15, y);
+    doc.text(pdfStr('Fichiers : ' + pieces.length + ' pieces  Vol. total : ' + fvolPDF(totalVol) + ' mm3  Qte : ' + opts.qty), 15, y);
   }
   y += 10;
 
   const p = calcPrice(opts.qty);
+
 
   // Si plusieurs pièces, tableau des pièces
   if (pieces.length > 1) {
@@ -1994,11 +2020,11 @@ function generatePDF() {
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(7.5);
       doc.setTextColor(...text);
-      const nameShort = pd.name.length > 28 ? pd.name.substring(0, 25) + '...' : pd.name;
+      const nameShort = pdfStr(pd.name.length > 28 ? pd.name.substring(0, 25) + '...' : pd.name);
       doc.text(nameShort, 16, y + 4.2);
-      doc.text(fvol(pd.vol), 80, y + 4.2);
+      doc.text(fvolPDF(pd.vol), 80, y + 4.2);
       doc.text(String(opts.qty), 120, y + 4.2);
-      doc.text(eur(pd.pricePP * opts.qty), W - 16, y + 4.2, { align: 'right' });
+      doc.text(eurPDF(pd.pricePP * opts.qty), W - 16, y + 4.2, { align: 'right' });
       y += 6;
     });
     y += 4;
@@ -2006,24 +2032,24 @@ function generatePDF() {
 
   // Price table
   const rows = [];
-  rows.push([t('p_base') + (p.minApplied ? ' *' : ''), eur(p.piecesTotal)]);
-  if (p.finishTotal > 0) rows.push([t('p_finish') + (p.finishMinApplied ? ' *' : ''), '+' + eur(p.finishTotal)]);
-  if (p.colorTotal > 0) rows.push([t('p_color') + ' ' + getColName(opts.col) + (p.colorMinApplied ? ' *' : ''), '+' + eur(p.colorTotal)]);
+  rows.push([pdfStr(t('p_base')) + (p.minApplied ? ' *' : ''), eurPDF(p.piecesTotal)]);
+  if (p.finishTotal > 0) rows.push([pdfStr(t('p_finish')) + (p.finishMinApplied ? ' *' : ''), '+' + eurPDF(p.finishTotal)]);
+  if (p.colorTotal > 0) rows.push([pdfStr(t('p_color') + ' ' + getColName(opts.col)) + (p.colorMinApplied ? ' *' : ''), '+' + eurPDF(p.colorTotal)]);
 
   // Delay
   const delayPPTotal = p.pieceDetails.reduce((s, pd) => {
     const delayRate = opts.delay === 'pri' ? 0.10 : opts.delay === 'exp' ? 0.25 : 0;
     return s + pd.basePP * delayRate;
   }, 0) * opts.qty;
-  if (delayPPTotal > 0) rows.push([t('p_delay'), '+' + eur(delayPPTotal)]);
+  if (delayPPTotal > 0) rows.push([pdfStr(t('p_delay')), '+' + eurPDF(delayPPTotal)]);
 
   // Nett
   const nettTotalPDF = p.pieceDetails.reduce((s) => s + (opts.nett ? 25 : 0), 0) * opts.qty;
-  if (nettTotalPDF > 0) rows.push([t('p_nett'), '+' + eur(nettTotalPDF)]);
+  if (nettTotalPDF > 0) rows.push([pdfStr(t('p_nett')), '+' + eurPDF(nettTotalPDF)]);
 
-  if (p.dossierTotal > 0) rows.push([t('p_dossier'), '+' + eur(p.dossierTotal)]);
-  if (p.livTotal > 0) rows.push([t('p_delivery'), '+' + eur(p.livTotal)]);
-  if (p.discRate > 0) rows.push([t('p_disc') + ' ' + Math.round(p.discRate * 100) + '%', '-' + eur(p.discAmount)]);
+  if (p.dossierTotal > 0) rows.push([pdfStr(t('p_dossier')), '+' + eurPDF(p.dossierTotal)]);
+  if (p.livTotal > 0) rows.push([pdfStr(t('p_delivery')), '+' + eurPDF(p.livTotal)]);
+  if (p.discRate > 0) rows.push([pdfStr(t('p_disc')) + ' ' + Math.round(p.discRate * 100) + '%', '-' + eurPDF(p.discAmount)]);
 
   // Table header
   doc.setFillColor(...green);
@@ -2051,8 +2077,8 @@ function generatePDF() {
 
   // Totals
   const totals = [
-    [t('p_subht'), eur(p.ht)],
-    [t('p_tva'), eur(p.tva)],
+    [pdfStr(t('p_subht')), eurPDF(p.ht)],
+    [pdfStr(t('p_tva')),   eurPDF(p.tva)],
   ];
   totals.forEach(row => {
     doc.setFont('helvetica', 'normal');
@@ -2072,11 +2098,11 @@ function generatePDF() {
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(10);
   doc.setTextColor(...lime);
-  doc.text(t('p_ttc'), 20, y + 9);
+  doc.text(pdfStr(t('p_ttc')), 20, y + 9);
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(14);
   doc.setTextColor(...white);
-  doc.text(eur(p.ttc), W - 16, y + 9, { align: 'right' });
+  doc.text(eurPDF(p.ttc), W - 16, y + 9, { align: 'right' });
   y += 22;
 
   // Notes
@@ -2084,28 +2110,28 @@ function generatePDF() {
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(7.5);
     doc.setTextColor(...muted);
-    doc.text('* ' + t('p_min_applied'), 15, y);
+    doc.text(pdfStr('* ' + t('p_min_applied')), 15, y);
     y += 5;
   }
   if (p.colorMinApplied) {
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(7.5);
     doc.setTextColor(...muted);
-    doc.text('* ' + t('p_color_min'), 15, y);
+    doc.text(pdfStr('* ' + t('p_color_min')), 15, y);
     y += 5;
   }
   if (p.finishMinApplied) {
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(7.5);
     doc.setTextColor(...muted);
-    doc.text('* ' + t('p_lissage_min'), 15, y);
+    doc.text(pdfStr('* ' + t('p_lissage_min')), 15, y);
     y += 5;
   }
 
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(7.5);
   doc.setTextColor(...muted);
-  doc.text(t('p_note'), 15, y);
+  doc.text(pdfStr(t('p_note')), 15, y);
   y += 8;
 
   // Contact section
@@ -2116,7 +2142,7 @@ function generatePDF() {
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(9);
   doc.setTextColor(...text);
-  doc.text(t('contact_text') + ' :', 15, y);
+  doc.text(pdfStr(t('contact_text')) + ' :', 15, y);
   y += 6;
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(...orange);
