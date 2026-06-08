@@ -175,6 +175,9 @@ header{
 .piece-item{display:flex;align-items:center;gap:.75rem;padding:.625rem .875rem;background:rgba(170,230,110,.1);border:1.5px solid rgba(170,230,110,.4);border-radius:10px;}
 .pdel{margin-left:auto;background:none;border:1.5px solid var(--border);border-radius:50%;width:24px;height:24px;font-size:1rem;line-height:1;color:var(--muted);cursor:pointer;transition:all .15s;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
 .pdel:hover{border-color:var(--orange);color:var(--orange);}
+.piece-qty{display:flex;align-items:center;gap:.3rem;flex-shrink:0;}
+.piece-qty button{background:var(--green);color:#fff;border:none;border-radius:50%;width:20px;height:20px;font-size:.9rem;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;flex-shrink:0;}
+.piece-qty input{width:38px;text-align:center;border:1.5px solid var(--border);border-radius:6px;font-size:.78rem;font-family:'Sora',sans-serif;font-weight:600;color:var(--green);padding:.15rem .2rem;background:#fff;}
 
 /* ERROR */
 .err{
@@ -1574,14 +1577,16 @@ function getOptions() {
   return { fin, col, delay, liv, nett, dossier, qty, app };
 }
 
-function calcPrice(qty) {
+function calcPrice(overrideQty) {
   if (!pieces.length) return null;
   const opts = getOptions();
   const numPieces = pieces.length;
+  const multi = numPieces > 1;
 
-  let totalPricePP = 0, minApplied = false;
+  let piecesTotal = 0, minApplied = false;
   const pieceDetails = [];
   for (const piece of pieces) {
+    const pQty = overrideQty != null ? overrideQty : (multi ? (piece.qty || 1) : opts.qty);
     const raw = piece.vol * 0.001;
     const basePP = Math.max(raw, 6);
     if (raw < 6) minApplied = true;
@@ -1589,16 +1594,17 @@ function calcPrice(qty) {
     const delayPP = basePP * delayRate;
     const nettPP = opts.nett ? 25 : 0;
     const pricePP = basePP + delayPP + nettPP;
-    totalPricePP += pricePP;
-    pieceDetails.push({ name: piece.name, vol: piece.vol, basePP, pricePP });
+    piecesTotal += pricePP * pQty;
+    pieceDetails.push({ name: piece.name, vol: piece.vol, basePP, pricePP, qty: pQty });
   }
-  const piecesTotal = totalPricePP * qty;
 
-  const rawFinish = opts.fin === 'lissage' ? numPieces * qty * 2 : 0;
+  const totalQty = overrideQty != null ? overrideQty * numPieces
+    : pieceDetails.reduce((s, pd) => s + pd.qty, 0);
+  const rawFinish = opts.fin === 'lissage' ? totalQty * 2 : 0;
   const finishMinApplied = rawFinish > 0 && rawFinish < 100;
   const finishTotal = rawFinish > 0 ? Math.max(rawFinish, 100) : 0;
 
-  const rawColor = opts.col !== 'blanc' ? numPieces * qty * 2 : 0;
+  const rawColor = opts.col !== 'blanc' ? totalQty * 2 : 0;
   const colorMinApplied = rawColor > 0 && rawColor < 100;
   const colorTotal = rawColor > 0 ? Math.max(rawColor, 100) : 0;
 
@@ -1608,6 +1614,7 @@ function calcPrice(qty) {
   const discRate = getDiscount(subBefore);
   const discAmount = subBefore * discRate;
   const ht = subBefore - discAmount;
+  const qty = overrideQty != null ? overrideQty : (multi ? null : opts.qty);
   return {
     minApplied, piecesTotal, finishTotal, finishMinApplied,
     colorTotal, colorMinApplied, dossierTotal, livTotal,
@@ -1627,8 +1634,8 @@ function makeRow(label, value, cls='') {
 function refresh() {
   if (!pieces.length) return;
   const opts = getOptions();
-  const qty = opts.qty;
-  const p = calcPrice(qty);
+  const multi = pieces.length > 1;
+  const p = multi ? calcPrice() : calcPrice(opts.qty);
   if (!p) return;
 
   // Volume total = somme de toutes les pieces
@@ -1655,17 +1662,15 @@ function refresh() {
   }
 
   // Délai
-  const delayPPTotal = p.pieceDetails.reduce((s, pd) => {
-    const delayRate = opts.delay === 'pri' ? 0.10 : opts.delay === 'exp' ? 0.25 : 0;
-    return s + pd.basePP * delayRate;
-  }, 0) * qty;
+  const delayRate = opts.delay === 'pri' ? 0.10 : opts.delay === 'exp' ? 0.25 : 0;
+  const delayPPTotal = p.pieceDetails.reduce((s, pd) => s + pd.basePP * delayRate * pd.qty, 0);
   if (delayPPTotal > 0) {
     const delayLabel = opts.delay === 'pri' ? t('p_delay') + ' (+10%)' : t('p_delay') + ' (+25%)';
     prows.appendChild(makeRow(delayLabel, '+' + eur(delayPPTotal), 'add'));
   }
 
   // Nettoyage
-  const nettTotal = p.pieceDetails.reduce((s) => s + (opts.nett ? 25 : 0), 0) * qty;
+  const nettTotal = p.pieceDetails.reduce((s, pd) => s + (opts.nett ? 25 * pd.qty : 0), 0);
   if (nettTotal > 0) {
     prows.appendChild(makeRow(t('p_nett'), '+' + eur(nettTotal), 'add'));
   }
@@ -1765,9 +1770,17 @@ function renderViewerTabs() {
 function renderPiecesList() {
   const list = $('piecesList');
   list.innerHTML = '';
+  const multi = pieces.length > 1;
   pieces.forEach((piece, idx) => {
     const item = document.createElement('div');
     item.className = 'piece-item';
+    const qtyHtml = multi
+      ? '<div class="piece-qty">' +
+          '<button class="pqm" data-idx="' + idx + '">&#8722;</button>' +
+          '<input class="pqi" type="number" min="1" value="' + (piece.qty || 1) + '" data-idx="' + idx + '">' +
+          '<button class="pqp" data-idx="' + idx + '">+</button>' +
+        '</div>'
+      : '';
     item.innerHTML =
       '<svg width="18" height="18" viewBox="0 0 22 22" fill="none" style="flex-shrink:0">' +
         '<path d="M13 2H6a2 2 0 00-2 2v14a2 2 0 002 2h10a2 2 0 002-2V8l-5-6z" fill="rgba(0,75,50,.15)" stroke="#004B32" stroke-width="1.5" stroke-linejoin="round"/>' +
@@ -1777,13 +1790,32 @@ function renderPiecesList() {
         '<div style="font-family:\'Sora\',sans-serif;font-weight:600;font-size:.82rem;color:var(--green);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + piece.name + '</div>' +
         '<div style="font-size:.75rem;color:var(--muted);margin-top:.1rem">' + fvol(piece.vol) + ' mm3</div>' +
       '</div>' +
+      qtyHtml +
       '<button class="pdel" title="Supprimer">&#215;</button>';
+    if (multi) {
+      item.querySelector('.pqm').addEventListener('click', () => {
+        pieces[idx].qty = Math.max(1, (pieces[idx].qty || 1) - 1);
+        item.querySelector('.pqi').value = pieces[idx].qty;
+        refresh(); renderSim();
+      });
+      item.querySelector('.pqp').addEventListener('click', () => {
+        pieces[idx].qty = (pieces[idx].qty || 1) + 1;
+        item.querySelector('.pqi').value = pieces[idx].qty;
+        refresh(); renderSim();
+      });
+      item.querySelector('.pqi').addEventListener('change', () => {
+        pieces[idx].qty = Math.max(1, parseInt(item.querySelector('.pqi').value) || 1);
+        item.querySelector('.pqi').value = pieces[idx].qty;
+        refresh(); renderSim();
+      });
+    }
     item.querySelector('.pdel').addEventListener('click', () => {
       pieces.splice(idx, 1);
       if (pieces.length === 0) {
         resetAll();
       } else {
         if (activeViewerIdx >= pieces.length) activeViewerIdx = pieces.length - 1;
+        $('qty').closest('.qty-ctrl').style.display = pieces.length > 1 ? 'none' : '';
         renderPiecesList();
         initViewer(pieces[activeViewerIdx].buf);
         setBadge('rot');
@@ -1811,7 +1843,7 @@ function confirmFiles() {
   hide($('unitModal'));
   // push all pending into pieces
   for (const pf of pendingFiles) {
-    pieces.push({ name: pf.name, vol: pf.vol, buf: pf.buf });
+    pieces.push({ name: pf.name, vol: pf.vol, buf: pf.buf, qty: 1 });
   }
   pendingFiles = [];
   pendingFileIndex = 0;
@@ -1826,6 +1858,7 @@ function confirmFiles() {
   show($('simcard'));
   hide($('pempty'));
   show($('ppanel'));
+  $('qty').closest('.qty-ctrl').style.display = pieces.length > 1 ? 'none' : '';
   show($('viewercard'));
   document.getElementById('pageTop').classList.remove('no-viewer');
   refresh();
@@ -2012,17 +2045,18 @@ function generatePDF() {
   doc.setFontSize(9);
   doc.setTextColor(...muted);
   const totalVol = pieces.reduce((s, pc) => s + pc.vol, 0);
-  if (pieces.length === 1) {
+  const multi = pieces.length > 1;
+  if (!multi) {
     doc.text(pdfStr('Fichier : ' + pieces[0].name), 15, y);
     y += 5;
     doc.setFont('helvetica', 'normal');
     doc.text(pdfStr('Volume : ' + fvolPDF(totalVol) + ' mm3  Qte : ' + opts.qty), 15, y);
   } else {
-    doc.text(pdfStr('Fichiers : ' + pieces.length + ' pieces  Vol. total : ' + fvolPDF(totalVol) + ' mm3  Qte : ' + opts.qty), 15, y);
+    doc.text(pdfStr('Fichiers : ' + pieces.length + ' pieces  Vol. total : ' + fvolPDF(totalVol) + ' mm3'), 15, y);
   }
   y += 10;
 
-  const p = calcPrice(opts.qty);
+  const p = multi ? calcPrice() : calcPrice(opts.qty);
 
 
   // Si plusieurs pièces, tableau des pièces
@@ -2046,8 +2080,8 @@ function generatePDF() {
       const nameShort = pdfStr(pd.name.length > 28 ? pd.name.substring(0, 25) + '...' : pd.name);
       doc.text(nameShort, 16, y + 4.2);
       doc.text(fvolPDF(pd.vol), 80, y + 4.2);
-      doc.text(String(opts.qty), 120, y + 4.2);
-      doc.text(eurPDF(pd.pricePP * opts.qty), W - 16, y + 4.2, { align: 'right' });
+      doc.text(String(pd.qty), 120, y + 4.2);
+      doc.text(eurPDF(pd.pricePP * pd.qty), W - 16, y + 4.2, { align: 'right' });
       y += 6;
     });
     y += 4;
@@ -2060,14 +2094,12 @@ function generatePDF() {
   if (p.colorTotal > 0) rows.push([pdfStr(t('p_color') + ' ' + getColName(opts.col)) + (p.colorMinApplied ? ' *' : ''), '+' + eurPDF(p.colorTotal)]);
 
   // Delay
-  const delayPPTotal = p.pieceDetails.reduce((s, pd) => {
-    const delayRate = opts.delay === 'pri' ? 0.10 : opts.delay === 'exp' ? 0.25 : 0;
-    return s + pd.basePP * delayRate;
-  }, 0) * opts.qty;
+  const pdfDelayRate = opts.delay === 'pri' ? 0.10 : opts.delay === 'exp' ? 0.25 : 0;
+  const delayPPTotal = p.pieceDetails.reduce((s, pd) => s + pd.basePP * pdfDelayRate * pd.qty, 0);
   if (delayPPTotal > 0) rows.push([pdfStr(t('p_delay')), '+' + eurPDF(delayPPTotal)]);
 
   // Nett
-  const nettTotalPDF = p.pieceDetails.reduce((s) => s + (opts.nett ? 25 : 0), 0) * opts.qty;
+  const nettTotalPDF = p.pieceDetails.reduce((s, pd) => s + (opts.nett ? 25 * pd.qty : 0), 0);
   if (nettTotalPDF > 0) rows.push([pdfStr(t('p_nett')), '+' + eurPDF(nettTotalPDF)]);
 
   if (p.dossierTotal > 0) rows.push([pdfStr(t('p_dossier')), '+' + eurPDF(p.dossierTotal)]);
