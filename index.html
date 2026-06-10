@@ -43,6 +43,9 @@ header{
   color:#fff;text-transform:uppercase;letter-spacing:-.025em;line-height:1.2;
 }
 .logo h1 .accent{color:var(--orange)}
+.logo-img{
+  display:block;height:42px;width:auto;background:transparent;
+}
 .logo p{font-size:.78rem;color:rgba(170,230,110,.85);margin-top:.15rem;letter-spacing:.02em}
 .hright{display:flex;align-items:center;gap:.75rem;flex-wrap:wrap}
 .hbadge{
@@ -289,6 +292,31 @@ header{
 .vbadge.rot{color:var(--lime);border-color:rgba(170,230,110,.4);background:rgba(170,230,110,.08)}
 .vbadge.man{color:var(--muted);border-color:var(--border);background:none}
 
+/* UNIT SELECTOR */
+.unit-selector{
+  display:flex;align-items:center;gap:.625rem;flex-wrap:wrap;
+  margin-top:.75rem;padding-top:.75rem;border-top:1px solid var(--border);
+}
+.unit-lbl{
+  font-family:'Sora',sans-serif;font-weight:600;font-size:.7rem;
+  text-transform:uppercase;letter-spacing:.08em;color:var(--muted);
+}
+.unit-pills{display:flex;gap:.3rem}
+.unit-btn{
+  font-family:'Sora',sans-serif;font-weight:600;font-size:.72rem;
+  padding:.25rem .7rem;border-radius:100px;
+  border:1.5px solid var(--border);background:var(--white);
+  color:var(--muted);cursor:pointer;transition:all .15s;
+}
+.unit-btn:hover{border-color:var(--green);color:var(--green)}
+.unit-btn.active{background:var(--green);border-color:var(--green);color:var(--white)}
+.unit-warning{
+  margin-top:.625rem;font-size:.72rem;line-height:1.45;color:#8A6D00;
+  background:#FFF8E6;border:1px solid #F2E2A8;border-radius:8px;
+  padding:.5rem .7rem;
+}
+.unit-warning:empty{display:none}
+
 /* PRICE PANEL */
 .pempty{text-align:center;padding:2.5rem 1rem;color:var(--muted)}
 .pempty svg{margin:0 auto .875rem;display:block;color:var(--border)}
@@ -317,6 +345,7 @@ header{
 .prow .pv.add{color:var(--green)}
 .prow .pv.disc{color:var(--orange)}
 .pminsub{font-size:.72rem;color:var(--muted);font-style:italic;margin-top:.1rem}
+.p-indicative{font-style:italic;font-size:.72rem;color:#888;margin-top:-.85rem;margin-bottom:1.1rem}
 .pmincolor{font-size:.72rem;color:var(--orange);font-weight:600;margin-top:.1rem}
 
 .totals{border-top:1.5px solid var(--border);padding-top:.875rem}
@@ -392,39 +421,11 @@ header{
 }
 .contact-card a:hover{text-decoration:underline}
 
-/* MODAL */
-.modal-overlay{
-  position:fixed;inset:0;background:rgba(0,0,0,.55);
-  display:flex;align-items:center;justify-content:center;
-  z-index:9999;padding:1rem;
-}
-.modal-box{
-  background:var(--white);border-radius:20px;
-  padding:2rem;max-width:440px;width:100%;
-  box-shadow:0 20px 60px rgba(0,0,0,.2);
-  animation:fadeUp .2s ease;
-}
-.modal-icon{font-size:2rem;text-align:center;margin-bottom:1rem}
-.modal-title{
-  font-family:'Sora',sans-serif;font-weight:700;font-size:1.05rem;
-  color:var(--green);text-align:center;margin-bottom:.75rem;
-}
-.modal-body{font-size:.875rem;color:var(--muted);text-align:center;line-height:1.65;margin-bottom:1.5rem}
-.modal-actions{display:flex;gap:.75rem}
-.modal-actions .btn-yes{
-  flex:1;background:var(--green);color:var(--white);border:none;
-  border-radius:100px;padding:.7rem 1rem;
-  font-family:'Sora',sans-serif;font-size:.875rem;font-weight:700;cursor:pointer;
-  transition:opacity .15s;
-}
-.modal-actions .btn-yes:hover{opacity:.87}
-.modal-actions .btn-no{
-  flex:1;background:none;color:var(--muted);
-  border:1.5px solid var(--border);border-radius:100px;padding:.7rem 1rem;
-  font-family:'Sora',sans-serif;font-size:.875rem;font-weight:600;cursor:pointer;
-  transition:all .15s;
-}
-.modal-actions .btn-no:hover{border-color:var(--orange);color:var(--orange)}
+/* BUREAU D'ETUDES */
+.be-section{margin-top:1.125rem;padding-top:1rem;border-top:1px solid var(--border);text-align:center}
+.be-text{font-size:.78rem;color:var(--muted);line-height:1.5;margin-bottom:.5rem}
+.be-link{font-family:'Sora',sans-serif;font-weight:600;font-size:.8rem;color:var(--green);text-decoration:none}
+.be-link:hover{text-decoration:underline}
 
 /* UTILS */
 .hidden{display:none!important}
@@ -433,26 +434,19 @@ header{
 
 footer{text-align:center;padding:1.5rem;font-size:.78rem;color:var(--muted);border-top:1px solid var(--border)}
 footer strong{color:var(--orange)}
+.footer-company{margin-top:.6rem;font-size:.72rem;color:#004B32;line-height:1.4;display:flex;align-items:center;justify-content:center;gap:.75rem;flex-wrap:wrap}
+.footer-company a{color:#004B32;text-decoration:underline}
+.footer-company a:hover{opacity:.75}
+.footer-logo{height:34px;width:auto;background:transparent;flex-shrink:0}
 </style>
 </head>
 <body>
 
-<!-- UNIT MODAL -->
-<div class="modal-overlay hidden" id="unitModal">
-  <div class="modal-box">
-    <div class="modal-icon">&#9888;&#65039;</div>
-    <div class="modal-title" id="m_title_el"></div>
-    <div class="modal-body" id="m_body_el"></div>
-    <div class="modal-actions">
-      <button class="btn-yes" id="modalYes"></button>
-      <button class="btn-no" id="modalNo"></button>
-    </div>
-  </div>
-</div>
-
 <header>
   <div class="logo">
-    <h1>ONE <span class="accent">PRINT</span></h1>
+    <img src="Oneortho_logotype_2023_grege.png" alt="OneOrtho Medical" class="logo-img" id="logoImg"
+         onerror="this.style.display='none';var f=document.getElementById('logoFallback');if(f)f.style.display='block';">
+    <h1 id="logoFallback" style="display:none">ONE <span class="accent">PRINT</span></h1>
     <p id="brand_sub_el"></p>
   </div>
   <div class="hright">
@@ -486,6 +480,15 @@ footer strong{color:var(--orange)}
         <button id="vreset" class="vreset"></button>
       </div>
       <div id="viewerTabs" class="viewer-tabs" style="display:none"></div>
+      <div class="unit-selector">
+        <span class="unit-lbl" id="unit_lbl_el"></span>
+        <div class="unit-pills" id="unitPills">
+          <button class="unit-btn active" data-unit="mm">mm</button>
+          <button class="unit-btn" data-unit="cm">cm</button>
+          <button class="unit-btn" data-unit="in">in</button>
+        </div>
+      </div>
+      <div class="unit-warning" id="unitWarning"></div>
     </div>
 
     <!-- CONFIGURATION -->
@@ -501,7 +504,7 @@ footer strong{color:var(--orange)}
             <label for="app_md" id="c_app_md_el"></label>
           </div>
           <div class="pill">
-            <input type="radio" name="app" id="app_proto" value="proto">
+            <input type="radio" name="app" id="app_proto" value="proto" checked>
             <label for="app_proto" id="c_app_proto_el"></label>
           </div>
           <div class="pill">
@@ -642,6 +645,7 @@ footer strong{color:var(--orange)}
     <!-- DEVIS INSTANTANÉ -->
     <div class="card" id="pricecard">
       <div class="stitle orange" id="p_title_el"></div>
+      <div class="p-indicative" id="p_indicative_el"></div>
 
       <div class="pempty" id="pempty">
         <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
@@ -654,6 +658,7 @@ footer strong{color:var(--orange)}
 
       <div class="hidden fi" id="ppanel">
         <!-- Qty controls -->
+        <div class="olbl" id="p_qty_lbl" style="margin-bottom:.5rem;"></div>
         <div class="qty-ctrl" style="margin-bottom:1rem;">
           <button class="qty-btn" id="qtyMinus">&#8722;</button>
           <input type="number" id="qty" min="1" value="1">
@@ -722,6 +727,11 @@ footer strong{color:var(--orange)}
       </div>
 
       <div class="err hidden" id="err"></div>
+
+      <div class="be-section">
+        <p class="be-text" id="be_text_el"></p>
+        <a class="be-link" id="be_link_el" href="mailto:3dPrinting@oneortho-medical.com"></a>
+      </div>
     </div>
 
     <!-- SIMULATION -->
@@ -743,6 +753,7 @@ footer strong{color:var(--orange)}
 
 <footer>
   <span id="footer_txt_el"></span>
+  <div class="footer-company"><img src="Oneortho_logotype_2023_vert.png" alt="OneOrtho Medical" class="footer-logo"><span>OneOrtho Medical — Parc Inopolis, 206 route de Vourles, 69230 Saint-Genis-Laval — Tél. : +33(0)4 26 78 76 74 — <a href="https://www.oneortho-medical.com" target="_blank" rel="noopener">www.oneortho-medical.com</a></span></div>
 </footer>
 
 <script type="module">
@@ -765,11 +776,14 @@ const TRANSLATIONS = {
     brand_sub:   "Chiffrage SLS instantane -- PA2200 Nylon",
     badge:       "SLS Estimator",
     u_title:     "Fichier STL",
-    u_head:      "Deposez vos fichiers STL ici",
-    u_sub:       "Ou cliquer pour parcourir · Plusieurs fichiers, Binary & ASCII supportes",
+    u_head:      "Déposez vos fichiers STL ici ou cliquez pour parcourir",
+    u_head_add:  "Ajouter des fichiers STL au devis",
+    u_sub:       "Plusieurs fichiers, Binary & ASCII supportés",
     u_parsing:   "Analyse du fichier en cours...",
     u_vol:       "Volume calcule",
-    u_change:    "Changer",
+    u_change:    "Nouveau devis",
+    u_unit_lbl:  "Unité du fichier",
+    u_unit_warn: "Volume détecté : {vol} mm³ (unité : {unit}) — Vérifiez que l'unité correspond à votre fichier.",
     m_title:     "Confirmation d'unite",
     m_body:      "Confirmez-vous que votre fichier est modelise en millimetres (mm) ? Une erreur d'unite entrainerait un chiffrage incorrect.",
     m_yes:       "Oui, en mm",
@@ -807,6 +821,7 @@ const TRANSLATIONS = {
     c_retrait:   "Retrait en atelier",
     c_retrait_free: "Gratuit",
     p_title:     "Devis instantane",
+    p_indicative: "Devis indicatif — sous réserve de validation technique",
     p_volume:    "Volume",
     p_base:      "Prix de base (PA2200)",
     p_min_applied: "Minimum 6 EUR applique",
@@ -834,6 +849,8 @@ const TRANSLATIONS = {
     pdf_btn:     "Telecharger le devis PDF",
     pdf_app_req: "Veuillez selectionner la nature de l'application avant de generer le PDF.",
     contact_text: "Pour passer commande, envoyez votre devis a",
+    be_text:     "Vous n'avez pas de fichier 3D ? Notre bureau d'études peut concevoir votre pièce sur mesure.",
+    be_link:     "Contacter le bureau d'études → 3dPrinting@oneortho-medical.com",
     v_title:     "Apercu 3D",
     v_rot:       "Rotation auto",
     v_man:       "Manuel",
@@ -845,16 +862,22 @@ const TRANSLATIONS = {
     err_vol:     "Volume nul ou invalide -- verifiez que le mesh est ferme (watertight).",
     err_corrupt: "Fichier invalide ou corrompu : ",
     err_read:    "Impossible de lire le fichier.",
+    err_file_big: "Ce fichier dépasse 50 Mo. Simplifiez le maillage avant de l'importer.",
+    err_too_many: "Maximum 5 fichiers simultanés.",
+    err_total_big: "Le total des fichiers dépasse 150 Mo.",
   },
   en: {
     brand_sub:   "Instant SLS quoting -- PA2200 Nylon",
     badge:       "SLS Estimator",
     u_title:     "STL File",
-    u_head:      "Drop your STL files here",
-    u_sub:       "Or click to browse - Multiple files, Binary & ASCII supported",
+    u_head:      "Drop your STL files here or click to browse",
+    u_head_add:  "Add STL files to the quote",
+    u_sub:       "Multiple files, Binary & ASCII supported",
     u_parsing:   "Analysing file...",
     u_vol:       "Calculated volume",
-    u_change:    "Change",
+    u_change:    "New quote",
+    u_unit_lbl:  "File unit",
+    u_unit_warn: "Detected volume: {vol} mm³ (unit: {unit}) — Check the unit matches your file.",
     m_title:     "Unit confirmation",
     m_body:      "Please confirm your file is modelled in millimetres (mm). An incorrect unit would result in a wrong quote.",
     m_yes:       "Yes, in mm",
@@ -892,6 +915,7 @@ const TRANSLATIONS = {
     c_retrait:   "Workshop pick-up",
     c_retrait_free: "Free",
     p_title:     "Instant quote",
+    p_indicative: "Indicative quote — subject to technical validation",
     p_volume:    "Volume",
     p_base:      "Base price (PA2200)",
     p_min_applied: "Minimum EUR6 applied",
@@ -919,6 +943,8 @@ const TRANSLATIONS = {
     pdf_btn:     "Download PDF quote",
     pdf_app_req: "Please select the application type before generating the PDF.",
     contact_text: "To place an order, send your quote to",
+    be_text:     "Don't have a 3D file? Our design office can create your custom part.",
+    be_link:     "Contact the design office → 3dPrinting@oneortho-medical.com",
     v_title:     "3D Preview",
     v_rot:       "Auto-rotate",
     v_man:       "Manual",
@@ -930,16 +956,22 @@ const TRANSLATIONS = {
     err_vol:     "Zero or invalid volume -- check the mesh is watertight.",
     err_corrupt: "Invalid or corrupt file: ",
     err_read:    "Unable to read file.",
+    err_file_big: "This file exceeds 50 MB. Simplify the mesh before importing it.",
+    err_too_many: "Maximum 5 files at a time.",
+    err_total_big: "Total file size exceeds 150 MB.",
   },
   es: {
     brand_sub:   "Presupuesto SLS instantaneo -- PA2200 Nylon",
     badge:       "SLS Estimador",
     u_title:     "Archivo STL",
-    u_head:      "Suelte sus archivos STL aqui",
-    u_sub:       "O haga clic para buscar - Varios archivos, Binario y ASCII admitidos",
+    u_head:      "Suelte sus archivos STL aquí o haga clic para buscar",
+    u_head_add:  "Añadir archivos STL al presupuesto",
+    u_sub:       "Varios archivos, Binario y ASCII admitidos",
     u_parsing:   "Analizando el archivo...",
     u_vol:       "Volumen calculado",
-    u_change:    "Cambiar",
+    u_change:    "Nuevo presupuesto",
+    u_unit_lbl:  "Unidad del archivo",
+    u_unit_warn: "Volumen detectado: {vol} mm³ (unidad: {unit}) — Compruebe que la unidad corresponde a su archivo.",
     m_title:     "Confirmacion de unidad",
     m_body:      "Confirma que su archivo esta modelado en milimetros (mm)? Un error de unidad daria lugar a un presupuesto incorrecto.",
     m_yes:       "Si, en mm",
@@ -977,6 +1009,7 @@ const TRANSLATIONS = {
     c_retrait:   "Recogida en taller",
     c_retrait_free: "Gratis",
     p_title:     "Presupuesto instantaneo",
+    p_indicative: "Presupuesto indicativo — sujeto a validación técnica",
     p_volume:    "Volumen",
     p_base:      "Precio base (PA2200)",
     p_min_applied: "Minimo 6 EUR aplicado",
@@ -1004,6 +1037,8 @@ const TRANSLATIONS = {
     pdf_btn:     "Descargar presupuesto PDF",
     pdf_app_req: "Seleccione el tipo de aplicacion antes de generar el PDF.",
     contact_text: "Para realizar un pedido, envie su presupuesto a",
+    be_text:     "¿No tiene un archivo 3D? Nuestra oficina técnica puede diseñar su pieza a medida.",
+    be_link:     "Contactar con la oficina técnica → 3dPrinting@oneortho-medical.com",
     v_title:     "Vista previa 3D",
     v_rot:       "Rotacion auto",
     v_man:       "Manual",
@@ -1015,16 +1050,22 @@ const TRANSLATIONS = {
     err_vol:     "Volumen nulo o invalido -- compruebe que el mesh es estanco.",
     err_corrupt: "Archivo invalido o corrupto: ",
     err_read:    "No se puede leer el archivo.",
+    err_file_big: "Este archivo supera los 50 MB. Simplifique la malla antes de importarlo.",
+    err_too_many: "Máximo 5 archivos simultáneos.",
+    err_total_big: "El total de los archivos supera los 150 MB.",
   },
   it: {
     brand_sub:   "Preventivo SLS istantaneo -- PA2200 Nylon",
     badge:       "SLS Stimatore",
     u_title:     "File STL",
-    u_head:      "Rilascia i tuoi file STL qui",
-    u_sub:       "O clicca per sfogliare - Piu file, Binario e ASCII supportati",
+    u_head:      "Rilascia i tuoi file STL qui o clicca per sfogliare",
+    u_head_add:  "Aggiungi file STL al preventivo",
+    u_sub:       "Più file, Binario e ASCII supportati",
     u_parsing:   "Analisi del file in corso...",
     u_vol:       "Volume calcolato",
-    u_change:    "Cambia",
+    u_change:    "Nuovo preventivo",
+    u_unit_lbl:  "Unità del file",
+    u_unit_warn: "Volume rilevato: {vol} mm³ (unità: {unit}) — Verifica che l'unità corrisponda al tuo file.",
     m_title:     "Conferma unita",
     m_body:      "Confermi che il file e modellato in millimetri (mm)? Un'unita errata comporterebbe un preventivo scorretto.",
     m_yes:       "Si, in mm",
@@ -1062,6 +1103,7 @@ const TRANSLATIONS = {
     c_retrait:   "Ritiro in officina",
     c_retrait_free: "Gratuito",
     p_title:     "Preventivo istantaneo",
+    p_indicative: "Preventivo indicativo — soggetto a convalida tecnica",
     p_volume:    "Volume",
     p_base:      "Prezzo base (PA2200)",
     p_min_applied: "Minimo 6 EUR applicato",
@@ -1089,6 +1131,8 @@ const TRANSLATIONS = {
     pdf_btn:     "Scarica preventivo PDF",
     pdf_app_req: "Seleziona il tipo di applicazione prima di generare il PDF.",
     contact_text: "Per effettuare un ordine, invia il preventivo a",
+    be_text:     "Non hai un file 3D? Il nostro ufficio tecnico può progettare il tuo pezzo su misura.",
+    be_link:     "Contatta l'ufficio tecnico → 3dPrinting@oneortho-medical.com",
     v_title:     "Anteprima 3D",
     v_rot:       "Rotazione auto",
     v_man:       "Manuale",
@@ -1100,16 +1144,22 @@ const TRANSLATIONS = {
     err_vol:     "Volume nullo o non valido -- controlla che il mesh sia chiuso (watertight).",
     err_corrupt: "File non valido o corrotto: ",
     err_read:    "Impossibile leggere il file.",
+    err_file_big: "Questo file supera i 50 MB. Semplifica la mesh prima di importarlo.",
+    err_too_many: "Massimo 5 file contemporaneamente.",
+    err_total_big: "Il totale dei file supera i 150 MB.",
   },
   de: {
     brand_sub:   "Sofortangebot SLS -- PA2200 Nylon",
     badge:       "SLS-Kalkulator",
     u_title:     "STL-Datei",
-    u_head:      "STL-Dateien hier ablegen",
-    u_sub:       "Oder zum Durchsuchen klicken - Mehrere Dateien, Binar & ASCII unterstuetzt",
+    u_head:      "STL-Dateien hier ablegen oder zum Durchsuchen klicken",
+    u_head_add:  "STL-Dateien zum Angebot hinzufügen",
+    u_sub:       "Mehrere Dateien, Binär & ASCII unterstützt",
     u_parsing:   "Datei wird analysiert...",
     u_vol:       "Berechnetes Volumen",
-    u_change:    "Andern",
+    u_change:    "Neues Angebot",
+    u_unit_lbl:  "Dateieinheit",
+    u_unit_warn: "Erkanntes Volumen: {vol} mm³ (Einheit: {unit}) — Prüfen Sie, ob die Einheit zu Ihrer Datei passt.",
     m_title:     "Einheitenbestatigung",
     m_body:      "Bitte bestatigen Sie, dass Ihre Datei in Millimetern (mm) modelliert ist. Eine falsche Einheit wurde zu einem falschen Angebot fuhren.",
     m_yes:       "Ja, in mm",
@@ -1147,6 +1197,7 @@ const TRANSLATIONS = {
     c_retrait:   "Abholung im Betrieb",
     c_retrait_free: "Kostenlos",
     p_title:     "Sofortangebot",
+    p_indicative: "Richtpreisangebot — vorbehaltlich technischer Prüfung",
     p_volume:    "Volumen",
     p_base:      "Grundpreis (PA2200)",
     p_min_applied: "Mindestpreis 6 EUR angewandt",
@@ -1174,6 +1225,8 @@ const TRANSLATIONS = {
     pdf_btn:     "PDF-Angebot herunterladen",
     pdf_app_req: "Bitte Anwendungsart auswahlen, bevor Sie das PDF erstellen.",
     contact_text: "Um eine Bestellung aufzugeben, senden Sie Ihr Angebot an",
+    be_text:     "Sie haben keine 3D-Datei? Unser Konstruktionsbüro entwirft Ihr Bauteil maßgefertigt.",
+    be_link:     "Konstruktionsbüro kontaktieren → 3dPrinting@oneortho-medical.com",
     v_title:     "3D-Vorschau",
     v_rot:       "Autorotation",
     v_man:       "Manuell",
@@ -1185,16 +1238,22 @@ const TRANSLATIONS = {
     err_vol:     "Volumen null oder ungultig -- prufen Sie, ob das Mesh geschlossen ist (watertight).",
     err_corrupt: "Ungultige oder beschadigte Datei: ",
     err_read:    "Datei kann nicht gelesen werden.",
+    err_file_big: "Diese Datei überschreitet 50 MB. Vereinfachen Sie das Mesh vor dem Import.",
+    err_too_many: "Maximal 5 Dateien gleichzeitig.",
+    err_total_big: "Die Gesamtgröße der Dateien überschreitet 150 MB.",
   },
   pt: {
     brand_sub:   "Orcamento SLS instantaneo -- PA2200 Nylon",
     badge:       "SLS Estimador",
     u_title:     "Ficheiro STL",
-    u_head:      "Solte os seus ficheiros STL aqui",
-    u_sub:       "Ou clique para procurar - Varios ficheiros, Binario e ASCII suportados",
+    u_head:      "Solte os seus ficheiros STL aqui ou clique para procurar",
+    u_head_add:  "Adicionar ficheiros STL ao orçamento",
+    u_sub:       "Vários ficheiros, Binário e ASCII suportados",
     u_parsing:   "A analisar o ficheiro...",
     u_vol:       "Volume calculado",
-    u_change:    "Alterar",
+    u_change:    "Novo orcamento",
+    u_unit_lbl:  "Unidade do ficheiro",
+    u_unit_warn: "Volume detetado: {vol} mm³ (unidade: {unit}) — Verifique se a unidade corresponde ao seu ficheiro.",
     m_title:     "Confirmacao de unidade",
     m_body:      "Confirma que o seu ficheiro esta modelado em milimetros (mm)? Um erro de unidade resultaria num orcamento incorreto.",
     m_yes:       "Sim, em mm",
@@ -1232,6 +1291,7 @@ const TRANSLATIONS = {
     c_retrait:   "Levantamento em oficina",
     c_retrait_free: "Gratis",
     p_title:     "Orcamento instantaneo",
+    p_indicative: "Orçamento indicativo — sujeito a validação técnica",
     p_volume:    "Volume",
     p_base:      "Preco base (PA2200)",
     p_min_applied: "Minimo 6 EUR aplicado",
@@ -1259,6 +1319,8 @@ const TRANSLATIONS = {
     pdf_btn:     "Descarregar orcamento PDF",
     pdf_app_req: "Selecione o tipo de aplicacao antes de gerar o PDF.",
     contact_text: "Para fazer uma encomenda, envie o seu orcamento para",
+    be_text:     "Não tem um ficheiro 3D? O nosso gabinete técnico pode conceber a sua peça à medida.",
+    be_link:     "Contactar o gabinete técnico → 3dPrinting@oneortho-medical.com",
     v_title:     "Pre-visualizacao 3D",
     v_rot:       "Rotacao auto",
     v_man:       "Manual",
@@ -1270,6 +1332,9 @@ const TRANSLATIONS = {
     err_vol:     "Volume nulo ou invalido -- verifique se o mesh esta fechado (watertight).",
     err_corrupt: "Ficheiro invalido ou corrompido: ",
     err_read:    "Nao e possivel ler o ficheiro.",
+    err_file_big: "Este ficheiro excede 50 MB. Simplifique a malha antes de importá-lo.",
+    err_too_many: "Máximo de 5 ficheiros em simultâneo.",
+    err_total_big: "O total dos ficheiros excede 150 MB.",
   }
 };
 
@@ -1303,13 +1368,15 @@ const I18N_MAP = [
   ['c_opts','c_opts_el'],['c_nett','c_nett_el'],['c_dossier','c_dossier_el'],
   ['c_delivery','c_delivery_el'],['c_j1','c_j1_el'],
   ['c_retrait','c_retrait_el'],['c_retrait_free','c_retrait_free_el'],
-  ['p_title','p_title_el'],['p_volume','p_volume_lbl'],
+  ['p_title','p_title_el'],['p_indicative','p_indicative_el'],['p_volume','p_volume_lbl'],['c_qty','p_qty_lbl'],
   ['p_subht','p_subht_el'],['p_tva','p_tva_el'],
   ['p_note','p_note_el'],['p_validity','p_validity_el'],
   ['pdf_btn','btnPdf'],
   ['s_title','s_title_el'],['s_qty','s_qty_el'],['s_ht','s_ht_el'],['s_ttc','s_ttc_el'],
   ['v_title','v_title_el'],['v_hint1','v_hint1_el'],['v_hint2','v_hint2_el'],
+  ['u_unit_lbl','unit_lbl_el'],
   ['contact_text','contact_text_el'],
+  ['be_text','be_text_el'],['be_link','be_link_el'],
   ['footer_txt','footer_txt_el'],
 ];
 
@@ -1343,10 +1410,19 @@ function applyLang(l) {
   const vresetEl = document.getElementById('vreset');
   if (vresetEl) vresetEl.textContent = t('v_reset');
 
+  updateDropHead();
+
   if (pieces.length) {
     refresh();
     renderSim();
+    updateUnitWarning();
   }
+}
+
+// Texte de la zone de depot : invite initiale vs ajout au devis en cours
+function updateDropHead() {
+  const el = $('u_head_el');
+  if (el) el.textContent = pieces.length ? t('u_head_add') : t('u_head');
 }
 
 // ── STL volume parser ────────────────────────────────────────────────────────
@@ -1499,10 +1575,10 @@ $('vreset').addEventListener('click',()=>{
 
 // ── State ────────────────────────────────────────────────────────────────────
 
-let pieces = []; // { name, vol, buf }[]
+let pieces = []; // { name, rawVol, vol, buf, qty }[]
 let activeViewerIdx = 0;
-let pendingFiles = []; // temporaire pendant le modal
-let pendingFileIndex = 0; // index du fichier en cours de confirmation
+let volUnit = 'mm'; // unite du fichier selectionnee : mm | cm | in
+const UNIT_FACTORS = { mm: 1, cm: 1000, in: 16387 }; // conversion vers mm3
 
 // ── Pricing ──────────────────────────────────────────────────────────────────
 
@@ -1839,67 +1915,70 @@ function renderPiecesList() {
       } else {
         if (activeViewerIdx >= pieces.length) activeViewerIdx = pieces.length - 1;
         $('qty').closest('.qty-ctrl').style.display = pieces.length > 1 ? 'none' : '';
+        $('p_qty_lbl').style.display = pieces.length > 1 ? 'none' : '';
         renderPiecesList();
         initViewer(pieces[activeViewerIdx].buf);
         setBadge('rot');
         renderViewerTabs();
         refresh();
         renderSim();
+        updateUnitWarning();
       }
     });
     list.appendChild(item);
   });
 }
 
-// ── File handling ─────────────────────────────────────────────────────────────
+// ── Unite du fichier ──────────────────────────────────────────────────────────
 
-function showModal() {
-  const pf = pendingFiles[pendingFileIndex];
-  $('m_title_el').textContent = t('m_title');
-  $('m_body_el').textContent = t('m_body') + (pendingFiles.length > 1 ? ' (' + (pendingFileIndex + 1) + '/' + pendingFiles.length + ')' : '');
-  $('modalYes').textContent = t('m_yes');
-  $('modalNo').textContent = t('m_no');
-  show($('unitModal'));
+function applyUnit(u) {
+  volUnit = u;
+  const f = UNIT_FACTORS[u] || 1;
+  pieces.forEach(p => { p.vol = p.rawVol * f; });
+  document.querySelectorAll('.unit-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.unit === u);
+  });
+  refresh();
+  renderSim();
+  renderPiecesList();
+  updateUnitWarning();
 }
 
-function confirmFiles() {
-  hide($('unitModal'));
-  // push all pending into pieces
-  for (const pf of pendingFiles) {
-    pieces.push({ name: pf.name, vol: pf.vol, buf: pf.buf, qty: 1 });
-  }
-  pendingFiles = [];
-  pendingFileIndex = 0;
+function updateUnitWarning() {
+  const el = $('unitWarning');
+  if (!el) return;
+  if (!pieces.length) { el.textContent = ''; return; }
+  const totalVol = pieces.reduce((s, pc) => s + pc.vol, 0);
+  el.textContent = t('u_unit_warn').replace('{vol}', fvol(totalVol)).replace('{unit}', volUnit);
+}
 
+function addPieces(loaded) {
+  // mm par defaut a chaque nouveau fichier
+  volUnit = 'mm';
+  for (const pf of loaded) {
+    pieces.push({ name: pf.name, rawVol: pf.vol, vol: pf.vol, buf: pf.buf, qty: 1 });
+  }
   activeViewerIdx = 0;
   initViewer(pieces[0].buf);
   setBadge('rot');
   renderViewerTabs();
-  renderPiecesList();
   show($('fl'));
   show($('optcard'));
   show($('simcard'));
   hide($('pempty'));
   show($('ppanel'));
   $('qty').closest('.qty-ctrl').style.display = pieces.length > 1 ? 'none' : '';
+  $('p_qty_lbl').style.display = pieces.length > 1 ? 'none' : '';
   show($('viewercard'));
   document.getElementById('pageTop').classList.remove('no-viewer');
-  refresh();
-  renderSim();
+  applyUnit('mm'); // recalcule vol, met a jour boutons, prix, simulation, warning
+  updateDropHead();
 }
 
-function rejectFiles() {
-  hide($('unitModal'));
-  pendingFiles = [];
-  pendingFileIndex = 0;
-  if (!pieces.length) {
-    resetDrop();
-  }
-  showErr(t('m_reject'));
-}
-
-$('modalYes').addEventListener('click', confirmFiles);
-$('modalNo').addEventListener('click', rejectFiles);
+const MB = 1024 * 1024;
+const MAX_FILE_SIZE = 50 * MB;
+const MAX_FILES = 5;
+const MAX_TOTAL_SIZE = 150 * MB;
 
 async function processFiles(files) {
   if (!files || !files.length) return;
@@ -1908,6 +1987,22 @@ async function processFiles(files) {
     showErr(t('err_format'));
     return;
   }
+  // ── Limites fichiers (cumul avec les pieces deja chargees) ──
+  if (pieces.length + stlFiles.length > MAX_FILES) {
+    showErr(t('err_too_many'));
+    return;
+  }
+  if (stlFiles.some(f => f.size > MAX_FILE_SIZE)) {
+    showErr(t('err_file_big'));
+    return;
+  }
+  const existingBytes = pieces.reduce((s, p) => s + (p.buf ? p.buf.byteLength : 0), 0);
+  const newBytes = stlFiles.reduce((s, f) => s + f.size, 0);
+  if (existingBytes + newBytes > MAX_TOTAL_SIZE) {
+    showErr(t('err_total_big'));
+    return;
+  }
+  hide($('err'));
   hide($('dz'));
   show($('ps'));
   hide($('err'));
@@ -1932,9 +2027,8 @@ async function processFiles(files) {
 
   hide($('ps'));
   show($('dz'));
-  pendingFiles = loaded;
-  pendingFileIndex = 0;
-  showModal();
+  $('fi').value = '';
+  addPieces(loaded);
 }
 
 function readFileAsBuffer(file) {
@@ -1952,11 +2046,13 @@ function resetDrop() { show($('dz')); hide($('ps')); }
 function resetAll() {
   cleanupViewer();
   pieces = [];
-  pendingFiles = [];
   activeViewerIdx = 0;
+  volUnit = 'mm';
+  document.querySelectorAll('.unit-btn').forEach(b => b.classList.toggle('active', b.dataset.unit === 'mm'));
+  const uw = $('unitWarning');
+  if (uw) uw.textContent = '';
   const vt = document.getElementById('viewerTabs');
   if (vt) { vt.innerHTML = ''; vt.style.display = 'none'; }
-  pendingFileIndex = 0;
   $('fi').value = '';
   show($('dz'));
   hide($('ps'));
@@ -1976,7 +2072,9 @@ function resetAll() {
   $('dstd').checked = true;
   $('lretrait').checked = true;
   $('qty').value = 1;
-  hide($('unitModal'));
+  $('p_qty_lbl').style.display = '';
+  $('app_proto').checked = true;
+  updateDropHead();
 }
 
 // ── PDF helpers (ASCII-safe strings for jsPDF) ───────────────────────────────
@@ -2278,6 +2376,11 @@ $('qtyMinus').addEventListener('click', () => {
 $('qtyPlus').addEventListener('click', () => {
   $('qty').value = (parseInt($('qty').value) || 1) + 1;
   refresh(); renderSim();
+});
+
+// Unit buttons
+document.querySelectorAll('.unit-btn').forEach(btn => {
+  btn.addEventListener('click', () => applyUnit(btn.dataset.unit));
 });
 
 // Language buttons
