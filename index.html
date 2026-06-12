@@ -1776,10 +1776,10 @@ function refresh() {
     prows.appendChild(makeRow(t('p_disc') + ' ' + discPct + '%', '-' + eur(p.discAmount), 'disc'));
   }
 
-  // Totals
+  // Totals — le sous-total HT affiche est le montant APRES remise (= p.ht)
   const rsubt = $('rsubt');
   if (p.discRate > 0) {
-    $('psubt').textContent = eur(p.subBefore);
+    $('psubt').textContent = eur(p.ht);
     show(rsubt);
   } else {
     hide(rsubt);
