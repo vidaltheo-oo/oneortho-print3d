@@ -357,14 +357,13 @@ header{
 .trow .tv{font-family:'Sora',sans-serif;font-weight:600}
 
 .gtotal{
-  background:var(--green);border-radius:14px;
+  background:rgba(0,75,50,.06);border:1.5px solid rgba(0,75,50,.18);border-radius:14px;
   padding:1.125rem 1.375rem;margin-top:.875rem;
-  display:flex;align-items:center;justify-content:space-between;
 }
-.gtotal .gtl{font-family:'Sora',sans-serif;font-weight:600;font-size:.875rem;color:var(--lime);text-transform:uppercase;letter-spacing:.03em}
-.gtotal .gtl small{display:block;color:rgba(255,255,255,.5);font-size:.72rem;font-weight:400;text-transform:none;margin-top:.1rem}
-.gtotal .gta{font-family:'Sora',sans-serif;font-weight:800;font-size:2.125rem;color:var(--white);line-height:1}
-.gtotal .gta sup{font-size:1rem;font-weight:600;vertical-align:super;margin-left:.1rem;color:rgba(255,255,255,.75)}
+.gtotal .gt-ht-lbl{font-family:'Sora',sans-serif;font-weight:600;font-size:.78rem;color:#004B32;text-transform:uppercase;letter-spacing:.04em;margin-bottom:.15rem}
+.gtotal .gta{font-family:'Sora',sans-serif;font-weight:800;font-size:2.125rem;color:#004B32;line-height:1}
+.gtotal .gta sup{font-size:1rem;font-weight:600;vertical-align:super;margin-left:.1rem;color:rgba(0,75,50,.6)}
+.gtotal .gt-ttc{font-family:'DM Sans',sans-serif;font-size:.85rem;color:#888;margin-top:.35rem}
 
 .pnote{text-align:center;font-size:.75rem;color:var(--muted);margin-top:.875rem;line-height:1.5}
 .pvalidity{font-size:.75rem;color:var(--muted);text-align:center;margin-top:.3rem}
@@ -393,6 +392,9 @@ header{
   font-family:'DM Sans',sans-serif;color:var(--text);text-align:right;
 }
 #simcard tbody td:first-child{text-align:left;font-weight:500}
+#simcard tbody td.sim-ht{font-family:'Sora',sans-serif;font-weight:700;color:#004B32}
+#simcard tbody td.sim-ttc{color:#888;font-size:.76rem}
+#simcard thead th.sim-ttc-th{color:#aaa;font-weight:500}
 .disc-chip{
   font-family:'Sora',sans-serif;font-size:.72rem;font-weight:700;
   color:var(--orange);background:rgba(255,108,79,.08);
@@ -680,13 +682,13 @@ footer strong{color:var(--orange)}
             <span class="tl" id="p_subht_lbl"></span>
             <span class="tv" id="psubt">&#8212;</span>
           </div>
-          <div class="trow"><span class="tl" id="p_subht_el"></span><span class="tv" id="pht">&#8212;</span></div>
           <div class="trow"><span class="tl" id="p_tva_el"></span><span class="tv" id="ptva">&#8212;</span></div>
         </div>
 
         <div class="gtotal">
-          <div><div class="gtl" id="p_ttc_lbl">TTC<small id="p_ttc_sub"></small></div></div>
-          <div class="gta" id="pttc">&#8212;<sup>&#8364;</sup></div>
+          <div class="gt-ht-lbl" id="p_ht_lbl"></div>
+          <div class="gta" id="pht">&#8212;<sup>&#8364;</sup></div>
+          <div class="gt-ttc">(<span id="pttc">&#8212;</span> <span id="p_ttc_short_el"></span>)</div>
         </div>
 
         <p class="pnote" id="p_note_el"></p>
@@ -837,6 +839,9 @@ const TRANSLATIONS = {
     p_subht:     "Sous-total HT",
     p_tva:       "TVA 20%",
     p_ttc:       "Total TTC",
+    p_total_ht:  "Total HT",
+    p_ttc_short: "TTC",
+    lbl_ht:      "HT",
     p_note:      "Devis indicatif - sous reserve de validation technique",
     p_empty:     "Chargez un fichier STL\npour obtenir votre devis",
     p_validity:  "Validite : 30 jours",
@@ -863,7 +868,7 @@ const TRANSLATIONS = {
     err_corrupt: "Fichier invalide ou corrompu : ",
     err_read:    "Impossible de lire le fichier.",
     err_file_big: "Ce fichier dépasse 50 Mo. Simplifiez le maillage avant de l'importer.",
-    err_too_many: "Maximum 5 fichiers simultanés.",
+    err_too_many: "Maximum 10 fichiers simultanés.",
     err_total_big: "Le total des fichiers dépasse 150 Mo.",
   },
   en: {
@@ -931,6 +936,9 @@ const TRANSLATIONS = {
     p_subht:     "Subtotal excl. VAT",
     p_tva:       "VAT 20%",
     p_ttc:       "Total incl. VAT",
+    p_total_ht:  "Total excl. VAT",
+    p_ttc_short: "incl. VAT",
+    lbl_ht:      "excl. VAT",
     p_note:      "Indicative quote - subject to technical validation",
     p_empty:     "Upload an STL file\nto get your quote",
     p_validity:  "Valid for 30 days",
@@ -957,7 +965,7 @@ const TRANSLATIONS = {
     err_corrupt: "Invalid or corrupt file: ",
     err_read:    "Unable to read file.",
     err_file_big: "This file exceeds 50 MB. Simplify the mesh before importing it.",
-    err_too_many: "Maximum 5 files at a time.",
+    err_too_many: "Maximum 10 files at a time.",
     err_total_big: "Total file size exceeds 150 MB.",
   },
   es: {
@@ -1025,6 +1033,9 @@ const TRANSLATIONS = {
     p_subht:     "Subtotal sin IVA",
     p_tva:       "IVA 20%",
     p_ttc:       "Total con IVA",
+    p_total_ht:  "Total sin IVA",
+    p_ttc_short: "con IVA",
+    lbl_ht:      "sin IVA",
     p_note:      "Presupuesto indicativo - sujeto a validacion tecnica",
     p_empty:     "Cargue un archivo STL\npara obtener su presupuesto",
     p_validity:  "Validez: 30 dias",
@@ -1051,7 +1062,7 @@ const TRANSLATIONS = {
     err_corrupt: "Archivo invalido o corrupto: ",
     err_read:    "No se puede leer el archivo.",
     err_file_big: "Este archivo supera los 50 MB. Simplifique la malla antes de importarlo.",
-    err_too_many: "Máximo 5 archivos simultáneos.",
+    err_too_many: "Máximo 10 archivos simultáneos.",
     err_total_big: "El total de los archivos supera los 150 MB.",
   },
   it: {
@@ -1119,6 +1130,9 @@ const TRANSLATIONS = {
     p_subht:     "Subtotale IVA esclusa",
     p_tva:       "IVA 20%",
     p_ttc:       "Totale IVA inclusa",
+    p_total_ht:  "Totale IVA esclusa",
+    p_ttc_short: "IVA incl.",
+    lbl_ht:      "IVA escl.",
     p_note:      "Preventivo indicativo - soggetto a convalida tecnica",
     p_empty:     "Carica un file STL\nper ottenere il tuo preventivo",
     p_validity:  "Validita: 30 giorni",
@@ -1145,7 +1159,7 @@ const TRANSLATIONS = {
     err_corrupt: "File non valido o corrotto: ",
     err_read:    "Impossibile leggere il file.",
     err_file_big: "Questo file supera i 50 MB. Semplifica la mesh prima di importarlo.",
-    err_too_many: "Massimo 5 file contemporaneamente.",
+    err_too_many: "Massimo 10 file contemporaneamente.",
     err_total_big: "Il totale dei file supera i 150 MB.",
   },
   de: {
@@ -1213,6 +1227,9 @@ const TRANSLATIONS = {
     p_subht:     "Zwischensumme netto",
     p_tva:       "MwSt. 20%",
     p_ttc:       "Gesamtbetrag inkl. MwSt.",
+    p_total_ht:  "Gesamt netto",
+    p_ttc_short: "inkl. MwSt.",
+    lbl_ht:      "netto",
     p_note:      "Richtpreisangebot - vorbehaltlich technischer Prufung",
     p_empty:     "Laden Sie eine STL-Datei hoch\num Ihr Angebot zu erhalten",
     p_validity:  "Gultigkeit: 30 Tage",
@@ -1239,7 +1256,7 @@ const TRANSLATIONS = {
     err_corrupt: "Ungultige oder beschadigte Datei: ",
     err_read:    "Datei kann nicht gelesen werden.",
     err_file_big: "Diese Datei überschreitet 50 MB. Vereinfachen Sie das Mesh vor dem Import.",
-    err_too_many: "Maximal 5 Dateien gleichzeitig.",
+    err_too_many: "Maximal 10 Dateien gleichzeitig.",
     err_total_big: "Die Gesamtgröße der Dateien überschreitet 150 MB.",
   },
   pt: {
@@ -1307,6 +1324,9 @@ const TRANSLATIONS = {
     p_subht:     "Subtotal s/ IVA",
     p_tva:       "IVA 20%",
     p_ttc:       "Total c/ IVA",
+    p_total_ht:  "Total s/ IVA",
+    p_ttc_short: "c/ IVA",
+    lbl_ht:      "s/ IVA",
     p_note:      "Orcamento indicativo - sujeito a validacao tecnica",
     p_empty:     "Carregue um ficheiro STL\npara obter o seu orcamento",
     p_validity:  "Validade: 30 dias",
@@ -1333,7 +1353,7 @@ const TRANSLATIONS = {
     err_corrupt: "Ficheiro invalido ou corrompido: ",
     err_read:    "Nao e possivel ler o ficheiro.",
     err_file_big: "Este ficheiro excede 50 MB. Simplifique a malha antes de importá-lo.",
-    err_too_many: "Máximo de 5 ficheiros em simultâneo.",
+    err_too_many: "Máximo de 10 ficheiros em simultâneo.",
     err_total_big: "O total dos ficheiros excede 150 MB.",
   }
 };
@@ -1369,7 +1389,7 @@ const I18N_MAP = [
   ['c_delivery','c_delivery_el'],['c_j1','c_j1_el'],
   ['c_retrait','c_retrait_el'],['c_retrait_free','c_retrait_free_el'],
   ['p_title','p_title_el'],['p_indicative','p_indicative_el'],['p_volume','p_volume_lbl'],['c_qty','p_qty_lbl'],
-  ['p_subht','p_subht_el'],['p_tva','p_tva_el'],
+  ['p_subht','p_subht_lbl'],['p_tva','p_tva_el'],['p_total_ht','p_ht_lbl'],['p_ttc_short','p_ttc_short_el'],
   ['p_note','p_note_el'],['p_validity','p_validity_el'],
   ['pdf_btn','btnPdf'],
   ['s_title','s_title_el'],['s_qty','s_qty_el'],['s_ht','s_ht_el'],['s_ttc','s_ttc_el'],
@@ -1399,10 +1419,6 @@ function applyLang(l) {
   const pemptyEl = document.getElementById('p_empty_el');
   if (pemptyEl) pemptyEl.innerHTML = t('p_empty').replace(/\n/g, '<br>');
 
-  const ttcLbl = document.getElementById('p_ttc_lbl');
-  if (ttcLbl) ttcLbl.childNodes[0].textContent = t('p_ttc');
-  const ttcSub = document.getElementById('p_ttc_sub');
-  if (ttcSub) ttcSub.textContent = t('p_tva');
 
   if (controls && controls.autoRotate) setBadge('rot');
   else setBadge('man');
@@ -1618,50 +1634,69 @@ function getOptions() {
   return { fin, col, delay, liv, nett, dossier, qty, app };
 }
 
+// Seuil au-dela duquel le minimum de 6 EUR/piece ne s'applique plus
+const MIN_PIECE = 6;
+const MIN_ORDER_THRESHOLD = 25;
+
 function calcPrice(overrideQty) {
   if (!pieces.length) return null;
   const opts = getOptions();
   const numPieces = pieces.length;
   const multi = numPieces > 1;
+  const delayRate = opts.delay === 'pri' ? 0.10 : opts.delay === 'exp' ? 0.25 : 0;
 
-  let piecesTotal = 0, minApplied = false;
-  const pieceDetails = [];
-  for (const piece of pieces) {
-    const pQty = overrideQty != null ? overrideQty : (multi ? (piece.qty || 1) : opts.qty);
-    const raw = piece.vol * 0.001;
-    const basePP = Math.max(raw, 6);
-    if (raw < 6) minApplied = true;
-    const delayRate = opts.delay === 'pri' ? 0.10 : opts.delay === 'exp' ? 0.25 : 0;
-    const delayPP = basePP * delayRate;
-    const nettPP = opts.nett ? 25 : 0;
-    const pricePP = basePP + delayPP + nettPP;
-    piecesTotal += pricePP * pQty;
-    pieceDetails.push({ name: piece.name, vol: piece.vol, basePP, pricePP, qty: pQty });
+  const rows = pieces.map(piece => ({
+    name: piece.name, vol: piece.vol, raw: piece.vol * 0.001,
+    qty: overrideQty != null ? overrideQty : (multi ? (piece.qty || 1) : opts.qty)
+  }));
+  const anyBelowMin = rows.some(r => r.raw < MIN_PIECE);
+
+  // Construit l'ensemble des totaux a partir d'un plancher de prix par piece
+  function build(useMin) {
+    let piecesTotal = 0;
+    const pieceDetails = [];
+    for (const r of rows) {
+      const basePP = useMin ? Math.max(r.raw, MIN_PIECE) : r.raw;
+      const delayPP = basePP * delayRate;
+      const nettPP = opts.nett ? 25 : 0;
+      const pricePP = basePP + delayPP + nettPP;
+      piecesTotal += pricePP * r.qty;
+      pieceDetails.push({ name: r.name, vol: r.vol, basePP, pricePP, qty: r.qty });
+    }
+    const totalQty = pieceDetails.reduce((s, pd) => s + pd.qty, 0);
+    const rawFinish = opts.fin === 'lissage' ? totalQty * 2 : 0;
+    const finishMinApplied = rawFinish > 0 && rawFinish < 100;
+    const finishTotal = rawFinish > 0 ? Math.max(rawFinish, 100) : 0;
+    const rawColor = opts.col !== 'blanc' ? totalQty * 2 : 0;
+    const colorMinApplied = rawColor > 0 && rawColor < 100;
+    const colorTotal = rawColor > 0 ? Math.max(rawColor, 100) : 0;
+    const dossierTotal = opts.dossier ? 15 : 0;
+    const livTotal = opts.liv === 'j1' ? 15 : 0;
+    const subBefore = piecesTotal + finishTotal + colorTotal + dossierTotal + livTotal;
+    const discRate = getDiscount(subBefore);
+    const discAmount = subBefore * discRate;
+    const ht = subBefore - discAmount;
+    return {
+      piecesTotal, pieceDetails, finishTotal, finishMinApplied,
+      colorTotal, colorMinApplied, dossierTotal, livTotal,
+      subBefore, discRate, discAmount, ht
+    };
   }
 
-  const totalQty = overrideQty != null ? overrideQty * numPieces
-    : pieceDetails.reduce((s, pd) => s + pd.qty, 0);
-  const rawFinish = opts.fin === 'lissage' ? totalQty * 2 : 0;
-  const finishMinApplied = rawFinish > 0 && rawFinish < 100;
-  const finishTotal = rawFinish > 0 ? Math.max(rawFinish, 100) : 0;
+  // 1) prix reel au mm3 sans plancher  2) plancher 6 EUR/piece uniquement si total < 25 EUR HT
+  const noMin = build(false);
+  const useMin = anyBelowMin && noMin.subBefore < MIN_ORDER_THRESHOLD;
+  const r = useMin ? build(true) : noMin;
 
-  const rawColor = opts.col !== 'blanc' ? totalQty * 2 : 0;
-  const colorMinApplied = rawColor > 0 && rawColor < 100;
-  const colorTotal = rawColor > 0 ? Math.max(rawColor, 100) : 0;
-
-  const dossierTotal = opts.dossier ? 15 : 0;
-  const livTotal = opts.liv === 'j1' ? 15 : 0;
-  const subBefore = piecesTotal + finishTotal + colorTotal + dossierTotal + livTotal;
-  const discRate = getDiscount(subBefore);
-  const discAmount = subBefore * discRate;
-  const ht = subBefore - discAmount;
   const qty = overrideQty != null ? overrideQty : (multi ? null : opts.qty);
   return {
-    minApplied, piecesTotal, finishTotal, finishMinApplied,
-    colorTotal, colorMinApplied, dossierTotal, livTotal,
-    subBefore, discRate, discAmount, ht,
-    tva: ht * 0.20, ttc: ht * 1.20,
-    nextTier: getNextTier(subBefore), qty, opts, pieceDetails, numPieces
+    minApplied: useMin,
+    piecesTotal: r.piecesTotal, finishTotal: r.finishTotal, finishMinApplied: r.finishMinApplied,
+    colorTotal: r.colorTotal, colorMinApplied: r.colorMinApplied,
+    dossierTotal: r.dossierTotal, livTotal: r.livTotal,
+    subBefore: r.subBefore, discRate: r.discRate, discAmount: r.discAmount, ht: r.ht,
+    tva: r.ht * 0.20, ttc: r.ht * 1.20,
+    nextTier: getNextTier(r.subBefore), qty, opts, pieceDetails: r.pieceDetails, numPieces
   };
 }
 
@@ -1750,9 +1785,10 @@ function refresh() {
     hide(rsubt);
   }
 
-  $('pht').textContent = eur(p.ht);
   $('ptva').textContent = eur(p.tva);
-  $('pttc').innerHTML = p.ttc.toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2}) + '<sup>EUR</sup>';
+  // HT = valeur principale (grand, gras, #004B32) ; TTC = secondaire (petit, #888)
+  $('pht').innerHTML = p.ht.toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2}) + '<sup>EUR</sup>';
+  $('pttc').textContent = eur(p.ttc);
 }
 
 // ── Simulation ────────────────────────────────────────────────────────────────
@@ -1760,21 +1796,28 @@ function refresh() {
 function calcPiecePrice(piece, qty) {
   const opts = getOptions();
   const raw = piece.vol * 0.001;
-  const basePP = Math.max(raw, 6);
   const delayRate = opts.delay === 'pri' ? 0.10 : opts.delay === 'exp' ? 0.25 : 0;
   const nettPP = opts.nett ? 25 : 0;
-  const pricePP = basePP * (1 + delayRate) + nettPP;
-  const piecesTotal = pricePP * qty;
-  const rawFinish = opts.fin === 'lissage' ? qty * 2 : 0;
-  const finishTotal = rawFinish > 0 ? Math.max(rawFinish, 100) : 0;
-  const rawColor = opts.col !== 'blanc' ? qty * 2 : 0;
-  const colorTotal = rawColor > 0 ? Math.max(rawColor, 100) : 0;
-  const dossierTotal = opts.dossier ? 15 : 0;
-  const livTotal = opts.liv === 'j1' ? 15 : 0;
-  const subBefore = piecesTotal + finishTotal + colorTotal + dossierTotal + livTotal;
-  const discRate = getDiscount(subBefore);
-  const ht = subBefore * (1 - discRate);
-  return { ht, ttc: ht * 1.20 };
+
+  function build(useMin) {
+    const basePP = useMin ? Math.max(raw, MIN_PIECE) : raw;
+    const pricePP = basePP * (1 + delayRate) + nettPP;
+    const piecesTotal = pricePP * qty;
+    const rawFinish = opts.fin === 'lissage' ? qty * 2 : 0;
+    const finishTotal = rawFinish > 0 ? Math.max(rawFinish, 100) : 0;
+    const rawColor = opts.col !== 'blanc' ? qty * 2 : 0;
+    const colorTotal = rawColor > 0 ? Math.max(rawColor, 100) : 0;
+    const dossierTotal = opts.dossier ? 15 : 0;
+    const livTotal = opts.liv === 'j1' ? 15 : 0;
+    const subBefore = piecesTotal + finishTotal + colorTotal + dossierTotal + livTotal;
+    const discRate = getDiscount(subBefore);
+    return { subBefore, ht: subBefore * (1 - discRate) };
+  }
+
+  const noMin = build(false);
+  const useMin = raw < MIN_PIECE && noMin.subBefore < MIN_ORDER_THRESHOLD;
+  const r = useMin ? build(true) : noMin;
+  return { ht: r.ht, ttc: r.ht * 1.20 };
 }
 
 function makeSimTable(thQty, thHT, thTTC) {
@@ -1782,7 +1825,7 @@ function makeSimTable(thQty, thHT, thTTC) {
   wrap.style.overflowX = 'auto';
   const table = document.createElement('table');
   const thead = document.createElement('thead');
-  thead.innerHTML = '<tr><th>' + thQty + '</th><th>' + thHT + '</th><th>' + thTTC + '</th></tr>';
+  thead.innerHTML = '<tr><th>' + thQty + '</th><th>' + thHT + '</th><th class="sim-ttc-th">' + thTTC + '</th></tr>';
   table.appendChild(thead);
   const tbody = document.createElement('tbody');
   table.appendChild(tbody);
@@ -1805,7 +1848,7 @@ function renderSim() {
       if (!p) return;
       const tr = document.createElement('tr');
       if (q === currentQty) tr.className = 'active-row';
-      tr.innerHTML = '<td>' + q + '</td><td>' + eur(p.ht) + '</td><td>' + eur(p.ttc) + '</td>';
+      tr.innerHTML = '<td>' + q + '</td><td class="sim-ht">' + eur(p.ht) + '</td><td class="sim-ttc">' + eur(p.ttc) + '</td>';
       tr.addEventListener('click', () => { $('qty').value = q; refresh(); renderSim(); });
       tbody.appendChild(tr);
     });
@@ -1822,7 +1865,7 @@ function renderSim() {
         const pp = calcPiecePrice(piece, q);
         const tr = document.createElement('tr');
         if (q === (piece.qty || 1)) tr.className = 'active-row';
-        tr.innerHTML = '<td>' + q + '</td><td>' + eur(pp.ht) + '</td><td>' + eur(pp.ttc) + '</td>';
+        tr.innerHTML = '<td>' + q + '</td><td class="sim-ht">' + eur(pp.ht) + '</td><td class="sim-ttc">' + eur(pp.ttc) + '</td>';
         tr.addEventListener('click', () => {
           pieces[idx].qty = q;
           renderPiecesList();
@@ -1870,6 +1913,9 @@ function renderPiecesList() {
   const list = $('piecesList');
   list.innerHTML = '';
   const multi = pieces.length > 1;
+  const curQty = Math.max(1, parseInt($('qty').value) || 1);
+  const pCalc = multi ? calcPrice() : calcPrice(curQty);
+  const det = pCalc ? pCalc.pieceDetails : [];
   pieces.forEach((piece, idx) => {
     const item = document.createElement('div');
     item.className = 'piece-item';
@@ -1880,6 +1926,12 @@ function renderPiecesList() {
           '<button class="pqp" data-idx="' + idx + '">+</button>' +
         '</div>'
       : '';
+    // Prix par piece : HT en avant (gras, #004B32), TTC en secondaire (#888)
+    const d = det[idx];
+    const htPP = d ? d.pricePP * d.qty : 0;
+    const priceHtml = '<div style="margin-top:.2rem;font-family:\'Sora\',sans-serif;font-weight:700;font-size:.8rem;color:#004B32">' +
+      eur(htPP) + ' ' + t('lbl_ht') +
+      ' <span style="font-family:\'DM Sans\',sans-serif;font-weight:400;font-size:.72rem;color:#888">(' + eur(htPP * 1.2) + ' ' + t('p_ttc_short') + ')</span></div>';
     item.innerHTML =
       '<svg width="18" height="18" viewBox="0 0 22 22" fill="none" style="flex-shrink:0">' +
         '<path d="M13 2H6a2 2 0 00-2 2v14a2 2 0 002 2h10a2 2 0 002-2V8l-5-6z" fill="rgba(0,75,50,.15)" stroke="#004B32" stroke-width="1.5" stroke-linejoin="round"/>' +
@@ -1888,6 +1940,7 @@ function renderPiecesList() {
       '<div style="flex:1;min-width:0">' +
         '<div style="font-family:\'Sora\',sans-serif;font-weight:600;font-size:.82rem;color:var(--green);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + piece.name + '</div>' +
         '<div style="font-size:.75rem;color:var(--muted);margin-top:.1rem">' + fvol(piece.vol) + ' mm3</div>' +
+        priceHtml +
       '</div>' +
       qtyHtml +
       '<button class="pdel" title="Supprimer">&#215;</button>';
@@ -1977,7 +2030,7 @@ function addPieces(loaded) {
 
 const MB = 1024 * 1024;
 const MAX_FILE_SIZE = 50 * MB;
-const MAX_FILES = 5;
+const MAX_FILES = 10;
 const MAX_TOTAL_SIZE = 150 * MB;
 
 async function processFiles(files) {
@@ -2251,35 +2304,35 @@ function generatePDF() {
 
   y += 4;
 
-  // Totals
-  const totals = [
-    [pdfStr(t('p_subht')), eurPDF(p.ht)],
-    [pdfStr(t('p_tva')),   eurPDF(p.tva)],
-  ];
-  totals.forEach(row => {
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(9);
-    doc.setTextColor(...muted);
-    doc.text(row[0], W - 70, y);
-    doc.setFont('helvetica', 'bold');
-    doc.setTextColor(...text);
-    doc.text(row[1], W - 16, y, { align: 'right' });
-    y += 7;
-  });
+  // TVA (ligne secondaire)
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(9);
+  doc.setTextColor(...muted);
+  doc.text(pdfStr(t('p_tva')), W - 70, y);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(...text);
+  doc.text(eurPDF(p.tva), W - 16, y, { align: 'right' });
+  y += 9;
 
-  // TTC box
-  y += 2;
+  // HT box — valeur principale mise en avant
   doc.setFillColor(...green);
   doc.roundedRect(12, y, W - 24, 14, 4, 4, 'F');
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(10);
   doc.setTextColor(...lime);
-  doc.text(pdfStr(t('p_ttc')), 20, y + 9);
+  doc.text(pdfStr(t('p_total_ht')), 20, y + 9);
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(14);
   doc.setTextColor(...white);
-  doc.text(eurPDF(p.ttc), W - 16, y + 9, { align: 'right' });
-  y += 22;
+  doc.text(eurPDF(p.ht), W - 16, y + 9, { align: 'right' });
+  y += 18;
+
+  // TTC — ligne secondaire sous le HT
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(9);
+  doc.setTextColor(...muted);
+  doc.text(pdfStr(t('p_ttc')) + ' : ' + eurPDF(p.ttc), W - 16, y, { align: 'right' });
+  y += 8;
 
   // Notes
   if (p.minApplied) {
