@@ -2603,20 +2603,25 @@ function addToCart() {
     btn.textContent = t('cart_added');
     setTimeout(() => { btn.textContent = t('cart_add'); }, 1400);
   }
-  // Non connecte : proposer connexion / inscription. Le devis est deja dans le
-  // panier (localStorage), donc conserve apres connexion.
-  if (!isLoggedIn()) showAuthModal();
+  // Connecte : on ouvre le panier. Non connecte : on propose connexion/inscription
+  // (le devis est deja dans le panier, donc conserve apres connexion).
+  if (isLoggedIn()) goTop('/panier');
+  else showAuthModal();
 }
 
 const cartBtnEl = $('btnCart');
 if (cartBtnEl) cartBtnEl.addEventListener('click', addToCart);
+
+// Icone panier de l'en-tete : ouvre la page /panier (navigation de la page parente).
+const cartPillEl = $('cartPill');
+if (cartPillEl) cartPillEl.addEventListener('click', () => goTop('/panier'));
 
 const authLoginEl = $('authLogin');
 if (authLoginEl) authLoginEl.addEventListener('click', () => goTop('/connexion'));
 const authSignupEl = $('authSignup');
 if (authSignupEl) authSignupEl.addEventListener('click', () => goTop('/inscription'));
 const authGuestEl = $('authGuest');
-if (authGuestEl) authGuestEl.addEventListener('click', hideAuthModal);
+if (authGuestEl) authGuestEl.addEventListener('click', () => goTop('/panier'));
 const authModalEl = $('authModal');
 if (authModalEl) authModalEl.addEventListener('click', (e) => { if (e.target === authModalEl) hideAuthModal(); });
 
