@@ -14,15 +14,19 @@ function one<T>(v: T | T[] | null): T | null {
 }
 
 export async function POST(request: Request) {
-  const token = bearerFromRequest(request);
-  if (!token) return Response.json({ error: "unauthenticated" }, { status: 401 });
-
-  let body: { commandeId?: string; statut?: string };
+  let body: { commandeId?: string; statut?: string; accessToken?: string };
   try {
     body = await request.json();
   } catch {
     return Response.json({ error: "bad_request" }, { status: 400 });
   }
+
+  // Token via le body (fiable) ou l'en-tete Authorization (fallback).
+  const token =
+    (typeof body.accessToken === "string" && body.accessToken) ||
+    bearerFromRequest(request);
+  if (!token) return Response.json({ error: "unauthenticated" }, { status: 401 });
+
   const { commandeId, statut } = body;
   if (!commandeId || !statut)
     return Response.json({ error: "bad_request" }, { status: 400 });

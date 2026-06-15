@@ -3,26 +3,28 @@ import { supabase } from "./supabaseClient";
 // Appels best-effort vers les route handlers d'emails. N'echouent jamais de
 // maniere bloquante : une erreur d'email ne doit pas casser le flux metier.
 
-async function authHeaders(): Promise<Record<string, string> | null> {
+async function token(): Promise<string | null> {
   const {
     data: { session },
   } = await supabase.auth.getSession();
-  if (!session?.access_token) return null;
-  return {
-    "Content-Type": "application/json",
-    Authorization: `Bearer ${session.access_token}`,
-  };
+  return session?.access_token ?? null;
 }
 
+// Le token est passe dans le body (fiable) ET dans l'en-tete (fallback) :
+// certaines plateformes ne transmettent pas toujours l'en-tete Authorization
+// aux fonctions serverless.
 export async function notifyOrderCreated(commandeIds: string[]): Promise<void> {
   if (!commandeIds.length) return;
   try {
-    const headers = await authHeaders();
-    if (!headers) return;
+    const accessToken = await token();
+    if (!accessToken) return;
     await fetch("/api/emails/order-created", {
       method: "POST",
-      headers,
-      body: JSON.stringify({ commandeIds }),
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${accessToken}`,
+      },
+      body: JSON.stringify({ commandeIds, accessToken }),
     });
   } catch {
     /* best-effort */
@@ -34,12 +36,15 @@ export async function notifyOrderStatus(
   statut: string
 ): Promise<void> {
   try {
-    const headers = await authHeaders();
-    if (!headers) return;
+    const accessToken = await token();
+    if (!accessToken) return;
     await fetch("/api/emails/order-status", {
       method: "POST",
-      headers,
-      body: JSON.stringify({ commandeId, statut }),
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${accessToken}`,
+      },
+      body: JSON.stringify({ commandeId, statut, accessToken }),
     });
   } catch {
     /* best-effort */

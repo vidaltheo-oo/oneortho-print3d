@@ -35,15 +35,19 @@ function one<T>(v: T | T[] | null): T | null {
 }
 
 export async function POST(request: Request) {
-  const token = bearerFromRequest(request);
-  if (!token) return Response.json({ error: "unauthenticated" }, { status: 401 });
-
-  let body: { commandeIds?: string[] };
+  let body: { commandeIds?: string[]; accessToken?: string };
   try {
     body = await request.json();
   } catch {
     return Response.json({ error: "bad_request" }, { status: 400 });
   }
+
+  // Token via le body (fiable) ou l'en-tete Authorization (fallback).
+  const token =
+    (typeof body.accessToken === "string" && body.accessToken) ||
+    bearerFromRequest(request);
+  if (!token) return Response.json({ error: "unauthenticated" }, { status: 401 });
+
   const ids = Array.isArray(body.commandeIds) ? body.commandeIds : [];
   if (ids.length === 0) return Response.json({ error: "no_orders" }, { status: 400 });
 
