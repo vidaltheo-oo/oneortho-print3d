@@ -487,7 +487,6 @@ footer strong{color:var(--orange)}
       <button class="lang-btn" data-lang="de">DE</button>
       <button class="lang-btn" data-lang="pt">PT</button>
     </div>
-    <div class="hbadge" id="badge_el"></div>
     <button class="cart-pill" id="cartPill" title="Panier" aria-label="Panier">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
         <path d="M3 4h2l2.4 12.3a1 1 0 0 0 1 .8h8.7a1 1 0 0 0 1-.8L21 8H6"
@@ -794,6 +793,17 @@ footer strong{color:var(--orange)}
   <span id="footer_txt_el"></span>
   <div class="footer-company"><img src="Oneortho_logotype_2023_vert.png" alt="OneOrtho Medical" class="footer-logo"><span>OneOrtho Medical — Parc Inopolis, 206 route de Vourles, 69230 Saint-Genis-Laval — Tél. : +33(0)4 26 78 76 74 — <a href="https://www.oneortho-medical.com" target="_blank" rel="noopener">www.oneortho-medical.com</a></span></div>
 </footer>
+
+<!-- Modale "connexion requise" pour commander (utilisateur non connecte) -->
+<div id="authModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:1000;align-items:center;justify-content:center;padding:20px;">
+  <div role="dialog" aria-modal="true" style="background:#fff;border-radius:18px;padding:28px;max-width:380px;width:100%;box-shadow:0 24px 60px -20px rgba(0,75,50,.5);">
+    <div id="authTitle" style="font-family:'Sora',sans-serif;font-weight:700;font-size:18px;color:#004B32;margin-bottom:8px;"></div>
+    <p id="authBody" style="font-size:14px;color:#5b6b66;line-height:1.55;margin:0 0 20px;"></p>
+    <button id="authLogin" type="button" style="display:block;width:100%;background:#004B32;color:#fff;border:none;border-radius:99px;padding:13px;font-family:'Sora',sans-serif;font-weight:700;font-size:14px;cursor:pointer;margin-bottom:10px;"></button>
+    <button id="authSignup" type="button" style="display:block;width:100%;background:#AAE66E;color:#004B32;border:none;border-radius:99px;padding:13px;font-family:'Sora',sans-serif;font-weight:700;font-size:14px;cursor:pointer;margin-bottom:10px;"></button>
+    <button id="authGuest" type="button" style="display:block;width:100%;background:none;color:#8A8478;border:none;padding:6px;font-family:'DM Sans',sans-serif;font-weight:600;font-size:13px;cursor:pointer;"></button>
+  </div>
+</div>
 
 <script type="module">
 import * as THREE from 'three';
@@ -1423,7 +1433,7 @@ function getColName(col) {
 }
 
 const I18N_MAP = [
-  ['brand_sub','brand_sub_el'],['badge','badge_el'],
+  ['brand_sub','brand_sub_el'],
   ['u_title','u_title_el'],['u_head','u_head_el'],['u_sub','u_sub_el'],
   ['u_parsing','u_parsing_el'],['u_vol','u_vol_el'],
   ['c_title','c_title_el'],['c_apptype','c_apptype_el'],
@@ -2541,6 +2551,43 @@ function buildCartItem() {
   };
 }
 
+// Session Supabase : le client Next stocke la session en localStorage
+// (cle sb-<ref>-auth-token). Meme origine => l'iframe peut la lire.
+function isLoggedIn() {
+  try {
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      if (k && k.startsWith('sb-') && k.endsWith('-auth-token')) {
+        const v = JSON.parse(localStorage.getItem(k) || 'null');
+        const s = v && v.currentSession ? v.currentSession : v;
+        if (s && s.access_token && (!s.expires_at || s.expires_at * 1000 > Date.now())) return true;
+      }
+    }
+  } catch (e) {}
+  return false;
+}
+
+// Textes de la modale "connexion requise" (i18n local aux 6 langues de l'app).
+const AUTH_I18N = {
+  fr: { title: "Connexion requise pour commander", body: "Votre configuration a ete ajoutee au panier et sera conservee. Connectez-vous ou creez un compte pour finaliser votre commande.", login: "Se connecter", signup: "Creer un compte", guest: "Continuer sans compte" },
+  en: { title: "Sign in to place your order", body: "Your configuration has been added to the cart and will be kept. Sign in or create an account to complete your order.", login: "Sign in", signup: "Create an account", guest: "Continue without an account" },
+  es: { title: "Inicia sesion para pedir", body: "Tu configuracion se ha anadido al carrito y se conservara. Inicia sesion o crea una cuenta para completar el pedido.", login: "Iniciar sesion", signup: "Crear una cuenta", guest: "Continuar sin cuenta" },
+  it: { title: "Accedi per ordinare", body: "La tua configurazione e stata aggiunta al carrello e verra conservata. Accedi o crea un account per completare l'ordine.", login: "Accedi", signup: "Crea un account", guest: "Continua senza account" },
+  de: { title: "Zum Bestellen anmelden", body: "Deine Konfiguration wurde in den Warenkorb gelegt und bleibt erhalten. Melde dich an oder erstelle ein Konto, um die Bestellung abzuschliessen.", login: "Anmelden", signup: "Konto erstellen", guest: "Ohne Konto fortfahren" },
+  pt: { title: "Inicie sessao para encomendar", body: "A sua configuracao foi adicionada ao carrinho e sera mantida. Inicie sessao ou crie uma conta para concluir o pedido.", login: "Iniciar sessao", signup: "Criar uma conta", guest: "Continuar sem conta" },
+};
+function goTop(path) { (window.top || window).location.href = path; }
+function showAuthModal() {
+  const tr = AUTH_I18N[currentLang] || AUTH_I18N.fr;
+  $('authTitle').textContent = tr.title;
+  $('authBody').textContent = tr.body;
+  $('authLogin').textContent = tr.login;
+  $('authSignup').textContent = tr.signup;
+  $('authGuest').textContent = tr.guest;
+  const m = $('authModal'); if (m) m.style.display = 'flex';
+}
+function hideAuthModal() { const m = $('authModal'); if (m) m.style.display = 'none'; }
+
 function addToCart() {
   const item = buildCartItem();
   if (!item) return;
@@ -2556,10 +2603,22 @@ function addToCart() {
     btn.textContent = t('cart_added');
     setTimeout(() => { btn.textContent = t('cart_add'); }, 1400);
   }
+  // Non connecte : proposer connexion / inscription. Le devis est deja dans le
+  // panier (localStorage), donc conserve apres connexion.
+  if (!isLoggedIn()) showAuthModal();
 }
 
 const cartBtnEl = $('btnCart');
 if (cartBtnEl) cartBtnEl.addEventListener('click', addToCart);
+
+const authLoginEl = $('authLogin');
+if (authLoginEl) authLoginEl.addEventListener('click', () => goTop('/connexion'));
+const authSignupEl = $('authSignup');
+if (authSignupEl) authSignupEl.addEventListener('click', () => goTop('/inscription'));
+const authGuestEl = $('authGuest');
+if (authGuestEl) authGuestEl.addEventListener('click', hideAuthModal);
+const authModalEl = $('authModal');
+if (authModalEl) authModalEl.addEventListener('click', (e) => { if (e.target === authModalEl) hideAuthModal(); });
 
 // ── Init ──────────────────────────────────────────────────────────────────────
 applyLang('fr');
