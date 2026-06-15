@@ -108,7 +108,15 @@ export default function SignupForm() {
     const { data, error: authError } = await supabase.auth.signUp({
       email: email.trim(),
       password,
-      options: { data: profile },
+      options: {
+        data: profile,
+        // Si la confirmation email est active, le lien doit revenir sur l'app
+        // (sinon il pointe vers la Site URL Supabase par defaut = lien casse).
+        emailRedirectTo:
+          typeof window !== "undefined"
+            ? `${window.location.origin}/connexion`
+            : undefined,
+      },
     });
 
     if (authError) {
