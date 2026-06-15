@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { ensureClientRecord, type ClientProfile } from "@/lib/clients";
+import { checkIsAdmin } from "@/lib/admin";
 import styles from "@/components/auth.module.css";
 
 // Destination apres connexion. L'espace client (/mes-commandes) n'est pas encore
@@ -43,7 +44,9 @@ export default function LoginForm() {
       );
     }
 
-    router.push(AFTER_AUTH);
+    // Les administrateurs sont rediriges vers le back-office.
+    const admin = await checkIsAdmin();
+    router.push(admin ? "/admin" : AFTER_AUTH);
   }
 
   return (
