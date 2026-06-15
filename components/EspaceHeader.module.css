@@ -1,0 +1,178 @@
+.header {
+  background: var(--green);
+  padding: 14px 22px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  position: sticky;
+  top: 0;
+  z-index: 30;
+}
+
+.left {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+}
+
+.brand {
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  padding: 0;
+  display: block;
+}
+
+.brandTitle {
+  font-family: var(--font-headings);
+  font-weight: 700;
+  font-size: 22px;
+  color: #fff;
+  text-transform: uppercase;
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+
+.brandTitle .accent {
+  color: var(--orange);
+}
+
+.brandSub {
+  font-size: 11px;
+  color: rgba(170, 230, 110, 0.85);
+  margin-top: 3px;
+  letter-spacing: 0.02em;
+}
+
+.nav {
+  display: flex;
+  gap: 6px;
+}
+
+.navLink {
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.78);
+  padding: 7px 12px;
+  border-radius: var(--radius-pill);
+}
+
+.navLink:hover {
+  color: #fff;
+}
+
+.navLinkActive {
+  color: #fff;
+  background: rgba(170, 230, 110, 0.16);
+}
+
+.right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.langs {
+  display: flex;
+  gap: 5px;
+}
+
+.langPill {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1.5px solid rgba(255, 255, 255, 0.18);
+  border-radius: var(--radius-pill);
+  color: rgba(255, 255, 255, 0.75);
+  font-family: var(--font-headings);
+  font-weight: 700;
+  font-size: 11px;
+  text-transform: uppercase;
+  padding: 5px 9px;
+  cursor: not-allowed;
+}
+
+.langPillActive {
+  background: var(--lime);
+  border-color: var(--lime);
+  color: var(--green);
+  cursor: default;
+}
+
+.cart {
+  position: relative;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1.5px solid rgba(255, 255, 255, 0.2);
+  border-radius: var(--radius-pill);
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #fff;
+}
+
+.cart:hover {
+  background: rgba(255, 255, 255, 0.22);
+}
+
+.cartBadge {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  background: var(--orange);
+  color: #fff;
+  font-family: var(--font-headings);
+  font-weight: 700;
+  font-size: 11px;
+  border-radius: var(--radius-pill);
+  min-width: 19px;
+  height: 19px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
+  border: 2px solid var(--green);
+}
+
+.authButtons {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btnLogin {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1.5px solid rgba(255, 255, 255, 0.22);
+  border-radius: var(--radius-pill);
+  padding: 8px 16px;
+  font-family: var(--font-headings);
+  font-weight: 600;
+  font-size: 13px;
+  color: #fff;
+  cursor: pointer;
+}
+
+.btnLogin:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.btnSignup {
+  background: var(--lime);
+  border: none;
+  border-radius: var(--radius-pill);
+  padding: 9px 18px;
+  font-family: var(--font-headings);
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--green);
+  cursor: pointer;
+}
+
+.btnSignup:hover {
+  background: #9ad95e;
+}

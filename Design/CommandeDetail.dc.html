@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Sora:wght@600;700&display=swap" rel="stylesheet">
+</helmet>
+<div style="font-family:'DM Sans',system-ui,sans-serif;color:#1C1C1A;display:flex;flex-direction:column;height:100%;background:#fff;">
+  <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:20px 22px 16px;border-bottom:1px solid #E2DED2;flex:none;">
+    <div>
+      <div style="font-family:'Sora';font-weight:700;font-size:16px;color:#004B32;letter-spacing:-.2px;">{{ data.id }}</div>
+      <div style="font-size:12px;color:#888;margin-top:3px;">Validée le {{ data.date }} · {{ data.devis }}</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <span style="{{ data.statusPill }}">{{ data.statut }}</span>
+      <button onClick="{{ onClose }}" style="width:32px;height:32px;border-radius:9px;border:1px solid #E2DED2;background:#fff;color:#666;cursor:pointer;display:flex;align-items:center;justify-content:center;" style-hover="background:#F4F1E7;color:#1A1A1A;"><svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M5 5l10 10M15 5L5 15"/></svg></button>
+    </div>
+  </div>
+
+  <div style="padding:18px 22px;display:flex;flex-direction:column;gap:20px;overflow-y:auto;">
+    <!-- client -->
+    <div style="display:flex;align-items:center;gap:12px;">
+      <span style="width:40px;height:40px;border-radius:99px;background:#004B32;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex:none;">{{ data.initials }}</span>
+      <div style="flex:1;min-width:0;"><div style="font-size:14px;font-weight:600;">{{ data.client }}</div><div style="font-size:12px;color:#888;">{{ data.files }} fichiers · PA2200 Nylon SLS</div></div>
+      <span style="{{ data.delaiStyle }}">{{ data.delai }}</span>
+    </div>
+
+    <!-- production -->
+    <div style="background:#FAF8F0;border:1px solid #E2DED2;border-radius:13px;padding:15px 16px;">
+      <div style="font-size:11px;color:#9aa39e;text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px;">Atelier de production</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:13px;">
+        <div><div style="font-size:11px;color:#9aa39e;">Imprimante</div><div style="font-size:13px;font-weight:600;margin-top:2px;">{{ data.printer }}</div></div>
+        <div><div style="font-size:11px;color:#9aa39e;">Opérateur</div><div style="font-size:13px;font-weight:600;margin-top:2px;">{{ data.operator }}</div></div>
+        <div><div style="font-size:11px;color:#9aa39e;">Finition</div><div style="font-size:13px;font-weight:600;margin-top:2px;">{{ data.finition }}</div></div>
+        <div><div style="font-size:11px;color:#9aa39e;">Teinte</div><div style="font-size:13px;font-weight:600;margin-top:2px;">{{ data.teinte }}</div></div>
+      </div>
+    </div>
+
+    <!-- pieces -->
+    <div>
+      <div style="font-size:11px;color:#9aa39e;text-transform:uppercase;letter-spacing:.5px;margin-bottom:9px;">Pièces</div>
+      <div style="border:1px solid #E2DED2;border-radius:13px;overflow:hidden;">
+        <sc-for list="{{ data.pieces }}" as="p" hint-placeholder-count="3">
+          <div style="{{ p.rowStyle }}">
+            <span style="width:30px;height:30px;border-radius:8px;background:#F0F7EC;color:#004B32;display:flex;align-items:center;justify-content:center;flex:none;"><svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 2.5h6l4 4V17a.5.5 0 0 1-.5.5h-9A.5.5 0 0 1 5 17z"/><path d="M11 2.5v4h4"/></svg></span>
+            <div style="flex:1;min-width:0;"><div style="font-size:12.5px;font-weight:600;color:#004B32;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ p.name }}</div><div style="font-size:11px;color:#9aa39e;">{{ p.volume }}</div></div>
+            <span style="background:#fff;border:1px solid #E2DED2;font-size:11px;color:#3f5249;padding:3px 9px;border-radius:99px;display:flex;align-items:center;gap:5px;flex:none;"><span style="{{ p.teinteDot }}"></span>{{ p.teinte }}</span>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+
+    <!-- shipping -->
+    <sc-if value="{{ data.shipped }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex;align-items:center;gap:12px;background:#F3E5F5;border:1px solid #E1BEE7;border-radius:13px;padding:13px 15px;">
+        <span style="width:36px;height:36px;border-radius:10px;background:#6A1B9A;color:#fff;display:flex;align-items:center;justify-content:center;flex:none;"><svg width="19" height="19" viewBox="0 0 24 24" fill="currentColor"><path d="M3 6.5h11v8H3z" fill-opacity=".25"/><path d="M3 6.5h11v8H3zM14 9h4l3 3v2.5h-7z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><circle cx="7" cy="16.5" r="1.7"/><circle cx="17" cy="16.5" r="1.7"/></svg></span>
+        <div style="flex:1;min-width:0;"><div style="font-size:11px;color:#6A1B9A;text-transform:uppercase;letter-spacing:.4px;">{{ data.carrier }}</div><div style="font-family:'Sora';font-weight:700;font-size:13.5px;color:#6A1B9A;">{{ data.tracking }}</div></div>
+        <span style="font-size:11.5px;color:#6A1B9A;font-weight:600;flex:none;">{{ data.shipDate }}</span>
+      </div>
+    </sc-if>
+
+    <!-- timeline -->
+    <div style="border-top:1px solid #E2DED2;padding-top:16px;">
+      <div style="font-size:11px;color:#9aa39e;text-transform:uppercase;letter-spacing:.5px;margin-bottom:16px;">Suivi de production</div>
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;position:relative;padding:0 8%;">
+        <div style="position:absolute;top:8px;left:16%;right:16%;height:2px;background:rgba(0,75,50,0.12);"></div>
+        <div style="{{ data.progressStyle }}"></div>
+        <sc-for list="{{ data.steps }}" as="step" hint-placeholder-count="3">
+          <div style="display:flex;flex-direction:column;align-items:center;gap:8px;flex:1;z-index:1;">
+            <span style="{{ step.dotStyle }}"></span>
+            <span style="{{ step.labelStyle }}">{{ step.label }}</span>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+
+    <!-- recap -->
+    <div style="background:#FAF8F0;border:1px solid #E2DED2;border-radius:13px;padding:15px 16px;">
+      <div style="display:flex;justify-content:space-between;font-size:13px;color:#555;padding:3px 0;"><span>Total HT</span><span style="font-weight:600;color:#1C1C1A;">{{ data.montant }}</span></div>
+      <div style="display:flex;justify-content:space-between;font-size:13px;color:#555;padding:3px 0;"><span>TVA 20%</span><span style="font-weight:600;color:#1C1C1A;">{{ data.tva }}</span></div>
+      <div style="display:flex;justify-content:space-between;font-size:15px;padding:10px 0 0;margin-top:8px;border-top:1px solid #E2DED2;"><span style="font-weight:700;">Total TTC</span><span style="font-family:'Sora';font-weight:700;color:#004B32;">{{ data.ttc }}</span></div>
+      <div style="display:flex;align-items:center;gap:7px;margin-top:11px;font-size:11.5px;color:#8A6D00;background:#FFF8E6;border:1px solid #F2E2A8;border-radius:9px;padding:8px 10px;"><svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="7.5"/><path d="M10 6.5v4M10 13.5h.01"/></svg>Facturation à réception — émise hors de l'outil.</div>
+    </div>
+
+    <!-- actions -->
+    <div style="display:grid;grid-template-columns:auto 1fr;gap:9px;">
+      <button style="display:flex;align-items:center;justify-content:center;gap:7px;background:#fff;border:1px solid rgba(0,75,50,0.2);color:#004B32;font-size:13px;font-weight:600;padding:12px 16px;border-radius:99px;cursor:pointer;" style-hover="background:#F0F7EC;"><svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3h7l3 3v11H5z"/><path d="M8 9h5M8 12h5"/></svg>Bon de prod.</button>
+      <button onClick="{{ onAdvance }}" style="display:flex;align-items:center;justify-content:center;gap:7px;background:#004B32;color:#fff;font-size:13px;font-weight:700;padding:12px;border:none;border-radius:99px;cursor:pointer;" style-hover="background:#00603f;"><svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10.5 8 14l8-8.5"/></svg>{{ data.primaryLabel }}</button>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:500,&quot;height&quot;:920},&quot;data&quot;:{&quot;editor&quot;:null},&quot;onClose&quot;:{&quot;editor&quot;:null},&quot;onAdvance&quot;:{&quot;editor&quot;:null}}"></script>
+</body>
+</html>

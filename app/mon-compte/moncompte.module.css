@@ -1,0 +1,129 @@
+.wrap {
+  max-width: 820px;
+  margin: 0 auto;
+  padding: 32px 24px 56px;
+}
+
+.title {
+  font-family: var(--font-headings);
+  font-weight: 800;
+  font-size: 28px;
+  color: var(--green);
+  margin: 0 0 2px;
+}
+
+.sub {
+  color: var(--muted);
+  font-size: 14px;
+  margin: 0 0 22px;
+}
+
+.tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 24px;
+  border-bottom: 1.5px solid var(--border);
+}
+
+.tab {
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1.5px;
+  padding: 10px 6px;
+  font-family: var(--font-headings);
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.tab:hover {
+  color: var(--green);
+}
+
+.tabActive {
+  color: var(--green);
+  border-bottom-color: var(--green);
+}
+
+.infoBox {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(170, 230, 110, 0.14);
+  border: 1.5px solid rgba(170, 230, 110, 0.5);
+  border-radius: 12px;
+  padding: 12px 16px;
+  margin-bottom: 18px;
+  font-size: 13px;
+  color: var(--green);
+}
+
+.infoBox svg {
+  flex: none;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.saveBtn {
+  background: var(--green);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-pill);
+  padding: 12px 26px;
+  font-family: var(--font-headings);
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.saveBtn:hover {
+  background: var(--green-hover);
+}
+
+.saveBtn:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}
+
+.logoutBtn {
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-family: var(--font-headings);
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.logoutBtn:hover {
+  color: var(--orange);
+}
+
+.feedback {
+  border-radius: var(--radius-input);
+  padding: 11px 13px;
+  font-size: 13px;
+}
+
+.feedbackOk {
+  background: #e8f5e9;
+  color: var(--green);
+}
+
+.feedbackErr {
+  background: #fdeaea;
+  color: #c62828;
+}
+
+.loading {
+  color: var(--muted);
+  font-size: 14px;
+  padding: 24px 0;
+}

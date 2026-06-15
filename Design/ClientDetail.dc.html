@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Sora:wght@600;700&display=swap" rel="stylesheet">
+</helmet>
+<div style="font-family:'DM Sans',system-ui,sans-serif;color:#1C1C1A;display:flex;flex-direction:column;height:100%;background:#fff;">
+  <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:22px 22px 18px;border-bottom:1px solid #E2DED2;flex:none;">
+    <div style="display:flex;align-items:center;gap:13px;min-width:0;">
+      <span style="width:52px;height:52px;border-radius:99px;background:#004B32;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:17px;flex:none;">{{ data.initials }}</span>
+      <div style="min-width:0;">
+        <div style="font-family:'Sora';font-weight:700;font-size:17px;color:#1C1C1A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ data.name }}</div>
+        <div style="display:flex;align-items:center;gap:7px;margin-top:6px;">
+          <span style="{{ data.natureStyle }}">{{ data.nature }}</span>
+          <span style="background:#EEF1F0;color:#5b6b66;font-size:11px;font-weight:600;padding:3px 9px;border-radius:99px;">{{ data.country }}</span>
+        </div>
+      </div>
+    </div>
+    <button onClick="{{ onClose }}" style="width:32px;height:32px;border-radius:9px;border:1px solid #E2DED2;background:#fff;color:#666;cursor:pointer;display:flex;align-items:center;justify-content:center;flex:none;" style-hover="background:#F4F1E7;color:#1A1A1A;"><svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M5 5l10 10M15 5L5 15"/></svg></button>
+  </div>
+
+  <div style="padding:20px 22px;display:flex;flex-direction:column;gap:22px;overflow-y:auto;">
+    <div>
+      <div style="font-size:11px;color:#9aa39e;text-transform:uppercase;letter-spacing:.5px;margin-bottom:11px;">Coordonnées</div>
+      <div style="display:flex;flex-direction:column;gap:11px;">
+        <div style="display:flex;align-items:center;gap:11px;"><span style="width:30px;height:30px;border-radius:9px;background:#F0F7EC;color:#004B32;display:flex;align-items:center;justify-content:center;flex:none;"><svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="2.5" y="4" width="15" height="12" rx="2"/><path d="M3 5l7 5 7-5"/></svg></span><span style="font-size:13.5px;color:#1C1C1A;">{{ data.email }}</span></div>
+        <div style="display:flex;align-items:center;gap:11px;"><span style="width:30px;height:30px;border-radius:9px;background:#F0F7EC;color:#004B32;display:flex;align-items:center;justify-content:center;flex:none;"><svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 3.5h3l1.5 4-2 1.5a11 11 0 0 0 4.5 4.5l1.5-2 4 1.5v3a1 1 0 0 1-1 1A13 13 0 0 1 3 4.5a1 1 0 0 1 1-1z"/></svg></span><span style="font-size:13.5px;color:#1C1C1A;">{{ data.phone }}</span></div>
+        <div style="display:flex;align-items:center;gap:11px;"><span style="width:30px;height:30px;border-radius:9px;background:#F0F7EC;color:#004B32;display:flex;align-items:center;justify-content:center;flex:none;"><svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2.5c3 0 5.5 2.4 5.5 5.4 0 3.8-5.5 9.6-5.5 9.6S4.5 11.7 4.5 7.9C4.5 4.9 7 2.5 10 2.5z"/><circle cx="10" cy="8" r="2"/></svg></span><span style="font-size:13.5px;color:#1C1C1A;">{{ data.city }}</span></div>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);background:#FAF8F0;border:1px solid #E2DED2;border-radius:13px;overflow:hidden;">
+      <div style="padding:15px 8px;text-align:center;"><div style="font-family:'Sora';font-size:22px;font-weight:700;">{{ data.devis }}</div><div style="font-size:10.5px;color:#9aa39e;margin-top:3px;">Devis</div></div>
+      <div style="padding:15px 8px;text-align:center;border-left:1px solid #E2DED2;"><div style="font-family:'Sora';font-size:22px;font-weight:700;">{{ data.cmd }}</div><div style="font-size:10.5px;color:#9aa39e;margin-top:3px;">Commandes</div></div>
+      <div style="padding:15px 8px;text-align:center;border-left:1px solid #E2DED2;"><div style="font-family:'Sora';font-size:16px;font-weight:700;color:#004B32;white-space:nowrap;">{{ data.ca }}</div><div style="font-size:10.5px;color:#9aa39e;margin-top:3px;">CA HT</div></div>
+    </div>
+
+    <div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:11px;"><div style="font-size:11px;color:#9aa39e;text-transform:uppercase;letter-spacing:.5px;">Historique des devis</div><span style="font-size:11px;color:#9aa39e;">{{ data.devisCount }} au total</span></div>
+      <div style="border:1px solid #E2DED2;border-radius:13px;overflow:hidden;">
+        <sc-for list="{{ data.devisList }}" as="q" hint-placeholder-count="3">
+          <div style="{{ q.rowStyle }}" style-hover="background:#F0F7EC;">
+            <div style="min-width:0;"><div style="font-size:12.5px;font-weight:600;color:#004B32;">{{ q.id }}</div><div style="font-size:11px;color:#9aa39e;">{{ q.date }}</div></div>
+            <div style="display:flex;align-items:center;gap:10px;flex:none;"><span style="font-size:13px;font-weight:700;">{{ q.montant }}</span><span style="{{ q.statusStyle }}">{{ q.statut }}</span></div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:9px;">
+      <button onClick="{{ onNewDevis }}" style="display:flex;align-items:center;justify-content:center;gap:8px;background:#FF6C4F;color:#fff;font-size:13px;font-weight:700;padding:12px;border:none;border-radius:99px;cursor:pointer;" style-hover="opacity:.88;"><svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 4v12M4 10h12"/></svg>Nouveau devis</button>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px;">
+        <button style="display:flex;align-items:center;justify-content:center;gap:7px;background:#fff;border:1px solid rgba(0,75,50,0.2);color:#004B32;font-size:13px;font-weight:600;padding:11px;border-radius:99px;cursor:pointer;" style-hover="background:#F0F7EC;"><svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="2.5" y="4" width="15" height="12" rx="2"/><path d="M3 5l7 5 7-5"/></svg>Email</button>
+        <button style="display:flex;align-items:center;justify-content:center;gap:7px;background:#fff;border:1px solid #E2DED2;color:#888;font-size:13px;font-weight:600;padding:11px;border-radius:99px;cursor:pointer;" style-hover="background:#F4F1E7;color:#1A1A1A;">Archiver</button>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:500,&quot;height&quot;:880},&quot;data&quot;:{&quot;editor&quot;:null},&quot;onClose&quot;:{&quot;editor&quot;:null},&quot;onNewDevis&quot;:{&quot;editor&quot;:null}}"></script>
+</body>
+</html>

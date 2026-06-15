@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Architects+Daughter&family=DM+Sans:wght@400;500;600;700&family=Sora:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:'DM Sans',system-ui,sans-serif;background:#ECE8DA;color:#1A1A1A;-webkit-font-smoothing:antialiased;}
+  ::-webkit-scrollbar{height:10px;width:10px;}
+  ::-webkit-scrollbar-thumb{background:rgba(0,75,50,0.22);border-radius:99px;}
+</style>
+</helmet>
+
+<div style="max-width:1480px;margin:0 auto;padding:30px 28px 80px;">
+
+  <!-- ===== CHROME ===== -->
+  <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:24px;flex-wrap:wrap;margin-bottom:18px;">
+    <div>
+      <div style="font-family:'Architects Daughter',cursive;font-size:15px;color:#6f8a7e;letter-spacing:.5px;">wireframes · exploration de structure</div>
+      <h1 style="margin:4px 0 0;font-family:'Sora',sans-serif;font-weight:700;font-size:27px;letter-spacing:-.5px;">
+        Tableau de bord admin — <span style="color:#004B32;">ONE</span><span style="color:#FF6C4F;">PRINT</span>
+      </h1>
+    </div>
+    <div style="display:flex;align-items:center;gap:16px;font-family:'Architects Daughter',cursive;font-size:14px;color:#4f6358;">
+      <div style="display:flex;align-items:center;gap:7px;"><span style="width:13px;height:13px;border-radius:4px;background:#004B32;display:inline-block;"></span>primaire</div>
+      <div style="display:flex;align-items:center;gap:7px;"><span style="width:13px;height:13px;border-radius:4px;background:#AAE66E;display:inline-block;"></span>positif / actif</div>
+      <div style="display:flex;align-items:center;gap:7px;"><span style="width:13px;height:13px;border-radius:4px;background:#FF6C4F;display:inline-block;"></span>PRINT / alerte</div>
+    </div>
+  </div>
+
+  <!-- tabs -->
+  <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:6px;">
+    <button onClick="{{ showA }}" style="{{ tabAStyle }}">
+      <div style="font-size:15px;">Variante A</div>
+      <div style="font-size:11.5px;font-family:'DM Sans';font-weight:500;opacity:.78;">Cockpit classique · détail slide-in</div>
+    </button>
+    <button onClick="{{ showB }}" style="{{ tabBStyle }}">
+      <div style="font-size:15px;">Variante B</div>
+      <div style="font-size:11.5px;font-family:'DM Sans';font-weight:500;opacity:.78;">Triage master-détail · panneau persistant</div>
+    </button>
+    <button onClick="{{ showC }}" style="{{ tabCStyle }}">
+      <div style="font-size:15px;">Variante C</div>
+      <div style="font-size:11.5px;font-family:'DM Sans';font-weight:500;opacity:.78;">Plein écran · rail compact + modale</div>
+    </button>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- VARIANTE A -->
+  <!-- ============================================================ -->
+  <sc-if value="{{ isA }}" hint-placeholder-val="{{ true }}">
+  <div data-screen-label="Variante A" data-comment-anchor="var-a">
+    <p style="font-family:'Architects Daughter',cursive;font-size:16px;color:#3f5249;margin:14px 2px 16px;max-width:880px;line-height:1.5;">
+      Structure éprouvée : sidebar pleine + header global. KPIs en ligne, filtres, puis tableau large scrollable. L'œil ouvre un <b>panneau de détail qui glisse de la droite</b> — l'admin garde le contexte du tableau derrière.
+    </p>
+
+    <div style="position:relative;width:100%;border:1.5px solid rgba(0,75,50,0.16);border-radius:18px;overflow:hidden;background:#F5F2E8;display:flex;box-shadow:0 18px 48px -28px rgba(0,75,50,0.4);">
+      <!-- SIDEBAR -->
+      <div style="width:230px;flex:none;background:#004B32;color:#fff;display:flex;flex-direction:column;padding:20px 14px;">
+        <div style="font-family:'Sora',sans-serif;font-weight:700;font-size:20px;letter-spacing:1px;padding:4px 8px 22px;">ONE<span style="color:#FF6C4F;">PRINT</span></div>
+        <div style="display:flex;flex-direction:column;gap:3px;">
+          <div style="display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:12px;color:rgba(255,255,255,.8);font-size:14.5px;font-weight:500;"><svg width="19" height="19" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="6.5" height="6.5" rx="1.5"/><rect x="11" y="3" width="6" height="4.5" rx="1.5"/><rect x="11" y="10.5" width="6" height="6.5" rx="1.5"/><rect x="3" y="12.5" width="6.5" height="4.5" rx="1.5"/></svg>Tableau de bord</div>
+          <div style="display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:12px;background:#AAE66E;color:#004B32;font-size:14.5px;font-weight:700;"><svg width="19" height="19" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2.5" width="12" height="15" rx="2"/><line x1="7" y1="7" x2="13" y2="7"/><line x1="7" y1="10" x2="13" y2="10"/><line x1="7" y1="13" x2="11" y2="13"/></svg>Devis</div>
+          <div style="display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:12px;color:rgba(255,255,255,.8);font-size:14.5px;font-weight:500;"><svg width="19" height="19" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4h2l1.8 9h8l1.7-6H6"/><circle cx="9" cy="16" r="1.1"/><circle cx="15" cy="16" r="1.1"/></svg>Commandes</div>
+          <div style="display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:12px;color:rgba(255,255,255,.8);font-size:14.5px;font-weight:500;"><svg width="19" height="19" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="7" r="3"/><path d="M4 17c0-3.3 2.7-5 6-5s6 1.7 6 5"/></svg>Clients</div>
+          <div style="display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:12px;color:rgba(255,255,255,.8);font-size:14.5px;font-weight:500;"><svg width="19" height="19" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3l6.5 3.75v7.5L10 18l-6.5-3.75v-7.5z"/><path d="M3.5 6.75 10 10.5l6.5-3.75M10 10.5V18"/></svg>Fichiers STL</div>
+          <div style="display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:12px;color:rgba(255,255,255,.8);font-size:14.5px;font-weight:500;"><svg width="19" height="19" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="2.6"/><path d="M10 3v1.8M10 15.2V17M3 10h1.8M15.2 10H17M5 5l1.3 1.3M13.7 13.7 15 15M15 5l-1.3 1.3M6.3 13.7 5 15"/></svg>Paramètres</div>
+        </div>
+        <div style="margin-top:auto;display:flex;align-items:center;gap:11px;padding:11px 8px 4px;border-top:1px solid rgba(255,255,255,.14);">
+          <div style="width:34px;height:34px;border-radius:99px;background:#AAE66E;color:#004B32;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;">CM</div>
+          <div><div style="font-size:13.5px;font-weight:600;">Camille Morel</div><div style="font-size:11.5px;color:rgba(255,255,255,.6);">Admin</div></div>
+        </div>
+      </div>
+
+      <!-- MAIN -->
+      <div style="flex:1;min-width:0;display:flex;flex-direction:column;">
+        <!-- header -->
+        <div style="display:flex;align-items:center;gap:18px;padding:15px 22px;background:#fff;border-bottom:1.5px solid rgba(0,75,50,0.1);">
+          <div style="font-family:'Sora',sans-serif;font-weight:600;font-size:19px;">Devis</div>
+          <div style="flex:1;max-width:440px;display:flex;align-items:center;gap:9px;background:#F2F0E6;border:1.5px solid rgba(0,75,50,0.12);border-radius:99px;padding:9px 16px;color:#8a8a82;font-size:14px;">
+            <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="9" cy="9" r="6"/><line x1="14" y1="14" x2="17" y2="17"/></svg>
+            Rechercher un devis, un client…
+          </div>
+          <div style="margin-left:auto;display:flex;align-items:center;gap:16px;">
+            <div style="position:relative;color:#004B32;"><svg width="22" height="22" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8a5 5 0 0 1 10 0c0 4 1.5 5 1.5 5h-13S5 12 5 8z"/><path d="M8.5 16a1.6 1.6 0 0 0 3 0"/></svg><span style="position:absolute;top:-4px;right:-5px;background:#FF6C4F;color:#fff;font-size:10px;font-weight:700;border-radius:99px;min-width:16px;height:16px;display:flex;align-items:center;justify-content:center;padding:0 3px;">9</span></div>
+            <div style="width:34px;height:34px;border-radius:99px;background:#004B32;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;">CM</div>
+          </div>
+        </div>
+
+        <!-- body -->
+        <div style="padding:20px 22px;display:flex;flex-direction:column;gap:18px;">
+          <!-- KPI ROW -->
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;">
+            <div style="background:#fff;border-radius:14px;border-left:4px solid #AAE66E;padding:15px 16px;box-shadow:0 6px 18px -14px rgba(0,75,50,.5);position:relative;">
+              <div style="position:absolute;top:13px;right:13px;width:30px;height:30px;border-radius:9px;background:#F0F7EC;color:#004B32;display:flex;align-items:center;justify-content:center;"><svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2.5" width="12" height="15" rx="2"/><line x1="7" y1="8" x2="13" y2="8"/><line x1="7" y1="12" x2="11" y2="12"/></svg></div>
+              <div style="font-size:12.5px;color:#666;font-weight:500;">Devis ce mois</div>
+              <div style="font-family:'Sora',sans-serif;font-size:30px;font-weight:700;margin-top:5px;white-space:nowrap;">47</div>
+              <div style="font-size:12px;color:#2e7d32;font-weight:600;margin-top:3px;">▲ 18% vs mai</div>
+            </div>
+            <div style="background:#fff;border-radius:14px;border-left:4px solid #AAE66E;padding:15px 16px;box-shadow:0 6px 18px -14px rgba(0,75,50,.5);position:relative;">
+              <div style="position:absolute;top:13px;right:13px;width:30px;height:30px;border-radius:9px;background:#F0F7EC;color:#004B32;display:flex;align-items:center;justify-content:center;"><svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3v14M13 6.5C13 5 11.7 4 10 4S7 5 7 6.3 8.3 8.5 10 9s3 1.2 3 2.7S11.7 14 10 14 7 13 7 11.5"/></svg></div>
+              <div style="font-size:12.5px;color:#666;font-weight:500;">CA devis (HT)</div>
+              <div style="font-family:'Sora',sans-serif;font-size:30px;font-weight:700;margin-top:5px;white-space:nowrap;">86,4k €</div>
+              <div style="font-size:12px;color:#2e7d32;font-weight:600;margin-top:3px;">▲ 12% vs mai</div>
+            </div>
+            <div style="background:#fff;border-radius:14px;border-left:4px solid #AAE66E;padding:15px 16px;box-shadow:0 6px 18px -14px rgba(0,75,50,.5);position:relative;">
+              <div style="position:absolute;top:13px;right:13px;width:30px;height:30px;border-radius:9px;background:#F0F7EC;color:#004B32;display:flex;align-items:center;justify-content:center;"><svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 13l4-4 3 3 5-6"/><path d="M13 6h3v3"/></svg></div>
+              <div style="font-size:12.5px;color:#666;font-weight:500;">Conversion → commande</div>
+              <div style="font-family:'Sora',sans-serif;font-size:30px;font-weight:700;margin-top:5px;white-space:nowrap;">34%</div>
+              <div style="font-size:12px;color:#2e7d32;font-weight:600;margin-top:3px;">▲ 5 pts</div>
+            </div>
+            <div style="background:#fff;border-radius:14px;border-left:4px solid #FF6C4F;padding:15px 16px;box-shadow:0 6px 18px -14px rgba(0,75,50,.5);position:relative;">
+              <div style="position:absolute;top:13px;right:13px;width:30px;height:30px;border-radius:9px;background:#FFF3E0;color:#FF6C4F;display:flex;align-items:center;justify-content:center;"><svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="7"/><path d="M10 6v4.5l3 1.7"/></svg></div>
+              <div style="font-size:12.5px;color:#666;font-weight:500;">En attente de validation</div>
+              <div style="font-family:'Sora',sans-serif;font-size:30px;font-weight:700;margin-top:5px;white-space:nowrap;">9</div>
+              <div style="display:inline-block;font-size:11px;color:#FF6C4F;background:#FFF3E0;font-weight:700;padding:2px 9px;border-radius:99px;margin-top:5px;">action requise</div>
+            </div>
+          </div>
+
+          <!-- FILTERS -->
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+            <span style="background:#004B32;color:#fff;font-size:13px;font-weight:600;padding:7px 15px;border-radius:99px;">Tous</span>
+            <span style="background:#fff;border:1.5px solid rgba(0,75,50,.14);color:#3f5249;font-size:13px;padding:7px 14px;border-radius:99px;">Nouveau</span>
+            <span style="background:#fff;border:1.5px solid rgba(0,75,50,.14);color:#3f5249;font-size:13px;padding:7px 14px;border-radius:99px;">En cours</span>
+            <span style="background:#fff;border:1.5px solid rgba(0,75,50,.14);color:#3f5249;font-size:13px;padding:7px 14px;border-radius:99px;">Validé</span>
+            <span style="background:#fff;border:1.5px solid rgba(0,75,50,.14);color:#3f5249;font-size:13px;padding:7px 14px;border-radius:99px;">Payé</span>
+            <span style="background:#fff;border:1.5px solid rgba(0,75,50,.14);color:#3f5249;font-size:13px;padding:7px 14px;border-radius:99px;">En production</span>
+            <span style="background:#fff;border:1.5px solid rgba(0,75,50,.14);color:#3f5249;font-size:13px;padding:7px 14px;border-radius:99px;">Expédié</span>
+            <span style="width:1px;height:22px;background:rgba(0,75,50,.16);margin:0 4px;"></span>
+            <span style="background:#fff;border:1.5px solid rgba(0,75,50,.14);color:#3f5249;font-size:13px;padding:7px 13px;border-radius:99px;">Nature ▾</span>
+            <span style="background:#fff;border:1.5px solid rgba(0,75,50,.14);color:#3f5249;font-size:13px;padding:7px 13px;border-radius:99px;">Délai ▾</span>
+            <span style="background:#fff;border:1.5px solid rgba(0,75,50,.14);color:#3f5249;font-size:13px;padding:7px 13px;border-radius:99px;">Ce mois ▾</span>
+            <span style="margin-left:auto;display:flex;align-items:center;gap:7px;background:#fff;border:1.5px solid #004B32;color:#004B32;font-size:13px;font-weight:600;padding:7px 15px;border-radius:99px;"><svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3v9M6.5 9 10 12.5 13.5 9"/><path d="M4 15h12"/></svg>Export CSV</span>
+          </div>
+
+          <div style="font-family:'Architects Daughter',cursive;font-size:14px;color:#6f8a7e;margin:-6px 0 -4px;">↔ tableau scrollable — 9 colonnes complètes</div>
+
+          <!-- TABLE -->
+          <div style="background:#fff;border-radius:14px;border:1.5px solid rgba(0,75,50,.1);overflow-x:auto;">
+            <div style="min-width:1080px;">
+              <div style="display:grid;grid-template-columns:160px 70px 1.4fr 70px 1.1fr 100px 100px 1.05fr 96px;background:#004B32;color:#fff;font-size:12px;font-weight:600;">
+                <div style="padding:12px 14px;">N° devis</div><div style="padding:12px 8px;">Date</div><div style="padding:12px 8px;">Client</div><div style="padding:12px 8px;">STL</div><div style="padding:12px 8px;">Nature</div><div style="padding:12px 8px;">Montant HT</div><div style="padding:12px 8px;">Délai</div><div style="padding:12px 8px;">Statut</div><div style="padding:12px 14px;text-align:right;">Actions</div>
+              </div>
+              <sc-for list="{{ quotes }}" as="q" hint-placeholder-count="9">
+                <div style="{{ q.rowStyle }}">
+                  <div style="padding:13px 14px;font-weight:600;font-size:12.5px;color:#004B32;">{{ q.id }}</div>
+                  <div style="padding:13px 8px;font-size:13px;color:#555;">{{ q.date }}</div>
+                  <div style="padding:11px 8px;"><div style="font-size:13.5px;font-weight:600;">{{ q.client }}</div><div style="font-size:11.5px;color:#888;">{{ q.email }}</div></div>
+                  <div style="padding:13px 8px;font-size:13px;color:#555;">{{ q.files }}</div>
+                  <div style="padding:11px 8px;"><span style="{{ q.natureStyle }}">{{ q.nature }}</span></div>
+                  <div style="padding:13px 8px;font-size:13.5px;font-weight:600;">{{ q.montant }}</div>
+                  <div style="padding:11px 8px;"><span style="{{ q.delaiStyle }}">{{ q.delai }}</span></div>
+                  <div style="padding:11px 8px;"><span style="{{ q.statusStyle }}">{{ q.statut }}</span></div>
+                  <div style="padding:10px 14px;display:flex;gap:6px;justify-content:flex-end;">
+                    <button onClick="{{ openPanelA }}" title="Voir" style="width:30px;height:30px;border-radius:8px;border:1.5px solid rgba(0,75,50,.16);background:#fff;color:#004B32;display:flex;align-items:center;justify-content:center;cursor:pointer;"><svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M2 10s3-5 8-5 8 5 8 5-3 5-8 5-8-5-8-5z"/><circle cx="10" cy="10" r="2.2"/></svg></button>
+                    <span style="width:30px;height:30px;border-radius:8px;border:1.5px solid rgba(0,75,50,.16);background:#fff;color:#7a8a82;display:flex;align-items:center;justify-content:center;"><svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3v9M6.5 9 10 12.5 13.5 9M4 15h12"/></svg></span>
+                    <span style="width:30px;height:30px;border-radius:8px;border:1.5px solid rgba(0,75,50,.16);background:#fff;color:#7a8a82;display:flex;align-items:center;justify-content:center;"><svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10.5 8 14l8-8.5"/></svg></span>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+
+          <!-- separate dashboard reference -->
+          <div style="margin-top:6px;border:1.5px dashed rgba(0,75,50,.28);border-radius:14px;padding:16px 18px;background:rgba(255,255,255,.45);">
+            <div style="font-family:'Architects Daughter',cursive;font-size:15px;color:#4f6358;margin-bottom:12px;">↑ le graphique d'évolution mensuelle vit sur la vue « Tableau de bord » dédiée — référence ci-dessous</div>
+            <div style="display:flex;align-items:flex-end;gap:10px;height:120px;padding:0 4px;">
+              <div style="flex:1;display:flex;align-items:flex-end;justify-content:space-between;height:100%;gap:7px;">
+                <div style="flex:1;height:38%;background:#004B32;border-radius:5px 5px 0 0;"></div>
+                <div style="flex:1;height:52%;background:#004B32;border-radius:5px 5px 0 0;"></div>
+                <div style="flex:1;height:44%;background:#004B32;border-radius:5px 5px 0 0;"></div>
+                <div style="flex:1;height:61%;background:#004B32;border-radius:5px 5px 0 0;"></div>
+                <div style="flex:1;height:55%;background:#004B32;border-radius:5px 5px 0 0;"></div>
+                <div style="flex:1;height:70%;background:#004B32;border-radius:5px 5px 0 0;"></div>
+                <div style="flex:1;height:64%;background:#004B32;border-radius:5px 5px 0 0;"></div>
+                <div style="flex:1;height:78%;background:#004B32;border-radius:5px 5px 0 0;"></div>
+                <div style="flex:1;height:72%;background:#004B32;border-radius:5px 5px 0 0;"></div>
+                <div style="flex:1;height:85%;background:#004B32;border-radius:5px 5px 0 0;"></div>
+                <div style="flex:1;height:80%;background:#004B32;border-radius:5px 5px 0 0;"></div>
+                <div style="flex:1;height:100%;background:#AAE66E;border-radius:5px 5px 0 0;"></div>
+              </div>
+            </div>
+            <div style="font-size:11px;color:#8a8a82;text-align:center;margin-top:8px;font-family:'DM Sans';">CA HT des devis · 12 derniers mois · juin en surbrillance</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SLIDE-IN PANEL -->
+      <sc-if value="{{ panelA }}" hint-placeholder-val="{{ false }}">
+        <div onClick="{{ closePanelA }}" style="position:absolute;inset:0;background:rgba(26,26,26,.28);"></div>
+        <div style="position:absolute;top:0;right:0;height:100%;width:410px;background:#fff;box-shadow:-18px 0 50px -28px rgba(0,0,0,.5);overflow-y:auto;">
+          <dc-import name="DevisDetail" closable="{{ true }}" on-close="{{ closePanelA }}" hint-size="410px,100%"></dc-import>
+        </div>
+      </sc-if>
+    </div>
+  </div>
+  </sc-if>
+
+  <!-- ============================================================ -->
+  <!-- VARIANTE B -->
+  <!-- ============================================================ -->
+  <sc-if value="{{ isB }}" hint-placeholder-val="{{ true }}">
+  <div data-screen-label="Variante B" data-comment-anchor="var-b">
+    <p style="font-family:'Architects Daughter',cursive;font-size:16px;color:#3f5249;margin:14px 2px 16px;max-width:880px;line-height:1.5;">
+      Pensée pour le <b>tri rapide</b> : bandeau KPI compact, liste de devis condensée à gauche, <b>panneau de détail toujours visible à droite</b>. On sélectionne, on traite, on enchaîne — zéro changement de page.
+    </p>
+
+    <div style="position:relative;width:100%;height:780px;border:1.5px solid rgba(0,75,50,0.16);border-radius:18px;overflow:hidden;background:#F5F2E8;display:flex;box-shadow:0 18px 48px -28px rgba(0,75,50,0.4);">
+      <!-- SIDEBAR -->
+      <div style="width:212px;flex:none;background:#004B32;color:#fff;display:flex;flex-direction:column;padding:20px 13px;">
+        <div style="font-family:'Sora',sans-serif;font-weight:700;font-size:19px;letter-spacing:1px;padding:4px 8px 22px;">ONE<span style="color:#FF6C4F;">PRINT</span></div>
+        <div style="display:flex;flex-direction:column;gap:3px;">
+          <div style="display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:12px;color:rgba(255,255,255,.8);font-size:14px;font-weight:500;"><svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="6.5" height="6.5" rx="1.5"/><rect x="11" y="3" width="6" height="4.5" rx="1.5"/><rect x="11" y="10.5" width="6" height="6.5" rx="1.5"/><rect x="3" y="12.5" width="6.5" height="4.5" rx="1.5"/></svg>Tableau de bord</div>
+          <div style="display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:12px;background:#AAE66E;color:#004B32;font-size:14px;font-weight:700;"><svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2.5" width="12" height="15" rx="2"/><line x1="7" y1="7" x2="13" y2="7"/><line x1="7" y1="10" x2="13" y2="10"/><line x1="7" y1="13" x2="11" y2="13"/></svg>Devis</div>
+          <div style="display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:12px;color:rgba(255,255,255,.8);font-size:14px;font-weight:500;"><svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4h2l1.8 9h8l1.7-6H6"/><circle cx="9" cy="16" r="1.1"/><circle cx="15" cy="16" r="1.1"/></svg>Commandes</div>
+          <div style="display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:12px;color:rgba(255,255,255,.8);font-size:14px;font-weight:500;"><svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="7" r="3"/><path d="M4 17c0-3.3 2.7-5 6-5s6 1.7 6 5"/></svg>Clients</div>
+          <div style="display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:12px;color:rgba(255,255,255,.8);font-size:14px;font-weight:500;"><svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3l6.5 3.75v7.5L10 18l-6.5-3.75v-7.5z"/><path d="M3.5 6.75 10 10.5l6.5-3.75M10 10.5V18"/></svg>Fichiers STL</div>
+          <div style="display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:12px;color:rgba(255,255,255,.8);font-size:14px;font-weight:500;"><svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="2.6"/><path d="M10 3v1.8M10 15.2V17M3 10h1.8M15.2 10H17M5 5l1.3 1.3M13.7 13.7 15 15M15 5l-1.3 1.3M6.3 13.7 5 15"/></svg>Paramètres</div>
+        </div>
+        <div style="margin-top:auto;display:flex;align-items:center;gap:11px;padding:11px 8px 4px;border-top:1px solid rgba(255,255,255,.14);">
+          <div style="width:32px;height:32px;border-radius:99px;background:#AAE66E;color:#004B32;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;">CM</div>
+          <div><div style="font-size:13px;font-weight:600;">Camille Morel</div><div style="font-size:11px;color:rgba(255,255,255,.6);">Admin</div></div>
+        </div>
+      </div>
+
+      <!-- MAIN COLUMN -->
+      <div style="flex:1;min-width:0;display:flex;flex-direction:column;">
+        <!-- header -->
+        <div style="display:flex;align-items:center;gap:16px;padding:13px 20px;background:#fff;border-bottom:1.5px solid rgba(0,75,50,0.1);flex:none;">
+          <div style="font-family:'Sora',sans-serif;font-weight:600;font-size:18px;">Devis</div>
+          <div style="flex:1;max-width:360px;display:flex;align-items:center;gap:9px;background:#F2F0E6;border:1.5px solid rgba(0,75,50,0.12);border-radius:99px;padding:8px 15px;color:#8a8a82;font-size:13.5px;"><svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="9" cy="9" r="6"/><line x1="14" y1="14" x2="17" y2="17"/></svg>Rechercher…</div>
+          <div style="margin-left:auto;display:flex;align-items:center;gap:14px;">
+            <div style="position:relative;color:#004B32;"><svg width="21" height="21" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8a5 5 0 0 1 10 0c0 4 1.5 5 1.5 5h-13S5 12 5 8z"/><path d="M8.5 16a1.6 1.6 0 0 0 3 0"/></svg><span style="position:absolute;top:-4px;right:-5px;background:#FF6C4F;color:#fff;font-size:10px;font-weight:700;border-radius:99px;min-width:16px;height:16px;display:flex;align-items:center;justify-content:center;padding:0 3px;">9</span></div>
+            <div style="width:32px;height:32px;border-radius:99px;background:#004B32;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;">CM</div>
+          </div>
+        </div>
+
+        <!-- KPI strip -->
+        <div style="display:flex;gap:0;background:#fff;border-bottom:1.5px solid rgba(0,75,50,.1);flex:none;">
+          <div style="flex:1;padding:13px 18px;border-right:1px solid rgba(0,75,50,.08);"><div style="font-size:11.5px;color:#666;">Devis ce mois</div><div style="display:flex;align-items:baseline;gap:8px;"><span style="font-family:'Sora';font-size:23px;font-weight:700;">47</span><span style="font-size:11.5px;color:#2e7d32;font-weight:600;">▲18%</span></div></div>
+          <div style="flex:1;padding:13px 18px;border-right:1px solid rgba(0,75,50,.08);"><div style="font-size:11.5px;color:#666;">CA HT</div><div style="display:flex;align-items:baseline;gap:8px;"><span style="font-family:'Sora';font-size:23px;font-weight:700;">86,4k €</span><span style="font-size:11.5px;color:#2e7d32;font-weight:600;">▲12%</span></div></div>
+          <div style="flex:1;padding:13px 18px;border-right:1px solid rgba(0,75,50,.08);"><div style="font-size:11.5px;color:#666;">Conversion</div><div style="display:flex;align-items:baseline;gap:8px;"><span style="font-family:'Sora';font-size:23px;font-weight:700;">34%</span><span style="font-size:11.5px;color:#2e7d32;font-weight:600;">▲5pts</span></div></div>
+          <div style="flex:1;padding:13px 18px;background:#FFF8F3;"><div style="font-size:11.5px;color:#666;">En attente</div><div style="display:flex;align-items:baseline;gap:8px;"><span style="font-family:'Sora';font-size:23px;font-weight:700;color:#FF6C4F;">9</span><span style="font-size:11px;color:#FF6C4F;font-weight:700;background:#FFF3E0;padding:1px 7px;border-radius:99px;">à valider</span></div></div>
+        </div>
+
+        <!-- SPLIT -->
+        <div style="flex:1;min-height:0;display:flex;">
+          <!-- list pane -->
+          <div style="width:54%;flex:none;display:flex;flex-direction:column;border-right:1.5px solid rgba(0,75,50,.1);">
+            <div style="display:flex;align-items:center;gap:7px;padding:11px 16px;flex-wrap:wrap;flex:none;border-bottom:1px solid rgba(0,75,50,.07);">
+              <span style="background:#004B32;color:#fff;font-size:12px;font-weight:600;padding:5px 12px;border-radius:99px;">Tous</span>
+              <span style="background:#fff;border:1.5px solid rgba(0,75,50,.14);color:#3f5249;font-size:12px;padding:5px 11px;border-radius:99px;">Nouveau</span>
+              <span style="background:#fff;border:1.5px solid rgba(0,75,50,.14);color:#3f5249;font-size:12px;padding:5px 11px;border-radius:99px;">À valider</span>
+              <span style="background:#fff;border:1.5px solid rgba(0,75,50,.14);color:#3f5249;font-size:12px;padding:5px 11px;border-radius:99px;">Nature ▾</span>
+              <span style="margin-left:auto;display:flex;align-items:center;gap:6px;background:#fff;border:1.5px solid #004B32;color:#004B32;font-size:12px;font-weight:600;padding:5px 12px;border-radius:99px;"><svg width="13" height="13" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3v9M6.5 9 10 12.5 13.5 9M4 15h12"/></svg>CSV</span>
+            </div>
+            <div style="flex:1;min-height:0;overflow-y:auto;padding:10px 12px;display:flex;flex-direction:column;gap:8px;">
+              <sc-for list="{{ quotes }}" as="q" hint-placeholder-count="9">
+                <div style="{{ q.cardStyle }}">
+                  <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
+                    <span style="font-weight:700;font-size:12.5px;color:#004B32;">{{ q.id }}</span>
+                    <span style="{{ q.statusStyle }}">{{ q.statut }}</span>
+                  </div>
+                  <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:7px;">
+                    <div><div style="font-size:13.5px;font-weight:600;">{{ q.client }}</div><div style="font-size:11px;color:#888;">{{ q.files }} STL · {{ q.date }}</div></div>
+                    <div style="text-align:right;"><div style="font-size:14px;font-weight:700;">{{ q.montant }}</div><span style="{{ q.delaiStyle }}">{{ q.delai }}</span></div>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+          <!-- detail pane (persistent) -->
+          <div style="flex:1;min-width:0;overflow-y:auto;background:#fff;">
+            <dc-import name="DevisDetail" closable="{{ false }}" hint-size="100%,100%"></dc-import>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div style="font-family:'Architects Daughter',cursive;font-size:14px;color:#6f8a7e;margin:12px 2px 0;">← liste condensée (cartes) · détail toujours affiché à droite →</div>
+  </div>
+  </sc-if>
+
+  <!-- ============================================================ -->
+  <!-- VARIANTE C -->
+  <!-- ============================================================ -->
+  <sc-if value="{{ isC }}" hint-placeholder-val="{{ true }}">
+  <div data-screen-label="Variante C" data-comment-anchor="var-c">
+    <p style="font-family:'Architects Daughter',cursive;font-size:16px;color:#3f5249;margin:14px 2px 16px;max-width:880px;line-height:1.5;">
+      Maximum de données à l'écran : <b>rail de navigation compact</b> (icônes seules), KPIs en bento, tableau plein cadre avec plus de lignes visibles. Le détail s'ouvre en <b>modale</b> par-dessus — idéal pour les gros volumes.
+    </p>
+
+    <div style="position:relative;width:100%;border:1.5px solid rgba(0,75,50,0.16);border-radius:18px;overflow:hidden;background:#F5F2E8;display:flex;box-shadow:0 18px 48px -28px rgba(0,75,50,0.4);">
+      <!-- RAIL -->
+      <div style="width:66px;flex:none;background:#004B32;color:#fff;display:flex;flex-direction:column;align-items:center;padding:18px 0;gap:6px;">
+        <div style="font-family:'Sora',sans-serif;font-weight:700;font-size:13px;color:#FF6C4F;margin-bottom:16px;letter-spacing:.5px;">1P</div>
+        <div style="width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.8);"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="6.5" height="6.5" rx="1.5"/><rect x="11" y="3" width="6" height="4.5" rx="1.5"/><rect x="11" y="10.5" width="6" height="6.5" rx="1.5"/><rect x="3" y="12.5" width="6.5" height="4.5" rx="1.5"/></svg></div>
+        <div style="width:42px;height:42px;border-radius:12px;background:#AAE66E;color:#004B32;display:flex;align-items:center;justify-content:center;"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2.5" width="12" height="15" rx="2"/><line x1="7" y1="7" x2="13" y2="7"/><line x1="7" y1="10" x2="13" y2="10"/><line x1="7" y1="13" x2="11" y2="13"/></svg></div>
+        <div style="width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.8);"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4h2l1.8 9h8l1.7-6H6"/><circle cx="9" cy="16" r="1.1"/><circle cx="15" cy="16" r="1.1"/></svg></div>
+        <div style="width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.8);"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="7" r="3"/><path d="M4 17c0-3.3 2.7-5 6-5s6 1.7 6 5"/></svg></div>
+        <div style="width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.8);"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3l6.5 3.75v7.5L10 18l-6.5-3.75v-7.5z"/><path d="M3.5 6.75 10 10.5l6.5-3.75M10 10.5V18"/></svg></div>
+        <div style="width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.8);"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="2.6"/><path d="M10 3v1.8M10 15.2V17M3 10h1.8M15.2 10H17M5 5l1.3 1.3M13.7 13.7 15 15M15 5l-1.3 1.3M6.3 13.7 5 15"/></svg></div>
+        <div style="margin-top:auto;width:34px;height:34px;border-radius:99px;background:#AAE66E;color:#004B32;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;">CM</div>
+      </div>
+
+      <!-- MAIN -->
+      <div style="flex:1;min-width:0;display:flex;flex-direction:column;">
+        <div style="display:flex;align-items:center;gap:16px;padding:14px 22px;background:#fff;border-bottom:1.5px solid rgba(0,75,50,0.1);">
+          <div style="font-family:'Sora',sans-serif;font-weight:600;font-size:19px;">Devis</div>
+          <div style="flex:1;max-width:520px;display:flex;align-items:center;gap:9px;background:#F2F0E6;border:1.5px solid rgba(0,75,50,0.12);border-radius:99px;padding:9px 16px;color:#8a8a82;font-size:14px;"><svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="9" cy="9" r="6"/><line x1="14" y1="14" x2="17" y2="17"/></svg>Rechercher un devis, un client, un n° STL…</div>
+          <div style="margin-left:auto;display:flex;align-items:center;gap:16px;">
+            <div style="position:relative;color:#004B32;"><svg width="22" height="22" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8a5 5 0 0 1 10 0c0 4 1.5 5 1.5 5h-13S5 12 5 8z"/><path d="M8.5 16a1.6 1.6 0 0 0 3 0"/></svg><span style="position:absolute;top:-4px;right:-5px;background:#FF6C4F;color:#fff;font-size:10px;font-weight:700;border-radius:99px;min-width:16px;height:16px;display:flex;align-items:center;justify-content:center;padding:0 3px;">9</span></div>
+            <div style="width:34px;height:34px;border-radius:99px;background:#004B32;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;">CM</div>
+          </div>
+        </div>
+
+        <div style="padding:18px 22px;display:flex;flex-direction:column;gap:16px;">
+          <!-- bento KPIs -->
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1.25fr;gap:13px;">
+            <div style="background:#fff;border-radius:14px;border-left:4px solid #AAE66E;padding:14px 16px;box-shadow:0 6px 18px -14px rgba(0,75,50,.5);"><div style="font-size:12px;color:#666;">Devis ce mois</div><div style="font-family:'Sora';font-size:27px;font-weight:700;margin-top:3px;">47</div><div style="font-size:11.5px;color:#2e7d32;font-weight:600;">▲ 18% vs mai</div></div>
+            <div style="background:#fff;border-radius:14px;border-left:4px solid #AAE66E;padding:14px 16px;box-shadow:0 6px 18px -14px rgba(0,75,50,.5);"><div style="font-size:12px;color:#666;">CA HT</div><div style="font-family:'Sora';font-size:27px;font-weight:700;margin-top:3px;">86,4k €</div><div style="font-size:11.5px;color:#2e7d32;font-weight:600;">▲ 12% vs mai</div></div>
+            <div style="background:#fff;border-radius:14px;border-left:4px solid #AAE66E;padding:14px 16px;box-shadow:0 6px 18px -14px rgba(0,75,50,.5);"><div style="font-size:12px;color:#666;">Conversion</div><div style="font-family:'Sora';font-size:27px;font-weight:700;margin-top:3px;">34%</div><div style="font-size:11.5px;color:#2e7d32;font-weight:600;">▲ 5 pts</div></div>
+            <div style="background:#004B32;color:#fff;border-radius:14px;padding:14px 16px;box-shadow:0 6px 18px -14px rgba(0,75,50,.5);display:flex;align-items:center;justify-content:space-between;"><div><div style="font-size:12px;color:rgba(255,255,255,.75);">En attente de validation</div><div style="font-family:'Sora';font-size:27px;font-weight:700;margin-top:3px;">9 devis</div></div><span style="background:#FF6C4F;color:#fff;font-size:11px;font-weight:700;padding:6px 12px;border-radius:99px;">à valider</span></div>
+          </div>
+
+          <!-- filters -->
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+            <span style="background:#004B32;color:#fff;font-size:13px;font-weight:600;padding:7px 15px;border-radius:99px;">Tous</span>
+            <span style="background:#fff;border:1.5px solid rgba(0,75,50,.14);color:#3f5249;font-size:13px;padding:7px 14px;border-radius:99px;">Nouveau</span>
+            <span style="background:#fff;border:1.5px solid rgba(0,75,50,.14);color:#3f5249;font-size:13px;padding:7px 14px;border-radius:99px;">En cours</span>
+            <span style="background:#fff;border:1.5px solid rgba(0,75,50,.14);color:#3f5249;font-size:13px;padding:7px 14px;border-radius:99px;">Validé</span>
+            <span style="background:#fff;border:1.5px solid rgba(0,75,50,.14);color:#3f5249;font-size:13px;padding:7px 14px;border-radius:99px;">Payé</span>
+            <span style="background:#fff;border:1.5px solid rgba(0,75,50,.14);color:#3f5249;font-size:13px;padding:7px 14px;border-radius:99px;">En production</span>
+            <span style="background:#fff;border:1.5px solid rgba(0,75,50,.14);color:#3f5249;font-size:13px;padding:7px 14px;border-radius:99px;">Expédié</span>
+            <span style="width:1px;height:22px;background:rgba(0,75,50,.16);margin:0 4px;"></span>
+            <span style="background:#fff;border:1.5px solid rgba(0,75,50,.14);color:#3f5249;font-size:13px;padding:7px 13px;border-radius:99px;">Délai ▾</span>
+            <span style="margin-left:auto;display:flex;align-items:center;gap:7px;background:#fff;border:1.5px solid #004B32;color:#004B32;font-size:13px;font-weight:600;padding:7px 15px;border-radius:99px;"><svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3v9M6.5 9 10 12.5 13.5 9M4 15h12"/></svg>Export CSV</span>
+          </div>
+
+          <!-- table -->
+          <div style="background:#fff;border-radius:14px;border:1.5px solid rgba(0,75,50,.1);overflow-x:auto;">
+            <div style="min-width:1080px;">
+              <div style="display:grid;grid-template-columns:160px 70px 1.4fr 70px 1.1fr 100px 100px 1.05fr 96px;background:#004B32;color:#fff;font-size:12px;font-weight:600;">
+                <div style="padding:12px 14px;">N° devis</div><div style="padding:12px 8px;">Date</div><div style="padding:12px 8px;">Client</div><div style="padding:12px 8px;">STL</div><div style="padding:12px 8px;">Nature</div><div style="padding:12px 8px;">Montant HT</div><div style="padding:12px 8px;">Délai</div><div style="padding:12px 8px;">Statut</div><div style="padding:12px 14px;text-align:right;">Actions</div>
+              </div>
+              <sc-for list="{{ quotes }}" as="q" hint-placeholder-count="9">
+                <div style="{{ q.rowStyle }}">
+                  <div style="padding:12px 14px;font-weight:600;font-size:12.5px;color:#004B32;">{{ q.id }}</div>
+                  <div style="padding:12px 8px;font-size:13px;color:#555;">{{ q.date }}</div>
+                  <div style="padding:10px 8px;"><div style="font-size:13.5px;font-weight:600;">{{ q.client }}</div><div style="font-size:11.5px;color:#888;">{{ q.email }}</div></div>
+                  <div style="padding:12px 8px;font-size:13px;color:#555;">{{ q.files }}</div>
+                  <div style="padding:10px 8px;"><span style="{{ q.natureStyle }}">{{ q.nature }}</span></div>
+                  <div style="padding:12px 8px;font-size:13.5px;font-weight:600;">{{ q.montant }}</div>
+                  <div style="padding:10px 8px;"><span style="{{ q.delaiStyle }}">{{ q.delai }}</span></div>
+                  <div style="padding:10px 8px;"><span style="{{ q.statusStyle }}">{{ q.statut }}</span></div>
+                  <div style="padding:9px 14px;display:flex;gap:6px;justify-content:flex-end;">
+                    <button onClick="{{ openModalC }}" title="Voir" style="width:30px;height:30px;border-radius:8px;border:1.5px solid rgba(0,75,50,.16);background:#fff;color:#004B32;display:flex;align-items:center;justify-content:center;cursor:pointer;"><svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M2 10s3-5 8-5 8 5 8 5-3 5-8 5-8-5-8-5z"/><circle cx="10" cy="10" r="2.2"/></svg></button>
+                    <span style="width:30px;height:30px;border-radius:8px;border:1.5px solid rgba(0,75,50,.16);background:#fff;color:#7a8a82;display:flex;align-items:center;justify-content:center;"><svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3v9M6.5 9 10 12.5 13.5 9M4 15h12"/></svg></span>
+                    <span style="width:30px;height:30px;border-radius:8px;border:1.5px solid rgba(0,75,50,.16);background:#fff;color:#7a8a82;display:flex;align-items:center;justify-content:center;"><svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10.5 8 14l8-8.5"/></svg></span>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- MODAL -->
+      <sc-if value="{{ modalC }}" hint-placeholder-val="{{ false }}">
+        <div onClick="{{ closeModalC }}" style="position:absolute;inset:0;background:rgba(26,26,26,.4);display:flex;align-items:center;justify-content:center;padding:30px;">
+          <div onClick="{{ stop }}" style="width:440px;max-height:100%;overflow-y:auto;background:#fff;border-radius:18px;box-shadow:0 30px 70px -20px rgba(0,0,0,.5);">
+            <dc-import name="DevisDetail" closable="{{ true }}" on-close="{{ closeModalC }}" hint-size="440px,100%"></dc-import>
+          </div>
+        </div>
+      </sc-if>
+    </div>
+    <div style="font-family:'Architects Daughter',cursive;font-size:14px;color:#6f8a7e;margin:12px 2px 0;">clique sur l'œil 👁 d'une ligne → ouvre la modale de détail</div>
+  </div>
+  </sc-if>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1480,&quot;height&quot;:1040}}">
+class Component extends DCLogic {
+  state = { v: 'A', panelA: false, modalC: false };
+
+  renderVals() {
+    const v = this.state.v;
+    const tab = (active) => ({
+      display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '1px',
+      padding: '10px 18px', borderRadius: '16px', cursor: 'pointer', textAlign: 'left',
+      fontFamily: "'Architects Daughter', cursive", fontWeight: 700,
+      border: active ? '1.5px solid #004B32' : '1.5px dashed rgba(0,75,50,0.3)',
+      background: active ? '#004B32' : 'rgba(255,255,255,0.55)',
+      color: active ? '#fff' : '#004B32',
+    });
+
+    const badge = (bg, fg) => ({
+      background: bg, color: fg, padding: '3px 11px', borderRadius: '999px',
+      fontSize: '12px', fontWeight: 600, whiteSpace: 'nowrap', display: 'inline-block',
+    });
+    const statusStyle = {
+      'Nouveau': badge('#FFF3E0', '#FF6C4F'),
+      'En cours': badge('#FFF8E1', '#B26A00'),
+      'Validé': badge('#E8F5E9', '#004B32'),
+      'Payé': badge('#AAE66E', '#004B32'),
+      'En production': badge('#E3F2FD', '#1565C0'),
+      'Expédié': badge('#F3E5F5', '#6A1B9A'),
+    };
+    const natureStyle = {
+      'DM': badge('#E8F5E9', '#004B32'),
+      'Prototype': badge('#F1F8E9', '#33691E'),
+      'Autre': badge('#ECEFF1', '#546E7A'),
+    };
+    const delaiStyle = {
+      'Standard': badge('#EEF1F0', '#5b6b66'),
+      'Priority': badge('#FFF8E1', '#B26A00'),
+      'Express': badge('#FFF3E0', '#FF6C4F'),
+    };
+
+    const raw = [
+      ['DEV-20260608-0042', '08/06', 'Clinique Saint-Roch', 'devis@st-roch.fr', 3, 'DM', '1 240 €', 'Express', 'Nouveau'],
+      ['DEV-20260607-0039', '07/06', 'Atelier Prothèse Lyon', 'contact@app-lyon.fr', 1, 'Prototype', '380 €', 'Standard', 'En cours'],
+      ['DEV-20260606-0037', '06/06', 'Dr. Mehdi Bouaziz', 'm.bouaziz@ortho.fr', 5, 'DM', '2 980 €', 'Priority', 'Validé'],
+      ['DEV-20260605-0031', '05/06', 'OrthoLab Genève', 'lab@ortholab.ch', 2, 'Prototype', '760 €', 'Standard', 'Payé'],
+      ['DEV-20260603-0028', '03/06', 'Hôpital Nord', 'achats@hop-nord.fr', 8, 'DM', '5 420 €', 'Priority', 'En production'],
+      ['DEV-20260601-0024', '01/06', 'MedStudio Paris', 'hello@medstudio.fr', 1, 'Autre', '210 €', 'Standard', 'Expédié'],
+      ['DEV-20260530-0019', '30/05', 'Clinique du Sport', 'devis@clinic-sport.fr', 4, 'DM', '1 890 €', 'Express', 'Validé'],
+      ['DEV-20260528-0014', '28/05', 'BioForm Toulouse', 'contact@bioform.fr', 2, 'Prototype', '540 €', 'Standard', 'Nouveau'],
+      ['DEV-20260526-0011', '26/05', 'Centre Ortho Lille', 'devis@ortho-lille.fr', 6, 'DM', '3 310 €', 'Priority', 'Payé'],
+    ];
+
+    const quotes = raw.map((r, i) => {
+      const selected = i === 2;
+      return {
+        id: r[0], date: r[1], client: r[2], email: r[3], files: r[4],
+        nature: r[5], montant: r[6], delai: r[7], statut: r[8],
+        statusStyle: statusStyle[r[8]], natureStyle: natureStyle[r[5]], delaiStyle: delaiStyle[r[7]],
+        rowStyle: {
+          display: 'grid',
+          gridTemplateColumns: '160px 70px 1.4fr 70px 1.1fr 100px 100px 1.05fr 96px',
+          alignItems: 'center',
+          background: i % 2 === 0 ? '#FFFFFF' : '#FAF8F0',
+          borderTop: '1px solid rgba(0,75,50,0.07)',
+        },
+        cardStyle: {
+          background: selected ? '#F0F7EC' : '#FFFFFF',
+          border: selected ? '1.5px solid #AAE66E' : '1.5px solid rgba(0,75,50,0.1)',
+          borderRadius: '12px', padding: '11px 13px', cursor: 'pointer',
+          boxShadow: selected ? '0 4px 14px -8px rgba(0,75,50,0.4)' : 'none',
+        },
+      };
+    });
+
+    return {
+      isA: v === 'A', isB: v === 'B', isC: v === 'C',
+      showA: () => this.setState({ v: 'A' }),
+      showB: () => this.setState({ v: 'B' }),
+      showC: () => this.setState({ v: 'C' }),
+      tabAStyle: tab(v === 'A'), tabBStyle: tab(v === 'B'), tabCStyle: tab(v === 'C'),
+      quotes,
+      panelA: this.state.panelA,
+      openPanelA: () => this.setState({ panelA: true }),
+      closePanelA: () => this.setState({ panelA: false }),
+      modalC: this.state.modalC,
+      openModalC: () => this.setState({ modalC: true }),
+      closeModalC: () => this.setState({ modalC: false }),
+      stop: (e) => { if (e && e.stopPropagation) e.stopPropagation(); },
+    };
+  }
+}
+</script>
+</body>
+</html>

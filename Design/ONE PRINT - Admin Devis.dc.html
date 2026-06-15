@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Sora:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:'DM Sans',system-ui,sans-serif;background:#F5F2E8;color:#1A1A1A;-webkit-font-smoothing:antialiased;}
+  input{font-family:inherit;}
+  input::placeholder{color:#9aa39e;}
+  ::-webkit-scrollbar{height:10px;width:10px;}
+  ::-webkit-scrollbar-track{background:transparent;}
+  ::-webkit-scrollbar-thumb{background:rgba(0,75,50,0.18);border-radius:99px;}
+  ::-webkit-scrollbar-thumb:hover{background:rgba(0,75,50,0.3);}
+</style>
+</helmet>
+
+<template id="__bundler_thumbnail" data-bg-color="#004B32">
+  <svg viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg">
+    <rect width="1200" height="800" fill="#004B32"/>
+    <rect x="430" y="250" width="340" height="300" rx="34" fill="#F5F2E8"/>
+    <rect x="478" y="312" width="244" height="26" rx="13" fill="#004B32"/>
+    <rect x="478" y="364" width="190" height="20" rx="10" fill="#AAE66E"/>
+    <rect x="478" y="406" width="244" height="20" rx="10" fill="#cdd8cf"/>
+    <rect x="478" y="448" width="150" height="20" rx="10" fill="#cdd8cf"/>
+    <rect x="478" y="496" width="110" height="34" rx="17" fill="#FF6C4F"/>
+  </svg>
+</template>
+
+<sc-if value="{{ authed }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;min-height:100vh;min-width:1200px;background:#F5F2E8;">
+
+  <!-- ===== SIDEBAR RAIL ===== -->
+  <aside style="position:sticky;top:0;align-self:flex-start;height:100vh;width:108px;flex:none;background:#004B32;display:flex;flex-direction:column;align-items:center;padding:22px 10px 18px;gap:4px;">
+    <div style="display:flex;flex-direction:column;align-items:center;line-height:1.05;margin-bottom:24px;">
+      <span style="font-family:'Sora';font-weight:700;font-size:15px;color:#fff;letter-spacing:1.5px;">ONE</span>
+      <span style="font-family:'Sora';font-weight:700;font-size:15px;color:#FF6C4F;letter-spacing:1.5px;">PRINT</span>
+    </div>
+    <button onClick="{{ goDash }}" style="{{ railDashStyle }}" style-hover="background:rgba(255,255,255,0.08);">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="3" width="8" height="8" rx="2.2"/><rect x="13" y="3" width="8" height="6" rx="2.2"/><rect x="13" y="11" width="8" height="10" rx="2.2"/><rect x="3" y="13" width="8" height="8" rx="2.2"/></svg>
+      <span style="font-size:11px;font-weight:600;">Bord</span>
+    </button>
+    <button onClick="{{ goDevis }}" style="{{ railDevisStyle }}" style-hover="background:rgba(255,255,255,0.08);">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M6 2.5h6.2L18 8.3V19.5A2 2 0 0 1 16 21.5H6A2 2 0 0 1 4 19.5V4.5A2 2 0 0 1 6 2.5Z"/><path d="M12.2 2.5 18 8.3h-4.2a1.6 1.6 0 0 1-1.6-1.6Z" fill-opacity=".4"/></svg>
+      <span style="font-size:11px;font-weight:600;">Devis</span>
+    </button>
+    <button onClick="{{ goCmd }}" style="{{ railCmdStyle }}" style-hover="background:rgba(255,255,255,0.08);">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M6.4 8h13l-1.3 6.6a2.2 2.2 0 0 1-2.16 1.78H9.86a2.2 2.2 0 0 1-2.16-1.78z"/><path d="M3 5h2l1.3 3.3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="10" cy="20" r="1.6"/><circle cx="16" cy="20" r="1.6"/></svg>
+      <span style="font-size:11px;font-weight:600;">Commandes</span>
+    </button>
+    <button onClick="{{ goClients }}" style="{{ railClientsStyle }}" style-hover="background:rgba(255,255,255,0.08);">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="8" r="4"/><path d="M4.5 19.5a7.5 7.5 0 0 1 15 0 .9.9 0 0 1-.9.9H5.4a.9.9 0 0 1-.9-.9Z"/></svg>
+      <span style="font-size:11px;font-weight:600;">Clients</span>
+    </button>
+    <button onClick="{{ goStl }}" style="{{ railStlStyle }}" style-hover="background:rgba(255,255,255,0.08);">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.2 20.5 7v10L12 21.8 3.5 17V7Z"/><path d="M12 2.2 20.5 7 12 11.8 3.5 7Z" fill-opacity=".4"/></svg>
+      <span style="font-size:11px;font-weight:600;">STL</span>
+    </button>
+    <div style="margin-top:auto;display:flex;flex-direction:column;align-items:center;gap:6px;padding-top:14px;">
+      <div style="width:40px;height:40px;border-radius:99px;background:#AAE66E;color:#004B32;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;">CM</div>
+      <div style="text-align:center;line-height:1.2;"><div style="font-size:11px;font-weight:600;color:#fff;">Camille M.</div><div style="font-size:10px;color:rgba(255,255,255,.55);">Admin</div></div>
+    </div>
+  </aside>
+
+  <!-- ===== MAIN ===== -->
+  <div style="flex:1;min-width:0;display:flex;flex-direction:column;">
+    <!-- header -->
+    <header style="position:sticky;top:0;z-index:50;display:flex;align-items:center;gap:20px;padding:16px 30px;background:rgba(245,242,232,0.85);backdrop-filter:blur(10px);border-bottom:1px solid rgba(0,75,50,0.1);">
+      <h1 style="margin:0;font-family:'Sora',sans-serif;font-weight:700;font-size:23px;letter-spacing:-.5px;text-transform:lowercase;">{{ pageTitle }}</h1>
+      <div style="flex:1;max-width:480px;position:relative;">
+        <div style="display:flex;align-items:center;gap:10px;background:#fff;border:1px solid rgba(0,75,50,0.1);border-radius:99px;padding:11px 18px;">
+          <svg width="17" height="17" viewBox="0 0 20 20" fill="none" stroke="#9aa39e" stroke-width="1.9" stroke-linecap="round"><circle cx="9" cy="9" r="6"/><line x1="14" y1="14" x2="17.5" y2="17.5"/></svg>
+          <input value="{{ query }}" onInput="{{ onSearch }}" onFocus="{{ onSearchFocus }}" placeholder="Rechercher un devis, un client, un n° STL…" style="flex:1;border:none;outline:none;background:transparent;font-size:14px;color:#1A1A1A;" />
+        </div>
+        <sc-if value="{{ searchActive }}" hint-placeholder-val="{{ false }}">
+          <div onClick="{{ closeSearch }}" style="position:fixed;inset:0;z-index:60;"></div>
+          <div style="position:absolute;top:calc(100% + 10px);left:0;width:100%;max-height:62vh;overflow-y:auto;background:#fff;border:1px solid #E2DED2;border-radius:16px;box-shadow:0 24px 60px -24px rgba(0,75,50,.5);z-index:61;padding:8px;">
+            <sc-for list="{{ searchGroups }}" as="g" hint-placeholder-count="2">
+              <div style="font-size:10.5px;color:#9aa39e;text-transform:uppercase;letter-spacing:.5px;padding:9px 10px 5px;">{{ g.label }}</div>
+              <sc-for list="{{ g.items }}" as="it" hint-placeholder-count="2">
+                <div onClick="{{ it.onClick }}" style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 10px;border-radius:10px;cursor:pointer;" style-hover="background:#F0F7EC;">
+                  <div style="min-width:0;"><div style="font-size:13px;font-weight:600;color:#1C1C1A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ it.title }}</div><div style="font-size:11.5px;color:#9aa39e;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ it.sub }}</div></div>
+                  <span style="{{ it.badgeStyle }}">{{ it.badge }}</span>
+                </div>
+              </sc-for>
+            </sc-for>
+            <sc-if value="{{ noSearchResults }}" hint-placeholder-val="{{ false }}">
+              <div style="padding:26px 16px;text-align:center;color:#9aa39e;font-size:13px;">Aucun résultat pour « {{ query }} »</div>
+            </sc-if>
+          </div>
+        </sc-if>
+      </div>
+      <div style="margin-left:auto;display:flex;align-items:center;gap:18px;">
+        <div style="position:relative;">
+          <div onClick="{{ toggleNotif }}" style="position:relative;color:#004B32;cursor:pointer;display:flex;">
+            <svg width="23" height="23" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.5a6 6 0 0 0-6 6c0 4.6-1.8 6-1.8 6h15.6s-1.8-1.4-1.8-6a6 6 0 0 0-6-6Z"/><path d="M10.1 19.2a2.1 2.1 0 0 0 3.8 0" fill="none" stroke="#004B32" stroke-width="2" stroke-linecap="round"/></svg>
+            <span style="position:absolute;top:-3px;right:-4px;background:#FF6C4F;color:#fff;font-size:10px;font-weight:700;border-radius:99px;min-width:17px;height:17px;display:flex;align-items:center;justify-content:center;padding:0 3px;border:2px solid #F5F2E8;">{{ unreadCount }}</span>
+          </div>
+          <sc-if value="{{ notifOpen }}" hint-placeholder-val="{{ false }}">
+            <div onClick="{{ closeNotif }}" style="position:fixed;inset:0;z-index:60;"></div>
+            <div style="position:absolute;top:calc(100% + 13px);right:0;width:344px;max-height:74vh;overflow-y:auto;background:#fff;border:1px solid #E2DED2;border-radius:16px;box-shadow:0 24px 60px -24px rgba(0,75,50,.5);z-index:61;">
+              <div style="display:flex;align-items:center;justify-content:space-between;padding:15px 16px 12px;border-bottom:1px solid #F0ECE0;position:sticky;top:0;background:#fff;">
+                <div style="font-family:'Sora';font-weight:700;font-size:14px;">Notifications</div>
+                <span onClick="{{ markAllRead }}" style="font-size:11.5px;color:#004B32;font-weight:600;cursor:pointer;">Tout marquer lu</span>
+              </div>
+              <sc-for list="{{ notifs }}" as="n" hint-placeholder-count="4">
+                <div style="{{ n.rowStyle }}" style-hover="background:#F0F7EC;">
+                  <span style="{{ n.iconStyle }}"><span style="{{ n.dotStyle }}"></span></span>
+                  <div style="flex:1;min-width:0;"><div style="{{ n.titleStyle }}">{{ n.title }}</div><div style="font-size:11.5px;color:#888;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ n.sub }}</div><div style="font-size:10.5px;color:#b3b3b3;margin-top:4px;">{{ n.time }}</div></div>
+                  <sc-if value="{{ n.unread }}" hint-placeholder-val="{{ false }}"><span style="width:8px;height:8px;border-radius:50%;background:#FF6C4F;flex:none;margin-top:4px;"></span></sc-if>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+        </div>
+        <div onClick="{{ logout }}" title="Se déconnecter" style="width:38px;height:38px;border-radius:99px;background:#004B32;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;cursor:pointer;">CM</div>
+      </div>
+    </header>
+
+    <!-- ============ DASHBOARD ============ -->
+    <sc-if value="{{ isDash }}" hint-placeholder-val="{{ false }}">
+    <div data-screen-label="Tableau de bord" style="padding:26px 30px 40px;display:flex;flex-direction:column;gap:20px;">
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:18px;">
+        <div style="position:relative;background:#fff;border:1px solid rgba(0,75,50,0.08);border-left:4px solid #AAE66E;border-radius:16px;padding:20px 22px;box-shadow:0 1px 2px rgba(0,75,50,.04),0 16px 30px -24px rgba(0,75,50,.4);"><div style="position:absolute;top:18px;right:18px;width:34px;height:34px;border-radius:10px;background:#F0F7EC;color:#004B32;display:flex;align-items:center;justify-content:center;"><svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M6 2.5h6.2L18 8.3V19.5A2 2 0 0 1 16 21.5H6A2 2 0 0 1 4 19.5V4.5A2 2 0 0 1 6 2.5Z"/><path d="M12.2 2.5 18 8.3h-4.2a1.6 1.6 0 0 1-1.6-1.6Z" fill-opacity=".4"/></svg></div><div style="font-size:13px;color:#6B6B6B;">Devis ce mois</div><div style="font-family:'Sora';font-size:32px;font-weight:700;margin-top:6px;white-space:nowrap;">47</div><div style="font-size:12px;color:#2e7d32;font-weight:600;margin-top:4px;">▲ 18% vs mai</div></div>
+        <div style="position:relative;background:#fff;border:1px solid rgba(0,75,50,0.08);border-left:4px solid #AAE66E;border-radius:16px;padding:20px 22px;box-shadow:0 1px 2px rgba(0,75,50,.04),0 16px 30px -24px rgba(0,75,50,.4);"><div style="position:absolute;top:18px;right:18px;width:34px;height:34px;border-radius:10px;background:#F0F7EC;color:#004B32;display:flex;align-items:center;justify-content:center;"><svg width="17" height="17" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3v14M13 6.5C13 5 11.7 4 10 4S7 5 7 6.3 8.3 8.5 10 9s3 1.2 3 2.7S11.7 14 10 14 7 13 7 11.5"/></svg></div><div style="font-size:13px;color:#6B6B6B;">CA HT</div><div style="font-family:'Sora';font-size:32px;font-weight:700;margin-top:6px;white-space:nowrap;">86,4k €</div><div style="font-size:12px;color:#2e7d32;font-weight:600;margin-top:4px;">▲ 12% vs mai</div></div>
+        <div style="position:relative;background:#fff;border:1px solid rgba(0,75,50,0.08);border-left:4px solid #AAE66E;border-radius:16px;padding:20px 22px;box-shadow:0 1px 2px rgba(0,75,50,.04),0 16px 30px -24px rgba(0,75,50,.4);"><div style="position:absolute;top:18px;right:18px;width:34px;height:34px;border-radius:10px;background:#F0F7EC;color:#004B32;display:flex;align-items:center;justify-content:center;"><svg width="17" height="17" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 13l4-4 3 3 5.5-6.5"/><path d="M13 5.5h3.5V9"/></svg></div><div style="font-size:13px;color:#6B6B6B;">Conversion</div><div style="font-family:'Sora';font-size:32px;font-weight:700;margin-top:6px;white-space:nowrap;">34%</div><div style="font-size:12px;color:#2e7d32;font-weight:600;margin-top:4px;">▲ 5 pts</div></div>
+        <div style="background:#004B32;border-radius:16px;padding:20px 22px;box-shadow:0 1px 2px rgba(0,75,50,.04),0 16px 30px -24px rgba(0,75,50,.4);display:flex;align-items:center;justify-content:space-between;color:#fff;"><div><div style="font-size:13px;color:rgba(255,255,255,.75);">En attente</div><div style="font-family:'Sora';font-size:32px;font-weight:700;margin-top:6px;white-space:nowrap;">9</div></div><span onClick="{{ goDevis }}" style="background:#FF6C4F;color:#fff;font-size:11px;font-weight:700;padding:7px 13px;border-radius:99px;cursor:pointer;">à valider</span></div>
+      </div>
+
+      <div style="background:#fff;border:1px solid rgba(0,75,50,0.08);border-radius:16px;padding:22px 24px 16px;box-shadow:0 1px 2px rgba(0,75,50,.04),0 16px 36px -28px rgba(0,75,50,.4);">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px;">
+          <div><div style="font-family:'Sora';font-weight:600;font-size:17px;">Évolution du CA HT des devis</div><div style="font-size:12.5px;color:#888;margin-top:3px;">12 derniers mois · survolez une barre pour le détail</div></div>
+          <span style="background:#F4F1E7;border:1px solid rgba(0,75,50,.1);color:#3f5249;font-size:12.5px;padding:7px 14px;border-radius:99px;">12 mois ▾</span>
+        </div>
+        <div style="display:flex;gap:12px;">
+          <div style="display:flex;flex-direction:column;justify-content:space-between;height:220px;font-size:10.5px;color:#b3b3b3;text-align:right;padding-bottom:24px;width:36px;"><span>100k</span><span>75k</span><span>50k</span><span>25k</span><span>0</span></div>
+          <div style="flex:1;position:relative;">
+            <div style="position:absolute;left:0;right:0;top:0;height:196px;">
+              <div style="position:absolute;left:0;right:0;top:0;height:1px;background:rgba(0,75,50,.07);"></div>
+              <div style="position:absolute;left:0;right:0;top:49px;height:1px;background:rgba(0,75,50,.07);"></div>
+              <div style="position:absolute;left:0;right:0;top:98px;height:1px;background:rgba(0,75,50,.07);"></div>
+              <div style="position:absolute;left:0;right:0;top:147px;height:1px;background:rgba(0,75,50,.07);"></div>
+              <div style="position:absolute;left:0;right:0;top:196px;height:1px;background:rgba(0,75,50,.14);"></div>
+            </div>
+            <div style="display:flex;align-items:flex-end;gap:10px;height:196px;position:relative;">
+              <sc-for list="{{ chart }}" as="m" hint-placeholder-count="12">
+                <div onMouseEnter="{{ m.onEnter }}" onMouseLeave="{{ m.onLeave }}" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;cursor:pointer;">
+                  <span style="{{ m.tipStyle }}">{{ m.value }}k €</span>
+                  <div style="{{ m.barStyle }}"></div>
+                </div>
+              </sc-for>
+            </div>
+            <div style="display:flex;gap:10px;margin-top:9px;">
+              <sc-for list="{{ chart }}" as="m" hint-placeholder-count="12"><span style="{{ m.labelStyle }}">{{ m.label }}</span></sc-for>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;">
+        <div style="background:#fff;border:1px solid rgba(0,75,50,0.08);border-radius:16px;padding:20px 22px;box-shadow:0 1px 2px rgba(0,75,50,.04),0 16px 30px -24px rgba(0,75,50,.4);">
+          <div style="font-family:'Sora';font-weight:600;font-size:16px;margin-bottom:16px;">Répartition par statut</div>
+          <div style="display:flex;flex-direction:column;gap:13px;">
+            <sc-for list="{{ statusBreakdown }}" as="s" hint-placeholder-count="6">
+              <div style="display:flex;align-items:center;gap:12px;"><span style="width:104px;flex:none;font-size:12.5px;color:#3f5249;">{{ s.label }}</span><div style="flex:1;height:10px;background:#F2F0E6;border-radius:99px;overflow:hidden;"><div style="{{ s.fillStyle }}"></div></div><span style="width:28px;flex:none;text-align:right;font-size:13px;font-weight:700;">{{ s.count }}</span></div>
+            </sc-for>
+          </div>
+        </div>
+        <div style="background:#fff;border:1px solid rgba(0,75,50,0.08);border-radius:16px;padding:20px 22px;box-shadow:0 1px 2px rgba(0,75,50,.04),0 16px 30px -24px rgba(0,75,50,.4);">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;"><div style="font-family:'Sora';font-weight:600;font-size:16px;">Derniers devis</div><span onClick="{{ goDevis }}" style="font-size:12.5px;color:#004B32;font-weight:600;cursor:pointer;">Tout voir →</span></div>
+          <div style="display:flex;flex-direction:column;">
+            <sc-for list="{{ recent }}" as="q" hint-placeholder-count="4">
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px 0;border-top:1px solid rgba(0,75,50,.07);"><div style="min-width:0;"><div style="font-size:12.5px;font-weight:600;color:#004B32;">{{ q.id }}</div><div style="font-size:11.5px;color:#888;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ q.client }}</div></div><div style="display:flex;align-items:center;gap:10px;flex:none;"><span style="font-size:13px;font-weight:700;">{{ q.montant }}</span><span style="{{ q.statusStyle }}">{{ q.statut }}</span></div></div>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+    </div>
+    </sc-if>
+
+    <!-- ============ DEVIS ============ -->
+    <sc-if value="{{ isDevis }}" hint-placeholder-val="{{ true }}">
+    <div data-screen-label="Devis" style="padding:26px 30px 40px;display:flex;flex-direction:column;gap:20px;">
+      <!-- KPI cards -->
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:18px;">
+        <div style="position:relative;background:#fff;border:1px solid rgba(0,75,50,0.08);border-left:4px solid #AAE66E;border-radius:16px;padding:20px 22px;box-shadow:0 1px 2px rgba(0,75,50,.04),0 16px 30px -24px rgba(0,75,50,.4);">
+          <div style="position:absolute;top:18px;right:18px;width:34px;height:34px;border-radius:10px;background:#F0F7EC;color:#004B32;display:flex;align-items:center;justify-content:center;"><svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M6 2.5h6.2L18 8.3V19.5A2 2 0 0 1 16 21.5H6A2 2 0 0 1 4 19.5V4.5A2 2 0 0 1 6 2.5Z"/><path d="M12.2 2.5 18 8.3h-4.2a1.6 1.6 0 0 1-1.6-1.6Z" fill-opacity=".4"/></svg></div>
+          <div style="font-size:13px;color:#6B6B6B;">Devis ce mois</div>
+          <div style="font-family:'Sora';font-size:32px;font-weight:700;margin-top:6px;white-space:nowrap;">47</div>
+          <div style="font-size:12px;color:#2e7d32;font-weight:600;margin-top:4px;">▲ 18% vs mai</div>
+        </div>
+        <div style="position:relative;background:#fff;border:1px solid rgba(0,75,50,0.08);border-left:4px solid #AAE66E;border-radius:16px;padding:20px 22px;box-shadow:0 1px 2px rgba(0,75,50,.04),0 16px 30px -24px rgba(0,75,50,.4);">
+          <div style="position:absolute;top:18px;right:18px;width:34px;height:34px;border-radius:10px;background:#F0F7EC;color:#004B32;display:flex;align-items:center;justify-content:center;"><svg width="17" height="17" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3v14M13 6.5C13 5 11.7 4 10 4S7 5 7 6.3 8.3 8.5 10 9s3 1.2 3 2.7S11.7 14 10 14 7 13 7 11.5"/></svg></div>
+          <div style="font-size:13px;color:#6B6B6B;">CA devis (HT)</div>
+          <div style="font-family:'Sora';font-size:32px;font-weight:700;margin-top:6px;white-space:nowrap;">86,4k €</div>
+          <div style="font-size:12px;color:#2e7d32;font-weight:600;margin-top:4px;">▲ 12% vs mai</div>
+        </div>
+        <div style="position:relative;background:#fff;border:1px solid rgba(0,75,50,0.08);border-left:4px solid #AAE66E;border-radius:16px;padding:20px 22px;box-shadow:0 1px 2px rgba(0,75,50,.04),0 16px 30px -24px rgba(0,75,50,.4);">
+          <div style="position:absolute;top:18px;right:18px;width:34px;height:34px;border-radius:10px;background:#F0F7EC;color:#004B32;display:flex;align-items:center;justify-content:center;"><svg width="17" height="17" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 13l4-4 3 3 5.5-6.5"/><path d="M13 5.5h3.5V9"/></svg></div>
+          <div style="font-size:13px;color:#6B6B6B;">Conversion → commande</div>
+          <div style="font-family:'Sora';font-size:32px;font-weight:700;margin-top:6px;white-space:nowrap;">34%</div>
+          <div style="font-size:12px;color:#2e7d32;font-weight:600;margin-top:4px;">▲ 5 pts</div>
+        </div>
+        <div style="position:relative;background:#fff;border:1px solid rgba(0,75,50,0.08);border-left:4px solid #FF6C4F;border-radius:16px;padding:20px 22px;box-shadow:0 1px 2px rgba(0,75,50,.04),0 16px 30px -24px rgba(0,75,50,.4);">
+          <div style="position:absolute;top:18px;right:18px;width:34px;height:34px;border-radius:10px;background:#FFF3E0;color:#FF6C4F;display:flex;align-items:center;justify-content:center;"><svg width="17" height="17" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="7.2"/><path d="M10 5.8v4.4l2.8 1.6"/></svg></div>
+          <div style="font-size:13px;color:#6B6B6B;">En attente de validation</div>
+          <div style="font-family:'Sora';font-size:32px;font-weight:700;margin-top:6px;white-space:nowrap;">9</div>
+          <div style="display:inline-block;font-size:11px;color:#FF6C4F;background:#FFF3E0;font-weight:700;padding:3px 10px;border-radius:99px;margin-top:5px;">action requise</div>
+        </div>
+      </div>
+
+      <!-- FILTERS -->
+      <div style="display:flex;align-items:center;gap:9px;flex-wrap:wrap;position:relative;z-index:20;">
+        <sc-for list="{{ statusPills }}" as="p" hint-placeholder-count="7">
+          <span onClick="{{ p.onClick }}" style="{{ p.style }}">{{ p.label }}</span>
+        </sc-for>
+        <span style="width:1px;height:24px;background:rgba(0,75,50,.14);margin:0 4px;"></span>
+
+        <div style="position:relative;">
+          <span onClick="{{ toggleNature }}" style="{{ fNatureStyle }}">Nature ▾</span>
+          <sc-if value="{{ showNature }}" hint-placeholder-val="{{ false }}">
+            <div style="position:absolute;top:calc(100% + 9px);left:0;width:236px;background:#fff;border:1px solid rgba(0,75,50,.12);border-radius:14px;box-shadow:0 20px 44px -20px rgba(0,75,50,.45);padding:10px;z-index:30;">
+              <div style="font-size:10.5px;color:#9aa39e;text-transform:uppercase;letter-spacing:.4px;padding:4px 8px 8px;">Nature de l'application</div>
+              <div style="display:flex;align-items:center;gap:11px;padding:9px;border-radius:10px;background:#F0F7EC;cursor:pointer;"><span style="width:18px;height:18px;border-radius:6px;background:#004B32;color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;">✓</span><span style="font-size:13px;">Dispositif médical</span></div>
+              <div style="display:flex;align-items:center;gap:11px;padding:9px;border-radius:10px;background:#F0F7EC;cursor:pointer;"><span style="width:18px;height:18px;border-radius:6px;background:#004B32;color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;">✓</span><span style="font-size:13px;">Prototype</span></div>
+              <div style="display:flex;align-items:center;gap:11px;padding:9px;border-radius:10px;cursor:pointer;" style-hover="background:#F4F1E7;"><span style="width:18px;height:18px;border-radius:6px;border:1.5px solid rgba(0,75,50,.25);"></span><span style="font-size:13px;color:#666;">Autre</span></div>
+            </div>
+          </sc-if>
+        </div>
+
+        <div style="position:relative;">
+          <span onClick="{{ toggleDelai }}" style="{{ fDelaiStyle }}">Délai ▾</span>
+          <sc-if value="{{ showDelai }}" hint-placeholder-val="{{ false }}">
+            <div style="position:absolute;top:calc(100% + 9px);left:0;width:212px;background:#fff;border:1px solid rgba(0,75,50,.12);border-radius:14px;box-shadow:0 20px 44px -20px rgba(0,75,50,.45);padding:10px;z-index:30;">
+              <div style="font-size:10.5px;color:#9aa39e;text-transform:uppercase;letter-spacing:.4px;padding:4px 8px 8px;">Délai de production</div>
+              <div style="display:flex;align-items:center;gap:11px;padding:9px;border-radius:10px;cursor:pointer;" style-hover="background:#F4F1E7;"><span style="width:18px;height:18px;border-radius:6px;border:1.5px solid rgba(0,75,50,.25);"></span><span style="font-size:13px;color:#666;">Standard</span></div>
+              <div style="display:flex;align-items:center;gap:11px;padding:9px;border-radius:10px;background:#F0F7EC;cursor:pointer;"><span style="width:18px;height:18px;border-radius:6px;background:#004B32;color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;">✓</span><span style="font-size:13px;">Priority</span></div>
+              <div style="display:flex;align-items:center;gap:11px;padding:9px;border-radius:10px;background:#F0F7EC;cursor:pointer;"><span style="width:18px;height:18px;border-radius:6px;background:#004B32;color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;">✓</span><span style="font-size:13px;">Express</span></div>
+            </div>
+          </sc-if>
+        </div>
+
+        <div style="position:relative;">
+          <span onClick="{{ togglePeriode }}" style="{{ fPeriodeStyle }}">Ce mois ▾</span>
+          <sc-if value="{{ showPeriode }}" hint-placeholder-val="{{ false }}">
+            <div style="position:absolute;top:calc(100% + 9px);left:0;width:224px;background:#fff;border:1px solid rgba(0,75,50,.12);border-radius:14px;box-shadow:0 20px 44px -20px rgba(0,75,50,.45);padding:10px;z-index:30;">
+              <div style="font-size:10.5px;color:#9aa39e;text-transform:uppercase;letter-spacing:.4px;padding:4px 8px 8px;">Période</div>
+              <div style="display:flex;align-items:center;gap:11px;padding:9px;border-radius:10px;cursor:pointer;" style-hover="background:#F4F1E7;"><span style="width:16px;height:16px;border-radius:99px;border:1.5px solid rgba(0,75,50,.25);"></span><span style="font-size:13px;color:#666;">Cette semaine</span></div>
+              <div style="display:flex;align-items:center;gap:11px;padding:9px;border-radius:10px;background:#F0F7EC;cursor:pointer;"><span style="width:16px;height:16px;border-radius:99px;border:5px solid #004B32;"></span><span style="font-size:13px;">Ce mois</span></div>
+              <div style="display:flex;align-items:center;gap:11px;padding:9px;border-radius:10px;cursor:pointer;" style-hover="background:#F4F1E7;"><span style="width:16px;height:16px;border-radius:99px;border:1.5px solid rgba(0,75,50,.25);"></span><span style="font-size:13px;color:#666;">3 derniers mois</span></div>
+              <div style="display:flex;align-items:center;gap:11px;padding:9px;border-radius:10px;border-top:1px solid rgba(0,75,50,.08);margin-top:4px;cursor:pointer;"><svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="#004B32" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="14" height="13" rx="2"/><path d="M3 8h14M7 2.5v3M13 2.5v3"/></svg><span style="font-size:13px;color:#004B32;font-weight:600;">Personnalisé…</span></div>
+            </div>
+          </sc-if>
+        </div>
+
+        <button style="margin-left:auto;display:flex;align-items:center;gap:8px;background:#fff;border:1px solid #004B32;color:#004B32;font-size:13px;font-weight:600;padding:8px 16px;border-radius:99px;cursor:pointer;" style-hover="background:#004B32;color:#fff;"><svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3v9M6.5 9 10 12.5 13.5 9M4 15h12"/></svg>Export CSV</button>
+      </div>
+
+      <div style="font-size:12.5px;color:#9aa39e;margin:-6px 2px -4px;">{{ countLabel }}</div>
+
+      <!-- TABLE -->
+      <div style="background:#fff;border:1px solid rgba(0,75,50,0.08);border-radius:16px;overflow:hidden;box-shadow:0 1px 2px rgba(0,75,50,.04),0 18px 40px -30px rgba(0,75,50,.4);position:relative;z-index:1;">
+        <div style="overflow-x:auto;">
+          <div style="min-width:1080px;">
+            <div style="display:grid;grid-template-columns:170px 76px 1.5fr 64px 1.15fr 110px 110px 1.1fr 104px;background:#004B32;color:#fff;font-size:12px;font-weight:600;letter-spacing:.2px;">
+              <div onClick="{{ sorts.id }}" style="padding:14px 18px;cursor:pointer;display:flex;align-items:center;gap:5px;" style-hover="color:#AAE66E;">N° devis<span style="color:#AAE66E;font-size:10px;">{{ arrows.id }}</span></div>
+              <div onClick="{{ sorts.date }}" style="padding:14px 8px;cursor:pointer;display:flex;align-items:center;gap:5px;" style-hover="color:#AAE66E;">Date<span style="color:#AAE66E;font-size:10px;">{{ arrows.date }}</span></div>
+              <div onClick="{{ sorts.client }}" style="padding:14px 8px;cursor:pointer;display:flex;align-items:center;gap:5px;" style-hover="color:#AAE66E;">Client<span style="color:#AAE66E;font-size:10px;">{{ arrows.client }}</span></div>
+              <div onClick="{{ sorts.files }}" style="padding:14px 8px;cursor:pointer;display:flex;align-items:center;gap:5px;" style-hover="color:#AAE66E;">STL<span style="color:#AAE66E;font-size:10px;">{{ arrows.files }}</span></div>
+              <div onClick="{{ sorts.nature }}" style="padding:14px 8px;cursor:pointer;display:flex;align-items:center;gap:5px;" style-hover="color:#AAE66E;">Nature<span style="color:#AAE66E;font-size:10px;">{{ arrows.nature }}</span></div>
+              <div onClick="{{ sorts.montant }}" style="padding:14px 8px;cursor:pointer;display:flex;align-items:center;gap:5px;" style-hover="color:#AAE66E;">Montant HT<span style="color:#AAE66E;font-size:10px;">{{ arrows.montant }}</span></div>
+              <div onClick="{{ sorts.delai }}" style="padding:14px 8px;cursor:pointer;display:flex;align-items:center;gap:5px;" style-hover="color:#AAE66E;">Délai<span style="color:#AAE66E;font-size:10px;">{{ arrows.delai }}</span></div>
+              <div onClick="{{ sorts.statut }}" style="padding:14px 8px;cursor:pointer;display:flex;align-items:center;gap:5px;" style-hover="color:#AAE66E;">Statut<span style="color:#AAE66E;font-size:10px;">{{ arrows.statut }}</span></div>
+              <div style="padding:14px 18px;text-align:right;">Actions</div>
+            </div>
+            <sc-if value="{{ hasResults }}" hint-placeholder-val="{{ true }}">
+              <sc-for list="{{ quotes }}" as="q" hint-placeholder-count="9">
+                <div onClick="{{ q.open }}" style="{{ q.rowStyle }}" style-hover="background:#F0F7EC;">
+                  <div style="padding:14px 18px;font-weight:600;font-size:12.5px;color:#004B32;">{{ q.id }}</div>
+                  <div style="padding:14px 8px;font-size:13px;color:#555;">{{ q.date }}</div>
+                  <div style="padding:11px 8px;"><div style="font-size:13.5px;font-weight:600;">{{ q.client }}</div><div style="font-size:11.5px;color:#9aa39e;">{{ q.email }}</div></div>
+                  <div style="padding:14px 8px;font-size:13px;color:#555;">{{ q.files }}</div>
+                  <div style="padding:11px 8px;"><span style="{{ q.natureStyle }}">{{ q.nature }}</span></div>
+                  <div style="padding:14px 8px;font-size:13.5px;font-weight:600;">{{ q.montant }}</div>
+                  <div style="padding:11px 8px;"><span style="{{ q.delaiStyle }}">{{ q.delai }}</span></div>
+                  <div style="padding:11px 8px;"><span style="{{ q.statusStyle }}">{{ q.statut }}</span></div>
+                  <div style="padding:10px 18px;display:flex;gap:7px;justify-content:flex-end;">
+                    <button onClick="{{ q.open }}" title="Voir" style="width:32px;height:32px;border-radius:9px;border:1px solid rgba(0,75,50,.14);background:#fff;color:#004B32;display:flex;align-items:center;justify-content:center;cursor:pointer;" style-hover="background:#004B32;color:#fff;"><svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M2 10s3-5 8-5 8 5 8 5-3 5-8 5-8-5-8-5z"/><circle cx="10" cy="10" r="2.2"/></svg></button>
+                    <button title="PDF" style="width:32px;height:32px;border-radius:9px;border:1px solid rgba(0,75,50,.14);background:#fff;color:#7a8a82;display:flex;align-items:center;justify-content:center;cursor:pointer;" style-hover="background:#F0F7EC;color:#004B32;"><svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3v9M6.5 9 10 12.5 13.5 9M4 15h12"/></svg></button>
+                    <button title="Valider" style="width:32px;height:32px;border-radius:9px;border:1px solid rgba(0,75,50,.14);background:#fff;color:#7a8a82;display:flex;align-items:center;justify-content:center;cursor:pointer;" style-hover="background:#AAE66E;color:#004B32;border-color:#AAE66E;"><svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10.5 8 14l8-8.5"/></svg></button>
+                  </div>
+                </div>
+              </sc-for>
+            </sc-if>
+          </div>
+        </div>
+        <!-- EMPTY STATE -->
+        <sc-if value="{{ isEmpty }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;flex-direction:column;align-items:center;text-align:center;padding:64px 24px;">
+            <div style="width:64px;height:64px;border-radius:18px;background:#F0F7EC;color:#004B32;display:flex;align-items:center;justify-content:center;margin-bottom:18px;"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="21" y2="21"/><line x1="8" y1="11" x2="14" y2="11"/></svg></div>
+            <div style="font-family:'Sora';font-weight:600;font-size:17px;">Aucun devis trouvé</div>
+            <div style="font-size:13.5px;color:#888;margin-top:6px;max-width:340px;line-height:1.5;">Aucun devis ne correspond à votre recherche ou à ces filtres. Essayez d'élargir les critères.</div>
+            <button onClick="{{ resetFilters }}" style="margin-top:18px;display:flex;align-items:center;gap:7px;background:#004B32;color:#fff;font-size:13px;font-weight:600;padding:10px 18px;border:none;border-radius:99px;cursor:pointer;" style-hover="background:#00603f;"><svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10a6 6 0 1 1 1.8 4.3M4 10V6.5M4 10h3.5"/></svg>Réinitialiser les filtres</button>
+          </div>
+        </sc-if>
+      </div>
+    </div>
+    </sc-if>
+
+    <!-- ============ COMMANDES ============ -->
+    <sc-if value="{{ isCommandes }}" hint-placeholder-val="{{ false }}">
+    <div data-screen-label="Commandes" style="padding:26px 30px 40px;display:flex;flex-direction:column;gap:20px;">
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:18px;">
+        <div style="background:#fff;border:1px solid rgba(0,75,50,0.08);border-left:4px solid #AAE66E;border-radius:16px;padding:20px 22px;box-shadow:0 1px 2px rgba(0,75,50,.04),0 16px 30px -24px rgba(0,75,50,.4);">
+          <div style="font-size:13px;color:#6B6B6B;">À lancer en production</div>
+          <div style="font-family:'Sora';font-size:32px;font-weight:700;margin-top:6px;">{{ cmdStats.aLancer }}</div>
+          <div style="display:inline-block;font-size:11px;color:#FF6C4F;background:#FFF3E0;font-weight:700;padding:3px 10px;border-radius:99px;margin-top:5px;">action requise</div>
+        </div>
+        <div style="background:#fff;border:1px solid rgba(0,75,50,0.08);border-left:4px solid #1565C0;border-radius:16px;padding:20px 22px;box-shadow:0 1px 2px rgba(0,75,50,.04),0 16px 30px -24px rgba(0,75,50,.4);">
+          <div style="font-size:13px;color:#6B6B6B;">En production</div>
+          <div style="font-family:'Sora';font-size:32px;font-weight:700;margin-top:6px;">{{ cmdStats.enProd }}</div>
+          <div style="font-size:12px;color:#1565C0;font-weight:600;margin-top:4px;">en cours d'impression</div>
+        </div>
+        <div style="background:#fff;border:1px solid rgba(0,75,50,0.08);border-left:4px solid #6A1B9A;border-radius:16px;padding:20px 22px;box-shadow:0 1px 2px rgba(0,75,50,.04),0 16px 30px -24px rgba(0,75,50,.4);">
+          <div style="font-size:13px;color:#6B6B6B;">Expédiées ce mois</div>
+          <div style="font-family:'Sora';font-size:32px;font-weight:700;margin-top:6px;">{{ cmdStats.exped }}</div>
+          <div style="font-size:12px;color:#2e7d32;font-weight:600;margin-top:4px;">▲ délai moyen 4,2 j</div>
+        </div>
+        <div style="background:#004B32;border-radius:16px;padding:20px 22px;box-shadow:0 1px 2px rgba(0,75,50,.04),0 16px 30px -24px rgba(0,75,50,.4);color:#fff;">
+          <div style="font-size:13px;color:rgba(255,255,255,.75);">CA en production (HT)</div>
+          <div style="font-family:'Sora';font-size:32px;font-weight:700;margin-top:6px;white-space:nowrap;">{{ cmdStats.caProd }}</div>
+          <div style="font-size:12px;color:#AAE66E;font-weight:600;margin-top:4px;">facturé à réception</div>
+        </div>
+      </div>
+
+      <div style="display:flex;align-items:center;gap:9px;flex-wrap:wrap;">
+        <sc-for list="{{ cmdPills }}" as="p" hint-placeholder-count="4"><span onClick="{{ p.onClick }}" style="{{ p.style }}">{{ p.label }}</span></sc-for>
+        <button style="margin-left:auto;display:flex;align-items:center;gap:8px;background:#fff;border:1px solid #004B32;color:#004B32;font-size:13px;font-weight:600;padding:8px 16px;border-radius:99px;cursor:pointer;" style-hover="background:#004B32;color:#fff;"><svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3v9M6.5 9 10 12.5 13.5 9M4 15h12"/></svg>Export CSV</button>
+      </div>
+
+      <div style="font-size:12.5px;color:#9aa39e;margin:-6px 2px -4px;">{{ cmdCountLabel }}</div>
+
+      <div style="background:#fff;border:1px solid rgba(0,75,50,0.08);border-radius:16px;overflow:hidden;box-shadow:0 1px 2px rgba(0,75,50,.04),0 18px 40px -30px rgba(0,75,50,.4);">
+        <div style="overflow-x:auto;">
+          <div style="min-width:1000px;">
+            <div style="display:grid;grid-template-columns:152px 92px 1.5fr 56px 116px 104px 1.1fr 92px;background:#004B32;color:#fff;font-size:12px;font-weight:600;letter-spacing:.2px;">
+              <div style="padding:14px 18px;">N° commande</div>
+              <div style="padding:14px 8px;">Validée</div>
+              <div style="padding:14px 8px;">Client</div>
+              <div style="padding:14px 8px;">STL</div>
+              <div style="padding:14px 8px;">Montant HT</div>
+              <div style="padding:14px 8px;">Délai</div>
+              <div style="padding:14px 8px;">Statut</div>
+              <div style="padding:14px 18px;text-align:right;">Actions</div>
+            </div>
+            <sc-if value="{{ cmdHas }}" hint-placeholder-val="{{ true }}"><sc-for list="{{ commandes }}" as="c" hint-placeholder-count="7">
+              <div onClick="{{ c.open }}" style="{{ c.rowStyle }}" style-hover="background:#F0F7EC;">
+                <div style="padding:14px 18px;font-weight:600;font-size:12.5px;color:#004B32;">{{ c.id }}</div>
+                <div style="padding:14px 8px;font-size:13px;color:#555;">{{ c.date }}</div>
+                <div style="padding:10px 8px;display:flex;align-items:center;gap:10px;"><span style="width:30px;height:30px;border-radius:99px;background:#004B32;color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex:none;">{{ c.initials }}</span><div style="min-width:0;"><div style="font-size:13px;font-weight:600;">{{ c.client }}</div><div style="font-size:11px;color:#9aa39e;">{{ c.devis }}</div></div></div>
+                <div style="padding:14px 8px;font-size:13px;color:#555;">{{ c.files }}</div>
+                <div style="padding:14px 8px;font-size:13.5px;font-weight:600;">{{ c.montant }}</div>
+                <div style="padding:11px 8px;"><span style="{{ c.delaiStyle }}">{{ c.delai }}</span></div>
+                <div style="padding:11px 8px;"><span style="{{ c.statusStyle }}">{{ c.statut }}</span></div>
+                <div style="padding:10px 18px;display:flex;gap:7px;justify-content:flex-end;">
+                  <button onClick="{{ c.open }}" title="Suivre" style="width:32px;height:32px;border-radius:9px;border:1px solid rgba(0,75,50,.14);background:#fff;color:#004B32;display:flex;align-items:center;justify-content:center;cursor:pointer;" style-hover="background:#004B32;color:#fff;"><svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M2 10s3-5 8-5 8 5 8 5-3 5-8 5-8-5-8-5z"/><circle cx="10" cy="10" r="2.2"/></svg></button>
+                  <button title="Bon de production" style="width:32px;height:32px;border-radius:9px;border:1px solid rgba(0,75,50,.14);background:#fff;color:#7a8a82;display:flex;align-items:center;justify-content:center;cursor:pointer;" style-hover="background:#F0F7EC;color:#004B32;"><svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3h7l3 3v11H5z"/><path d="M8 9h5M8 12h5"/></svg></button>
+                </div>
+              </div>
+            </sc-for></sc-if>
+          </div>
+        </div>
+        <sc-if value="{{ cmdEmpty }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;flex-direction:column;align-items:center;text-align:center;padding:56px 24px;">
+            <div style="width:60px;height:60px;border-radius:17px;background:#F0F7EC;color:#004B32;display:flex;align-items:center;justify-content:center;margin-bottom:16px;"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6.4 8h13l-1.3 6.6a2.2 2.2 0 0 1-2.16 1.78H9.86a2.2 2.2 0 0 1-2.16-1.78z"/><path d="M3 5h2l1.3 3.3"/></svg></div>
+            <div style="font-family:'Sora';font-weight:600;font-size:16px;">Aucune commande</div>
+            <div style="font-size:13px;color:#888;margin-top:6px;max-width:320px;line-height:1.5;">Aucune commande ne correspond à ce filtre ou à votre recherche.</div>
+          </div>
+        </sc-if>
+      </div>
+    </div>
+    </sc-if>
+
+    <!-- ============ CLIENTS ============ -->
+    <sc-if value="{{ isClients }}" hint-placeholder-val="{{ false }}">
+    <div data-screen-label="Clients" style="padding:26px 30px 40px;display:flex;flex-direction:column;gap:20px;">
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:18px;">
+        <div style="background:#fff;border:1px solid rgba(0,75,50,0.08);border-left:4px solid #AAE66E;border-radius:16px;padding:20px 22px;box-shadow:0 1px 2px rgba(0,75,50,.04),0 16px 30px -24px rgba(0,75,50,.4);"><div style="font-size:13px;color:#6B6B6B;">Total clients</div><div style="font-family:'Sora';font-size:32px;font-weight:700;margin-top:6px;">38</div><div style="font-size:12px;color:#2e7d32;font-weight:600;margin-top:4px;">▲ 4 ce mois</div></div>
+        <div style="background:#fff;border:1px solid rgba(0,75,50,0.08);border-left:4px solid #AAE66E;border-radius:16px;padding:20px 22px;box-shadow:0 1px 2px rgba(0,75,50,.04),0 16px 30px -24px rgba(0,75,50,.4);"><div style="font-size:13px;color:#6B6B6B;">Actifs (90 j)</div><div style="font-family:'Sora';font-size:32px;font-weight:700;margin-top:6px;">29</div><div style="font-size:12px;color:#6B6B6B;font-weight:600;margin-top:4px;">76% du portefeuille</div></div>
+        <div style="background:#fff;border:1px solid rgba(0,75,50,0.08);border-left:4px solid #AAE66E;border-radius:16px;padding:20px 22px;box-shadow:0 1px 2px rgba(0,75,50,.04),0 16px 30px -24px rgba(0,75,50,.4);"><div style="font-size:13px;color:#6B6B6B;">Panier moyen (HT)</div><div style="font-family:'Sora';font-size:32px;font-weight:700;margin-top:6px;white-space:nowrap;">1 840 €</div><div style="font-size:12px;color:#2e7d32;font-weight:600;margin-top:4px;">▲ 8% vs trim.</div></div>
+        <div style="background:#004B32;border-radius:16px;padding:20px 22px;box-shadow:0 1px 2px rgba(0,75,50,.04),0 16px 30px -24px rgba(0,75,50,.4);color:#fff;"><div style="font-size:13px;color:rgba(255,255,255,.75);">Top client (CA)</div><div style="font-family:'Sora';font-size:23px;font-weight:700;margin-top:8px;">Hôpital Nord</div><div style="font-size:12px;color:#AAE66E;font-weight:600;margin-top:4px;">96 700 € · 18 commandes</div></div>
+      </div>
+
+      <div style="font-size:12.5px;color:#9aa39e;margin:-6px 2px -4px;">{{ cliCountLabel }}</div>
+
+      <div style="background:#fff;border:1px solid rgba(0,75,50,0.08);border-radius:16px;overflow:hidden;box-shadow:0 1px 2px rgba(0,75,50,.04),0 18px 40px -30px rgba(0,75,50,.4);">
+        <div style="overflow-x:auto;">
+          <div style="min-width:980px;">
+            <div style="display:grid;grid-template-columns:1.9fr 76px 92px 122px 130px 1fr 92px;background:#004B32;color:#fff;font-size:12px;font-weight:600;letter-spacing:.2px;">
+              <div onClick="{{ cliSorts.name }}" style="padding:14px 18px;cursor:pointer;display:flex;align-items:center;gap:5px;" style-hover="color:#AAE66E;">Client<span style="color:#AAE66E;font-size:10px;">{{ cliArrows.name }}</span></div>
+              <div onClick="{{ cliSorts.country }}" style="padding:14px 8px;cursor:pointer;display:flex;align-items:center;gap:5px;" style-hover="color:#AAE66E;">Pays<span style="color:#AAE66E;font-size:10px;">{{ cliArrows.country }}</span></div>
+              <div onClick="{{ cliSorts.devis }}" style="padding:14px 8px;cursor:pointer;display:flex;align-items:center;gap:5px;" style-hover="color:#AAE66E;">Devis<span style="color:#AAE66E;font-size:10px;">{{ cliArrows.devis }}</span></div>
+              <div onClick="{{ cliSorts.cmd }}" style="padding:14px 8px;cursor:pointer;display:flex;align-items:center;gap:5px;" style-hover="color:#AAE66E;">Commandes<span style="color:#AAE66E;font-size:10px;">{{ cliArrows.cmd }}</span></div>
+              <div onClick="{{ cliSorts.ca }}" style="padding:14px 8px;cursor:pointer;display:flex;align-items:center;gap:5px;" style-hover="color:#AAE66E;">CA HT<span style="color:#AAE66E;font-size:10px;">{{ cliArrows.ca }}</span></div>
+              <div onClick="{{ cliSorts.nature }}" style="padding:14px 8px;cursor:pointer;display:flex;align-items:center;gap:5px;" style-hover="color:#AAE66E;">Type<span style="color:#AAE66E;font-size:10px;">{{ cliArrows.nature }}</span></div>
+              <div style="padding:14px 18px;text-align:right;">Actions</div>
+            </div>
+            <sc-if value="{{ cliHas }}" hint-placeholder-val="{{ true }}"><sc-for list="{{ clients }}" as="c" hint-placeholder-count="9">
+              <div onClick="{{ c.open }}" style="{{ c.rowStyle }}" style-hover="background:#F0F7EC;">
+                <div style="padding:10px 18px;display:flex;align-items:center;gap:11px;min-width:0;"><span style="width:34px;height:34px;border-radius:99px;background:#004B32;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex:none;">{{ c.initials }}</span><div style="min-width:0;"><div style="font-size:13.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ c.name }}</div><div style="font-size:11.5px;color:#9aa39e;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ c.email }}</div></div></div>
+                <div style="padding:14px 8px;"><span style="background:#EEF1F0;color:#5b6b66;font-size:11.5px;font-weight:600;padding:4px 10px;border-radius:99px;">{{ c.country }}</span></div>
+                <div style="padding:14px 8px;font-size:13.5px;font-weight:600;">{{ c.devis }}</div>
+                <div style="padding:14px 8px;font-size:13.5px;font-weight:600;">{{ c.cmd }}</div>
+                <div style="padding:14px 8px;font-family:'Sora';font-size:13.5px;font-weight:700;color:#004B32;white-space:nowrap;">{{ c.ca }}</div>
+                <div style="padding:11px 8px;"><span style="{{ c.natureStyle }}">{{ c.nature }}</span></div>
+                <div style="padding:10px 18px;display:flex;gap:7px;justify-content:flex-end;">
+                  <button onClick="{{ c.open }}" title="Voir la fiche" style="width:32px;height:32px;border-radius:9px;border:1px solid rgba(0,75,50,.14);background:#fff;color:#004B32;display:flex;align-items:center;justify-content:center;cursor:pointer;" style-hover="background:#004B32;color:#fff;"><svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M2 10s3-5 8-5 8 5 8 5-3 5-8 5-8-5-8-5z"/><circle cx="10" cy="10" r="2.2"/></svg></button>
+                  <button title="Nouveau devis" style="width:32px;height:32px;border-radius:9px;border:1px solid rgba(0,75,50,.14);background:#fff;color:#7a8a82;display:flex;align-items:center;justify-content:center;cursor:pointer;" style-hover="background:#F0F7EC;color:#004B32;"><svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 4v12M4 10h12"/></svg></button>
+                </div>
+              </div>
+            </sc-for></sc-if>
+          </div>
+        </div>
+        <sc-if value="{{ cliEmpty }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;flex-direction:column;align-items:center;text-align:center;padding:56px 24px;">
+            <div style="width:60px;height:60px;border-radius:17px;background:#F0F7EC;color:#004B32;display:flex;align-items:center;justify-content:center;margin-bottom:16px;"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4.5 19.5a7.5 7.5 0 0 1 15 0"/></svg></div>
+            <div style="font-family:'Sora';font-weight:600;font-size:16px;">Aucun client trouvé</div>
+            <div style="font-size:13px;color:#888;margin-top:6px;max-width:320px;line-height:1.5;">Aucun client ne correspond à votre recherche.</div>
+          </div>
+        </sc-if>
+      </div>
+    </div>
+    </sc-if>
+
+    <!-- ============ STL ============ -->
+    <sc-if value="{{ isStl }}" hint-placeholder-val="{{ false }}">
+    <div data-screen-label="Fichiers STL" style="padding:26px 30px 40px;display:flex;flex-direction:column;gap:20px;">
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:18px;">
+        <div style="background:#fff;border:1px solid rgba(0,75,50,0.08);border-left:4px solid #AAE66E;border-radius:16px;padding:20px 22px;box-shadow:0 1px 2px rgba(0,75,50,.04),0 16px 30px -24px rgba(0,75,50,.4);"><div style="font-size:13px;color:#6B6B6B;">Fichiers STL</div><div style="font-family:'Sora';font-size:32px;font-weight:700;margin-top:6px;">248</div><div style="font-size:12px;color:#2e7d32;font-weight:600;margin-top:4px;">▲ 32 ce mois</div></div>
+        <div style="background:#fff;border:1px solid rgba(0,75,50,0.08);border-left:4px solid #AAE66E;border-radius:16px;padding:20px 22px;box-shadow:0 1px 2px rgba(0,75,50,.04),0 16px 30px -24px rgba(0,75,50,.4);"><div style="font-size:13px;color:#6B6B6B;">Volume imprimé</div><div style="font-family:'Sora';font-size:32px;font-weight:700;margin-top:6px;white-space:nowrap;">1,84 M</div><div style="font-size:12px;color:#6B6B6B;font-weight:600;margin-top:4px;">mm³ cumulés</div></div>
+        <div style="background:#fff;border:1px solid rgba(0,75,50,0.08);border-left:4px solid #1565C0;border-radius:16px;padding:20px 22px;box-shadow:0 1px 2px rgba(0,75,50,.04),0 16px 30px -24px rgba(0,75,50,.4);"><div style="font-size:13px;color:#6B6B6B;">En file d'attente</div><div style="font-family:'Sora';font-size:32px;font-weight:700;margin-top:6px;">11</div><div style="font-size:12px;color:#1565C0;font-weight:600;margin-top:4px;">slots imprimante</div></div>
+        <div style="background:#004B32;border-radius:16px;padding:20px 22px;box-shadow:0 1px 2px rgba(0,75,50,.04),0 16px 30px -24px rgba(0,75,50,.4);color:#fff;display:flex;align-items:center;justify-content:space-between;"><div><div style="font-size:13px;color:rgba(255,255,255,.75);">Importer un STL</div><div style="font-size:12px;color:rgba(255,255,255,.6);margin-top:6px;max-width:140px;">Glissez vos fichiers ou parcourez</div></div><span style="width:44px;height:44px;border-radius:13px;background:#FF6C4F;color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;flex:none;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span></div>
+      </div>
+
+      <div style="font-size:12.5px;color:#9aa39e;margin:-6px 2px -4px;">{{ stlCountLabel }}</div>
+
+      <div style="background:#fff;border:1px solid rgba(0,75,50,0.08);border-radius:16px;overflow:hidden;box-shadow:0 1px 2px rgba(0,75,50,.04),0 18px 40px -30px rgba(0,75,50,.4);">
+        <div style="overflow-x:auto;">
+          <div style="min-width:1040px;">
+            <div style="display:grid;grid-template-columns:1.7fr 116px 152px 122px 116px 1.2fr 88px;background:#004B32;color:#fff;font-size:12px;font-weight:600;letter-spacing:.2px;">
+              <div onClick="{{ stlSorts.name }}" style="padding:14px 18px;cursor:pointer;display:flex;align-items:center;gap:5px;" style-hover="color:#AAE66E;">Fichier<span style="color:#AAE66E;font-size:10px;">{{ stlArrows.name }}</span></div>
+              <div onClick="{{ stlSorts.volume }}" style="padding:14px 8px;cursor:pointer;display:flex;align-items:center;gap:5px;" style-hover="color:#AAE66E;">Volume<span style="color:#AAE66E;font-size:10px;">{{ stlArrows.volume }}</span></div>
+              <div onClick="{{ stlSorts.dims }}" style="padding:14px 8px;cursor:pointer;display:flex;align-items:center;gap:5px;" style-hover="color:#AAE66E;">Dimensions<span style="color:#AAE66E;font-size:10px;">{{ stlArrows.dims }}</span></div>
+              <div onClick="{{ stlSorts.teinte }}" style="padding:14px 8px;cursor:pointer;display:flex;align-items:center;gap:5px;" style-hover="color:#AAE66E;">Teinte<span style="color:#AAE66E;font-size:10px;">{{ stlArrows.teinte }}</span></div>
+              <div onClick="{{ stlSorts.devis }}" style="padding:14px 8px;cursor:pointer;display:flex;align-items:center;gap:5px;" style-hover="color:#AAE66E;">Devis<span style="color:#AAE66E;font-size:10px;">{{ stlArrows.devis }}</span></div>
+              <div onClick="{{ stlSorts.client }}" style="padding:14px 8px;cursor:pointer;display:flex;align-items:center;gap:5px;" style-hover="color:#AAE66E;">Client<span style="color:#AAE66E;font-size:10px;">{{ stlArrows.client }}</span></div>
+              <div style="padding:14px 18px;text-align:right;">Actions</div>
+            </div>
+            <sc-if value="{{ stlHas }}" hint-placeholder-val="{{ true }}"><sc-for list="{{ stl }}" as="f" hint-placeholder-count="8">
+              <div onClick="{{ f.open }}" style="{{ f.rowStyle }}" style-hover="background:#F0F7EC;">
+                <div style="padding:12px 18px;display:flex;align-items:center;gap:11px;min-width:0;"><span style="width:34px;height:34px;border-radius:9px;background:#F0F7EC;color:#004B32;display:flex;align-items:center;justify-content:center;flex:none;"><svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 2.5h6l4 4V17a.5.5 0 0 1-.5.5h-9A.5.5 0 0 1 5 17z"/><path d="M11 2.5v4h4"/></svg></span><span style="font-size:13px;font-weight:600;color:#004B32;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ f.name }}</span></div>
+                <div style="padding:14px 8px;font-size:13px;color:#555;">{{ f.volume }}</div>
+                <div style="padding:14px 8px;font-size:13px;color:#555;">{{ f.dims }}</div>
+                <div style="padding:11px 8px;"><span style="{{ f.teintePillStyle }}"><span style="{{ f.teinteDotStyle }}"></span>{{ f.teinte }}</span></div>
+                <div style="padding:14px 8px;font-size:12.5px;font-weight:600;color:#3f5249;">{{ f.devis }}</div>
+                <div style="padding:14px 8px;font-size:13px;color:#555;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ f.client }}</div>
+                <div style="padding:10px 18px;display:flex;gap:7px;justify-content:flex-end;">
+                  <button onClick="{{ f.open }}" title="Aperçu 3D" style="width:32px;height:32px;border-radius:9px;border:1px solid rgba(0,75,50,.14);background:#fff;color:#004B32;display:flex;align-items:center;justify-content:center;cursor:pointer;" style-hover="background:#004B32;color:#fff;"><svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M2 10s3-5 8-5 8 5 8 5-3 5-8 5-8-5-8-5z"/><circle cx="10" cy="10" r="2.2"/></svg></button>
+                  <button title="Télécharger" style="width:32px;height:32px;border-radius:9px;border:1px solid rgba(0,75,50,.14);background:#fff;color:#7a8a82;display:flex;align-items:center;justify-content:center;cursor:pointer;" style-hover="background:#F0F7EC;color:#004B32;"><svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3v9M6.5 9 10 12.5 13.5 9M4 15h12"/></svg></button>
+                </div>
+              </div>
+            </sc-for></sc-if>
+          </div>
+        </div>
+        <sc-if value="{{ stlEmpty }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;flex-direction:column;align-items:center;text-align:center;padding:56px 24px;">
+            <div style="width:60px;height:60px;border-radius:17px;background:#F0F7EC;color:#004B32;display:flex;align-items:center;justify-content:center;margin-bottom:16px;"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.2 20.5 7v10L12 21.8 3.5 17V7Z"/></svg></div>
+            <div style="font-family:'Sora';font-weight:600;font-size:16px;">Aucun fichier STL</div>
+            <div style="font-size:13px;color:#888;margin-top:6px;max-width:320px;line-height:1.5;">Aucun fichier ne correspond à votre recherche.</div>
+          </div>
+        </sc-if>
+      </div>
+    </div>
+    </sc-if>
+  </div>
+
+  <!-- MODAL -->
+  <sc-if value="{{ modalOpen }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ closeModal }}" style="position:fixed;inset:0;z-index:1000;background:rgba(26,26,26,.42);backdrop-filter:blur(2px);display:flex;align-items:center;justify-content:flex-end;padding:24px;">
+      <div onClick="{{ stop }}" style="width:460px;max-height:calc(100vh - 48px);overflow-y:auto;background:#fff;border-radius:20px;box-shadow:0 40px 90px -24px rgba(0,0,0,.5);">
+        <dc-import name="DevisDetail" statut="{{ modalStatus }}" closable="{{ true }}" on-change-statut="{{ setModalStatus }}" on-close="{{ closeModal }}" hint-size="460px,100%"></dc-import>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- DETAIL DRAWER (client / commande / stl) -->
+  <sc-if value="{{ panelOpen }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ closePanel }}" style="position:fixed;inset:0;z-index:1000;background:rgba(26,26,26,.42);backdrop-filter:blur(2px);display:flex;align-items:stretch;justify-content:flex-end;">
+      <div onClick="{{ stop }}" style="width:500px;max-width:94vw;height:100vh;background:#fff;box-shadow:-30px 0 90px -24px rgba(0,0,0,.5);overflow:hidden;">
+        <sc-if value="{{ isClientPanel }}" hint-placeholder-val="{{ false }}"><dc-import name="ClientDetail" data="{{ panelData }}" on-close="{{ closePanel }}" on-new-devis="{{ onNewDevisPanel }}" hint-size="500px,100%"></dc-import></sc-if>
+        <sc-if value="{{ isCommandePanel }}" hint-placeholder-val="{{ false }}"><dc-import name="CommandeDetail" data="{{ panelData }}" on-close="{{ closePanel }}" on-advance="{{ advancePanel }}" hint-size="500px,100%"></dc-import></sc-if>
+        <sc-if value="{{ isStlPanel }}" hint-placeholder-val="{{ false }}"><dc-import name="StlDetail" data="{{ panelData }}" on-close="{{ closePanel }}" on-view-devis="{{ closePanel }}" hint-size="500px,100%"></dc-import></sc-if>
+      </div>
+    </div>
+  </sc-if>
+
+</div>
+</sc-if>
+
+<sc-if value="{{ notAuthed }}" hint-placeholder-val="{{ false }}">
+<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:#004B32;padding:24px;font-family:'DM Sans',system-ui,sans-serif;">
+  <div style="width:100%;max-width:404px;background:#F5F2E8;border-radius:24px;padding:38px 34px 30px;box-shadow:0 50px 120px -30px rgba(0,0,0,.6);">
+    <div style="display:flex;flex-direction:column;align-items:center;line-height:1.05;margin-bottom:26px;"><span style="font-family:'Sora';font-weight:700;font-size:22px;color:#004B32;letter-spacing:2px;">ONE</span><span style="font-family:'Sora';font-weight:700;font-size:22px;color:#FF6C4F;letter-spacing:2px;">PRINT</span><span style="font-size:11px;color:#8A8478;margin-top:8px;letter-spacing:.04em;">Espace administration</span></div>
+    <div style="font-family:'Sora';font-weight:700;font-size:19px;text-align:center;color:#1C1C1A;">Connexion</div>
+    <div style="font-size:13px;color:#8A8478;text-align:center;margin-top:5px;margin-bottom:24px;">Accédez au suivi des devis et commandes.</div>
+    <div style="display:flex;flex-direction:column;gap:14px;">
+      <div><div style="font-family:'Sora';font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:#8A8478;margin-bottom:7px;">E-mail</div><input value="camille.m@oneortho-medical.com" style="width:100%;border:1.5px solid #E2DED2;border-radius:12px;padding:12px 14px;font-size:14px;font-family:inherit;color:#1C1C1A;background:#fff;outline:none;" style-focus="border-color:#004B32;" /></div>
+      <div><div style="font-family:'Sora';font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:#8A8478;margin-bottom:7px;">Mot de passe</div><input type="password" value="abcdefgh" style="width:100%;border:1.5px solid #E2DED2;border-radius:12px;padding:12px 14px;font-size:14px;font-family:inherit;color:#1C1C1A;background:#fff;outline:none;" style-focus="border-color:#004B32;" /></div>
+    </div>
+    <button onClick="{{ login }}" style="width:100%;margin-top:22px;background:#FF6C4F;color:#fff;border:none;border-radius:99px;padding:13px;font-family:'Sora';font-size:14px;font-weight:700;cursor:pointer;" style-hover="opacity:.9;">Se connecter</button>
+    <div style="text-align:center;margin-top:16px;font-size:12.5px;color:#8A8478;cursor:pointer;">Mot de passe oublié ?</div>
+  </div>
+</div>
+</sc-if>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1480,&quot;height&quot;:1000}}">
+class Component extends DCLogic {
+  state = { view: 'devis', openFilter: null, modalOpen: false, modalStatus: 'Nouveau', query: '', searchOpen: false, statusFilter: 'Tous', cmdFilter: 'Tous', sortCol: 'date', sortDir: 'desc', cliSortCol: 'ca', cliSortDir: 'desc', stlSortCol: 'name', stlSortDir: 'asc', hoverBar: -1, panel: null, notifOpen: false, authed: true };
+
+  renderVals() {
+    const st = this.state;
+    const badge = (bg, fg) => ({
+      background: bg, color: fg, padding: '4px 12px', borderRadius: '999px',
+      fontSize: '12px', fontWeight: 600, whiteSpace: 'nowrap', display: 'inline-block',
+    });
+    const statusStyle = {
+      'Nouveau': badge('#FFF3E0', '#FF6C4F'), 'Refusé': badge('#FDEAEA', '#C62828'),
+      'Validé': badge('#E8F5E9', '#004B32'),
+      'En production': badge('#E3F2FD', '#1565C0'), 'Expédié': badge('#F3E5F5', '#6A1B9A'),
+    };
+    const natureStyle = { 'DM': badge('#E8F5E9', '#004B32'), 'Prototype': badge('#F1F8E9', '#33691E'), 'Autre': badge('#ECEFF1', '#546E7A') };
+    const delaiStyle = { 'Standard': badge('#EEF1F0', '#5b6b66'), 'Priority': badge('#FFF8E1', '#B26A00'), 'Express': badge('#FFF3E0', '#FF6C4F') };
+
+    const raw = [
+      ['DEV-20260608-0042', '08/06', 'Clinique Saint-Roch', 'devis@st-roch.fr', 3, 'DM', '1 240 €', 'Express', 'Nouveau'],
+      ['DEV-20260607-0039', '07/06', 'Atelier Prothèse Lyon', 'contact@app-lyon.fr', 1, 'Prototype', '380 €', 'Standard', 'Refusé'],
+      ['DEV-20260606-0037', '06/06', 'Dr. Mehdi Bouaziz', 'm.bouaziz@ortho.fr', 5, 'DM', '2 980 €', 'Priority', 'Validé'],
+      ['DEV-20260605-0031', '05/06', 'OrthoLab Genève', 'lab@ortholab.ch', 2, 'Prototype', '760 €', 'Standard', 'Validé'],
+      ['DEV-20260603-0028', '03/06', 'Hôpital Nord', 'achats@hop-nord.fr', 8, 'DM', '5 420 €', 'Priority', 'En production'],
+      ['DEV-20260601-0024', '01/06', 'MedStudio Paris', 'hello@medstudio.fr', 1, 'Autre', '210 €', 'Standard', 'Expédié'],
+      ['DEV-20260530-0019', '30/05', 'Clinique du Sport', 'devis@clinic-sport.fr', 4, 'DM', '1 890 €', 'Express', 'Validé'],
+      ['DEV-20260528-0014', '28/05', 'BioForm Toulouse', 'contact@bioform.fr', 2, 'Prototype', '540 €', 'Standard', 'Nouveau'],
+      ['DEV-20260526-0011', '26/05', 'Centre Ortho Lille', 'devis@ortho-lille.fr', 6, 'DM', '3 310 €', 'Priority', 'En production'],
+    ];
+    const base = raw.map((r) => ({
+      id: r[0], date: r[1], client: r[2], email: r[3], files: r[4], nature: r[5], montant: r[6], delai: r[7], statut: r[8],
+      statusStyle: statusStyle[r[8]], natureStyle: natureStyle[r[5]], delaiStyle: delaiStyle[r[7]],
+    }));
+
+    // ----- filtering -----
+    const fold = (s) => String(s).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    const q = fold(st.query.trim());
+    let filtered = base.filter((row) => {
+      const okStatus = st.statusFilter === 'Tous' || row.statut === st.statusFilter;
+      const okQuery = !q || (row.id + ' ' + row.client + ' ' + row.email).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().includes(q);
+      return okStatus && okQuery;
+    });
+
+    // ----- sorting -----
+    const natureRank = { 'DM': 0, 'Prototype': 1, 'Autre': 2 };
+    const delaiRank = { 'Standard': 0, 'Priority': 1, 'Express': 2 };
+    const statutRank = { 'Nouveau': 0, 'Validé': 1, 'Refusé': 2, 'En production': 3, 'Expédié': 4 };
+    const num = (s) => parseInt(String(s).replace(/[^0-9]/g, ''), 10) || 0;
+    const dval = (s) => { const p = s.split('/'); return Number(p[1]) * 31 + Number(p[0]); };
+    const keyOf = (row) => {
+      switch (st.sortCol) {
+        case 'id': return row.id;
+        case 'date': return dval(row.date);
+        case 'client': return row.client.toLowerCase();
+        case 'files': return row.files;
+        case 'nature': return natureRank[row.nature];
+        case 'montant': return num(row.montant);
+        case 'delai': return delaiRank[row.delai];
+        case 'statut': return statutRank[row.statut];
+        default: return 0;
+      }
+    };
+    filtered = filtered.slice().sort((a, b) => {
+      const va = keyOf(a), vb = keyOf(b);
+      const r = va < vb ? -1 : (va > vb ? 1 : 0);
+      return st.sortDir === 'asc' ? r : -r;
+    });
+
+    const openWith = (s) => () => this.setState({ modalOpen: true, modalStatus: s, openFilter: null, panel: null });
+    const setPanel = (type, data) => () => this.setState({ panel: { type, data }, notifOpen: false, searchOpen: false });
+    const initOf = (n) => String(n || '').split(/\s+/).filter((w) => /[A-Za-zÀ-ÿ]/.test(w)).slice(0, 2).map((w) => w[0].toUpperCase()).join('');
+    const quotes = filtered.map((row, i) => ({
+      ...row,
+      open: openWith(row.statut),
+      rowStyle: { display: 'grid', gridTemplateColumns: '170px 76px 1.5fr 64px 1.15fr 110px 110px 1.1fr 104px', alignItems: 'center', background: i % 2 === 0 ? '#FFFFFF' : '#FAF8F0', borderTop: i === 0 ? 'none' : '1px solid rgba(0,75,50,0.07)', cursor: 'pointer' },
+    }));
+
+    // sort handler + arrows
+    const sortBy = (col) => () => this.setState((s) => ({ sortCol: col, sortDir: s.sortCol === col ? (s.sortDir === 'asc' ? 'desc' : 'asc') : 'asc' }));
+    const cols = ['id', 'date', 'client', 'files', 'nature', 'montant', 'delai', 'statut'];
+    const sorts = {}, arrows = {};
+    cols.forEach((c) => { sorts[c] = sortBy(c); arrows[c] = st.sortCol === c ? (st.sortDir === 'asc' ? '▲' : '▼') : ''; });
+
+    // status pills
+    const pillList = ['Tous', 'Nouveau', 'Validé', 'Refusé', 'En production', 'Expédié'];
+    const statusPills = pillList.map((label) => {
+      const active = st.statusFilter === label;
+      return {
+        label, onClick: () => this.setState({ statusFilter: label }),
+        style: active
+          ? { background: '#004B32', color: '#fff', fontSize: '13px', fontWeight: 600, padding: '8px 16px', borderRadius: '99px', cursor: 'pointer', whiteSpace: 'nowrap' }
+          : { background: '#fff', border: '1px solid rgba(0,75,50,.12)', color: '#3f5249', fontSize: '13px', padding: '8px 15px', borderRadius: '99px', cursor: 'pointer', whiteSpace: 'nowrap' },
+      };
+    });
+
+    const count = quotes.length;
+    const countLabel = count === 0 ? 'Aucun devis' : (count + ' devis' + (st.statusFilter !== 'Tous' ? ' · ' + st.statusFilter : '') + (q ? ' · « ' + st.query.trim() + ' »' : ''));
+
+    // ----- chart -----
+    const chartRaw = [['juil', 38], ['août', 31], ['sept', 44], ['oct', 52], ['nov', 47], ['déc', 58], ['janv', 54], ['févr', 63], ['mars', 59], ['avr', 71], ['mai', 77], ['juin', 86]];
+    const maxV = 100;
+    const chart = chartRaw.map((m, i) => {
+      const isCur = i === chartRaw.length - 1;
+      const isHover = st.hoverBar === i;
+      const showTip = isHover || (st.hoverBar === -1 && isCur);
+      return {
+        label: m[0], value: m[1],
+        onEnter: () => this.setState({ hoverBar: i }),
+        onLeave: () => this.setState({ hoverBar: -1 }),
+        barStyle: { width: '100%', height: (m[1] / maxV * 196) + 'px', background: isCur ? '#AAE66E' : (isHover ? '#00744d' : '#004B32'), borderRadius: '6px 6px 0 0', transition: 'background .12s' },
+        labelStyle: { flex: 1, textAlign: 'center', fontSize: '10.5px', color: (isCur || isHover) ? '#004B32' : '#9aa39e', fontWeight: (isCur || isHover) ? 700 : 400 },
+        tipStyle: showTip ? { fontSize: '11px', fontWeight: 700, color: '#004B32', background: '#F0F7EC', padding: '2px 8px', borderRadius: '7px', marginBottom: '6px', whiteSpace: 'nowrap' } : { fontSize: '0px', height: '0px', overflow: 'hidden' },
+      };
+    });
+
+    const sb = [['Nouveau', 8, '#FF6C4F'], ['Validé', 11, '#004B32'], ['Refusé', 3, '#C62828'], ['En production', 6, '#1565C0'], ['Expédié', 8, '#6A1B9A']];
+    const sbMax = 11;
+    const statusBreakdown = sb.map((s) => ({ label: s[0], count: s[1], fillStyle: { width: (s[1] / sbMax * 100) + '%', height: '100%', background: s[2], borderRadius: '99px' } }));
+    const recent = base.slice(0, 4);
+
+    const railBtn = (active) => ({
+      display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '5px', width: '84px',
+      padding: '11px 4px', border: 'none', cursor: 'pointer', borderRadius: '15px',
+      background: active ? '#AAE66E' : 'transparent', color: active ? '#004B32' : 'rgba(255,255,255,0.72)',
+    });
+    const fBtn = (active) => ({
+      display: 'inline-flex', alignItems: 'center', cursor: 'pointer',
+      background: active ? '#F0F7EC' : '#fff',
+      border: active ? '1px solid #004B32' : '1px solid rgba(0,75,50,0.12)',
+      color: '#3f5249', fontSize: '13px', padding: '8px 15px', borderRadius: '99px',
+    });
+    const toggle = (k) => () => this.setState((s) => ({ openFilter: s.openFilter === k ? null : k }));
+
+    // ===== COMMANDES =====
+    const cmdRaw = [
+      ['CMD-2026-0112', '06/06', 'DEV-…0037', 'Dr. Mehdi Bouaziz', 'MB', 5, '2 980 €', 'Priority', 'Validé'],
+      ['CMD-2026-0109', '03/06', 'DEV-…0028', 'Hôpital Nord', 'HN', 8, '5 420 €', 'Priority', 'En production'],
+      ['CMD-2026-0104', '01/06', 'DEV-…0024', 'MedStudio Paris', 'MS', 1, '210 €', 'Standard', 'Expédié'],
+      ['CMD-2026-0101', '30/05', 'DEV-…0019', 'Clinique du Sport', 'CD', 4, '1 890 €', 'Express', 'Validé'],
+      ['CMD-2026-0098', '28/05', 'DEV-…0011', 'Centre Ortho Lille', 'CO', 6, '3 310 €', 'Priority', 'En production'],
+      ['CMD-2026-0094', '24/05', 'DEV-…0031', 'OrthoLab Genève', 'OG', 2, '760 €', 'Standard', 'Expédié'],
+      ['CMD-2026-0090', '21/05', 'DEV-…0014', 'BioForm Toulouse', 'BT', 3, '1 120 €', 'Standard', 'En production'],
+    ];
+    const cmdGrid = '152px 92px 1.5fr 56px 116px 104px 1.1fr 92px';
+    const cmdBase = cmdRaw.map((r) => ({
+      id: r[0], date: r[1], devis: r[2], client: r[3], initials: r[4], files: r[5], montant: r[6], delai: r[7], statut: r[8],
+      statusStyle: statusStyle[r[8]], delaiStyle: delaiStyle[r[7]],
+    }));
+    const cmdStats = {
+      aLancer: cmdBase.filter((r) => r.statut === 'Validé').length,
+      enProd: cmdBase.filter((r) => r.statut === 'En production').length,
+      exped: cmdBase.filter((r) => r.statut === 'Expédié').length,
+      caProd: cmdBase.filter((r) => r.statut === 'En production').reduce((a, r) => a + num(r.montant), 0).toLocaleString('fr-FR') + ' €',
+    };
+    const cmdFiltered = cmdBase.filter((r) => (st.cmdFilter === 'Tous' || r.statut === st.cmdFilter) && (!q || (r.id + ' ' + r.client + ' ' + r.devis).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().includes(q)));
+    const cmdPillList = ['Tous', 'Validé', 'En production', 'Expédié'];
+    const cmdPills = cmdPillList.map((label) => {
+      const active = st.cmdFilter === label;
+      return {
+        label, onClick: () => this.setState({ cmdFilter: label }),
+        style: active
+          ? { background: '#004B32', color: '#fff', fontSize: '13px', fontWeight: 600, padding: '8px 16px', borderRadius: '99px', cursor: 'pointer', whiteSpace: 'nowrap' }
+          : { background: '#fff', border: '1px solid rgba(0,75,50,.12)', color: '#3f5249', fontSize: '13px', padding: '8px 15px', borderRadius: '99px', cursor: 'pointer', whiteSpace: 'nowrap' },
+      };
+    });
+    const commandes = cmdFiltered.map((row, i) => ({
+      ...row,
+      open: setPanel('commande', row),
+      rowStyle: { display: 'grid', gridTemplateColumns: cmdGrid, alignItems: 'center', background: i % 2 === 0 ? '#FFFFFF' : '#FAF8F0', borderTop: i === 0 ? 'none' : '1px solid rgba(0,75,50,0.07)', cursor: 'pointer' },
+    }));
+    const cmdEmpty = commandes.length === 0;
+    const cmdCountLabel = commandes.length + ' commande' + (commandes.length > 1 ? 's' : '') + (st.cmdFilter !== 'Tous' ? ' · ' + st.cmdFilter : '');
+
+    // ===== CLIENTS =====
+    const cliNatureStyle = { 'DM': badge('#E8F5E9', '#004B32'), 'Proto': badge('#F1F8E9', '#33691E'), 'Autre': badge('#ECEFF1', '#546E7A') };
+    const cliRaw = [
+      ['Hôpital Nord', 'achats@hop-nord.fr', 'FR', 'HN', 23, 18, '96 700 €', 'DM', '+33 3 20 44 50 10', 'Lille, FR'],
+      ['Clinique Saint-Roch', 'devis@st-roch.fr', 'FR', 'CS', 12, 9, '42 300 €', 'DM', '+33 5 61 22 18 40', 'Toulouse, FR'],
+      ['Clinique du Sport', 'devis@clinic-sport.fr', 'FR', 'CD', 9, 6, '21 050 €', 'DM', '+33 4 91 32 77 05', 'Marseille, FR'],
+      ['Dr. Mehdi Bouaziz', 'm.bouaziz@ortho.fr', 'FR', 'MB', 7, 4, '18 940 €', 'DM', '+33 1 45 67 23 89', 'Paris, FR'],
+      ['Centre Ortho Lille', 'devis@ortho-lille.fr', 'FR', 'CO', 8, 5, '14 220 €', 'DM', '+33 3 20 55 12 30', 'Lille, FR'],
+      ['OrthoLab Genève', 'lab@ortholab.ch', 'CH', 'OG', 5, 3, '8 420 €', 'Proto', '+41 22 819 44 10', 'Genève, CH'],
+      ['Atelier Prothèse Lyon', 'contact@app-lyon.fr', 'FR', 'AP', 6, 2, '5 340 €', 'Proto', '+33 4 72 11 88 20', 'Lyon, FR'],
+      ['BioForm Toulouse', 'contact@bioform.fr', 'FR', 'BT', 4, 2, '3 760 €', 'Proto', '+33 5 62 47 90 15', 'Toulouse, FR'],
+      ['MedStudio Paris', 'hello@medstudio.fr', 'FR', 'MS', 3, 1, '1 980 €', 'Autre', '+33 1 84 25 60 70', 'Paris, FR'],
+    ];
+    const cliBase = cliRaw.map((c) => ({ name: c[0], email: c[1], country: c[2], initials: c[3], devis: c[4], cmd: c[5], ca: c[6], nature: c[7], natureStyle: cliNatureStyle[c[7]], phone: c[8], city: c[9] }));
+    const cliGrid = '1.9fr 76px 92px 122px 130px 1fr 92px';
+    const cliKey = (r) => { switch (st.cliSortCol) { case 'name': return r.name.toLowerCase(); case 'country': return r.country; case 'devis': return r.devis; case 'cmd': return r.cmd; case 'ca': return num(r.ca); case 'nature': return r.nature; default: return 0; } };
+    const cliFiltered = cliBase.filter((r) => !q || (r.name + ' ' + r.email).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().includes(q));
+    const cliSorted = cliFiltered.slice().sort((a, b) => { const va = cliKey(a), vb = cliKey(b); const r = va < vb ? -1 : (va > vb ? 1 : 0); return st.cliSortDir === 'asc' ? r : -r; });
+    const clients = cliSorted.map((row, i) => ({ ...row, open: setPanel('client', row), rowStyle: { display: 'grid', gridTemplateColumns: cliGrid, alignItems: 'center', background: i % 2 === 0 ? '#FFFFFF' : '#FAF8F0', borderTop: i === 0 ? 'none' : '1px solid rgba(0,75,50,0.07)', cursor: 'pointer' } }));
+    const cliEmpty = clients.length === 0;
+    const cliColList = ['name', 'country', 'devis', 'cmd', 'ca', 'nature'];
+    const cliSortBy = (col) => () => this.setState((s) => ({ cliSortCol: col, cliSortDir: s.cliSortCol === col ? (s.cliSortDir === 'asc' ? 'desc' : 'asc') : 'asc' }));
+    const cliSorts = {}, cliArrows = {};
+    cliColList.forEach((c) => { cliSorts[c] = cliSortBy(c); cliArrows[c] = st.cliSortCol === c ? (st.cliSortDir === 'asc' ? '▲' : '▼') : ''; });
+    const cliCountLabel = clients.length + ' client' + (clients.length > 1 ? 's' : '');
+
+    // ===== STL =====
+    const teinteColor = { 'Blanc': '#F0EDE3', 'Gris': '#888', 'Bleu': '#2563EB', 'Noir': '#111', 'Vert': '#004B32', 'Orange': '#FF6C4F', 'Rouge': '#DC2626' };
+    const teinteDot = (t) => ({ width: '11px', height: '11px', borderRadius: '50%', background: teinteColor[t] || '#ccc', border: t === 'Blanc' ? '1.5px solid rgba(0,0,0,.18)' : 'none', flex: 'none', display: 'inline-block' });
+    const teintePill = () => ({ display: 'inline-flex', alignItems: 'center', gap: '6px', background: '#fff', border: '1px solid #E2DED2', color: '#3f5249', fontSize: '12px', fontWeight: 600, padding: '4px 11px', borderRadius: '99px', whiteSpace: 'nowrap' });
+    const stlRaw = [
+      ['guide_foret_L.stl', '12 480 mm³', '62 × 28 × 19 mm', 'DEV-…0037', 'Dr. Mehdi Bouaziz', 'Blanc', 'Microbillée'],
+      ['guide_foret_R.stl', '12 310 mm³', '62 × 28 × 19 mm', 'DEV-…0037', 'Dr. Mehdi Bouaziz', 'Blanc', 'Microbillée'],
+      ['cale_osseuse.stl', '8 920 mm³', '40 × 22 × 14 mm', 'DEV-…0037', 'Dr. Mehdi Bouaziz', 'Gris', 'Lissage vapeur'],
+      ['prothese_v3.stl', '24 100 mm³', '88 × 41 × 33 mm', 'DEV-…0028', 'Hôpital Nord', 'Bleu', 'Microbillée'],
+      ['gabarit_coupe.stl', '5 660 mm³', '55 × 30 × 9 mm', 'DEV-…0019', 'Clinique du Sport', 'Blanc', 'Microbillée'],
+      ['implant_test.stl', '3 240 mm³', '26 × 18 × 12 mm', 'DEV-…0014', 'BioForm Toulouse', 'Vert', 'Lissage vapeur'],
+      ['support_dental.stl', '1 980 mm³', '30 × 24 × 8 mm', 'DEV-…0024', 'MedStudio Paris', 'Noir', 'Microbillée'],
+      ['modele_anat.stl', '41 220 mm³', '120 × 70 × 55 mm', 'DEV-…0011', 'Centre Ortho Lille', 'Orange', 'Microbillée'],
+    ];
+    const stlBase = stlRaw.map((s) => ({ name: s[0], volume: s[1], dims: s[2], devis: s[3], client: s[4], teinte: s[5], finition: s[6], initials: initOf(s[4]), teinteDotStyle: teinteDot(s[5]), teintePillStyle: teintePill() }));
+    const stlGrid = '1.7fr 116px 152px 122px 116px 1.2fr 88px';
+    const stlKey = (r) => { switch (st.stlSortCol) { case 'name': return r.name.toLowerCase(); case 'volume': return num(r.volume); case 'dims': return num(r.dims); case 'teinte': return r.teinte; case 'devis': return r.devis; case 'client': return r.client.toLowerCase(); default: return 0; } };
+    const stlFiltered = stlBase.filter((r) => !q || (r.name + ' ' + r.client + ' ' + r.devis).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().includes(q));
+    const stlSorted = stlFiltered.slice().sort((a, b) => { const va = stlKey(a), vb = stlKey(b); const r = va < vb ? -1 : (va > vb ? 1 : 0); return st.stlSortDir === 'asc' ? r : -r; });
+    const stl = stlSorted.map((row, i) => ({ ...row, open: setPanel('stl', row), rowStyle: { display: 'grid', gridTemplateColumns: stlGrid, alignItems: 'center', background: i % 2 === 0 ? '#FFFFFF' : '#FAF8F0', borderTop: i === 0 ? 'none' : '1px solid rgba(0,75,50,0.07)', cursor: 'pointer' } }));
+    const stlEmpty = stl.length === 0;
+    const stlColList = ['name', 'volume', 'dims', 'teinte', 'devis', 'client'];
+    const stlSortBy = (col) => () => this.setState((s) => ({ stlSortCol: col, stlSortDir: s.stlSortCol === col ? (s.stlSortDir === 'asc' ? 'desc' : 'asc') : 'asc' }));
+    const stlSorts = {}, stlArrows = {};
+    stlColList.forEach((c) => { stlSorts[c] = stlSortBy(c); stlArrows[c] = st.stlSortCol === c ? (st.stlSortDir === 'asc' ? '▲' : '▼') : ''; });
+    const stlCountLabel = stl.length + ' fichier' + (stl.length > 1 ? 's' : '') + ' STL';
+
+    // ===== DETAIL PANEL (client / commande / stl) =====
+    let panelType = null, panelData = null, panelOpen = false;
+    const fmtEur = (n) => n.toLocaleString('fr-FR', { minimumFractionDigits: 0, maximumFractionDigits: 0 }) + ' €';
+    if (st.panel) {
+      panelOpen = true; panelType = st.panel.type;
+      const d = st.panel.data;
+      if (panelType === 'client') {
+        const cdev = base.filter((r) => r.client === d.name).map((r, i) => ({
+          id: r.id, date: r.date, montant: r.montant, statut: r.statut, statusStyle: r.statusStyle,
+          rowStyle: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px', padding: '11px 13px', borderTop: i === 0 ? 'none' : '1px solid #EFEBDF', cursor: 'pointer' },
+        }));
+        panelData = { ...d, devisList: cdev, devisCount: cdev.length };
+      } else if (panelType === 'commande') {
+        const corder = ['Validé', 'En production', 'Expédié'];
+        let ci = corder.indexOf(d.statut); if (ci < 0) ci = 0;
+        const cLabels = ['Validé', 'Production', 'Expédié'];
+        const steps = cLabels.map((label, i) => {
+          const stt = i < ci ? 'done' : (i === ci ? 'current' : 'future');
+          let dotStyle, labelStyle;
+          if (stt === 'done') { dotStyle = { width: '16px', height: '16px', borderRadius: '99px', background: '#004B32' }; labelStyle = { fontSize: '10.5px', color: '#004B32', fontWeight: 600, textAlign: 'center' }; }
+          else if (stt === 'current') { dotStyle = { width: '16px', height: '16px', borderRadius: '99px', background: '#004B32', border: '3px solid #AAE66E', boxShadow: '0 0 0 3px #fff' }; labelStyle = { fontSize: '10.5px', color: '#004B32', fontWeight: 700, textAlign: 'center' }; }
+          else { dotStyle = { width: '16px', height: '16px', borderRadius: '99px', background: '#fff', border: '2px solid rgba(0,75,50,0.2)' }; labelStyle = { fontSize: '10.5px', color: '#b3b3b3', textAlign: 'center' }; }
+          return { label, dotStyle, labelStyle };
+        });
+        const pct = ci <= 0 ? 0 : (ci / (corder.length - 1)) * 100;
+        const progressStyle = { position: 'absolute', top: '8px', left: '16%', width: 'calc((100% - 32%) * ' + (pct / 100) + ')', height: '2px', background: '#004B32' };
+        let pcs = stlBase.filter((s) => s.devis === d.devis);
+        if (pcs.length === 0) pcs = stlBase.slice(0, Math.max(1, Math.min(3, d.files)));
+        const pieces = pcs.map((s, i) => ({ name: s.name, volume: s.volume, teinte: s.teinte, teinteDot: s.teinteDotStyle, rowStyle: { display: 'flex', alignItems: 'center', gap: '11px', padding: '11px 13px', borderTop: i === 0 ? 'none' : '1px solid #EFEBDF' } }));
+        const shipped = d.statut === 'Expédié';
+        const primaryMap = { 'Validé': 'Lancer la production', 'En production': 'Marquer expédié', 'Expédié': 'Clôturer le dossier' };
+        panelData = {
+          ...d, statusPill: statusStyle[d.statut], steps, progressStyle, pieces,
+          printer: 'EOS P396 — Bac B-24', operator: 'L. Ferreira', finition: pcs[0] ? pcs[0].finition : 'Microbillée', teinte: pcs[0] ? pcs[0].teinte : 'Blanc',
+          tva: fmtEur(num(d.montant) * 0.2), ttc: fmtEur(num(d.montant) * 1.2), shipped,
+          carrier: 'Chronopost', tracking: 'XY' + d.id.replace(/[^0-9]/g, '').slice(-8) + 'FR', shipDate: d.date,
+          primaryLabel: primaryMap[d.statut] || 'Avancer',
+        };
+      } else if (panelType === 'stl') {
+        panelData = { ...d, teinteDot: d.teinteDotStyle };
+      }
+    }
+    const closePanel = () => this.setState({ panel: null });
+    const advancePanel = () => { const order = ['Validé', 'En production', 'Expédié']; const d = st.panel && st.panel.data; if (!d) return; let i = order.indexOf(d.statut); i = Math.min(i + 1, order.length - 1); this.setState({ panel: { type: 'commande', data: { ...d, statut: order[i] } } }); };
+
+    // ===== GLOBAL SEARCH =====
+    const searchActive = st.searchOpen && q.length > 0;
+    let searchGroups = [];
+    if (searchActive) {
+      const dHits = base.filter((r) => (r.id + ' ' + r.client + ' ' + r.email).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().includes(q)).slice(0, 4).map((r) => ({ title: r.id, sub: r.client, badge: r.statut, badgeStyle: r.statusStyle, onClick: openWith(r.statut) }));
+      const cHits = cmdBase.filter((r) => (r.id + ' ' + r.client).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().includes(q)).slice(0, 3).map((r) => ({ title: r.id, sub: r.client, badge: r.statut, badgeStyle: statusStyle[r.statut], onClick: setPanel('commande', r) }));
+      const clHits = cliBase.filter((r) => (r.name + ' ' + r.email).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().includes(q)).slice(0, 3).map((r) => ({ title: r.name, sub: r.email, badge: r.nature, badgeStyle: r.natureStyle, onClick: setPanel('client', r) }));
+      const sHits = stlBase.filter((r) => (r.name + ' ' + r.client).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().includes(q)).slice(0, 3).map((r) => ({ title: r.name, sub: r.client, badge: r.teinte, badgeStyle: r.teintePillStyle, onClick: setPanel('stl', r) }));
+      searchGroups = [
+        { label: 'Devis', items: dHits }, { label: 'Commandes', items: cHits },
+        { label: 'Clients', items: clHits }, { label: 'Fichiers STL', items: sHits },
+      ].filter((g) => g.items.length > 0);
+    }
+    const searchTotal = searchGroups.reduce((a, g) => a + g.items.length, 0);
+
+    // ===== NOTIFICATIONS =====
+    const notifRaw = [
+      ['#FF6C4F', '#FFF3E0', 'Nouveau devis reçu', 'Clinique Saint-Roch · DEV-…0042', 'il y a 12 min', true],
+      ['#004B32', '#E8F5E9', 'Devis validé', 'Dr. Mehdi Bouaziz · 2 980 € HT', 'il y a 1 h', true],
+      ['#6A1B9A', '#F3E5F5', 'Commande expédiée', 'MedStudio Paris · CMD-2026-0104', 'il y a 3 h', true],
+      ['#1565C0', '#E3F2FD', 'Production lancée', 'Hôpital Nord · CMD-2026-0109', 'hier · 16:40', false],
+      ['#C62828', '#FDEAEA', 'Devis refusé', 'Atelier Prothèse Lyon · DEV-…0039', 'hier · 11:02', false],
+    ];
+    const notifs = notifRaw.map((n, i) => ({
+      title: n[2], sub: n[3], time: n[4], unread: n[5],
+      iconStyle: { width: '34px', height: '34px', borderRadius: '10px', background: n[1], display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 'none' },
+      dotStyle: { width: '12px', height: '12px', borderRadius: '50%', background: n[0] },
+      titleStyle: { fontSize: '13px', fontWeight: n[5] ? 700 : 600, color: '#1C1C1A' },
+      rowStyle: { display: 'flex', alignItems: 'flex-start', gap: '11px', padding: '13px 15px', background: n[5] ? '#FBFAF4' : '#fff', borderTop: i === 0 ? 'none' : '1px solid #F0ECE0' },
+    }));
+    const unreadCount = notifRaw.filter((n) => n[5]).length;
+
+    const titles = { dashboard: 'tableau de bord', devis: 'devis', commandes: 'commandes', clients: 'clients', stl: 'fichiers stl' };
+
+    return {
+      isDash: st.view === 'dashboard', isDevis: st.view === 'devis',
+      isCommandes: st.view === 'commandes', isClients: st.view === 'clients', isStl: st.view === 'stl',
+      pageTitle: titles[st.view] || 'devis',
+      goDash: () => this.setState({ view: 'dashboard', openFilter: null }),
+      goDevis: () => this.setState({ view: 'devis' }),
+      goCmd: () => this.setState({ view: 'commandes', openFilter: null }),
+      goClients: () => this.setState({ view: 'clients', openFilter: null }),
+      goStl: () => this.setState({ view: 'stl', openFilter: null }),
+      railDashStyle: railBtn(st.view === 'dashboard'),
+      railDevisStyle: railBtn(st.view === 'devis'),
+      railCmdStyle: railBtn(st.view === 'commandes'),
+      railClientsStyle: railBtn(st.view === 'clients'),
+      railStlStyle: railBtn(st.view === 'stl'),
+      commandes, cmdPills, cmdCountLabel, cmdStats, cmdEmpty,
+      clients, cliSorts, cliArrows, cliCountLabel, cliEmpty,
+      stl, stlSorts, stlArrows, stlCountLabel, stlEmpty,
+      quotes, chart, statusBreakdown, recent,
+      hasResults: count > 0, isEmpty: count === 0, countLabel,
+      query: st.query, onSearch: (e) => this.setState({ query: e.target.value, searchOpen: true }),
+      onSearchFocus: () => this.setState({ searchOpen: true }),
+      closeSearch: () => this.setState({ searchOpen: false }),
+      searchActive, searchGroups, searchTotal,
+      noSearchResults: searchActive && searchTotal === 0,
+      cmdHas: !cmdEmpty, cliHas: !cliEmpty, stlHas: !stlEmpty,
+      notAuthed: !st.authed,
+      statusPills, sorts, arrows,
+      resetFilters: () => this.setState({ query: '', statusFilter: 'Tous' }),
+      showNature: st.openFilter === 'nature', showDelai: st.openFilter === 'delai', showPeriode: st.openFilter === 'periode',
+      toggleNature: toggle('nature'), toggleDelai: toggle('delai'), togglePeriode: toggle('periode'),
+      fNatureStyle: fBtn(st.openFilter === 'nature'), fDelaiStyle: fBtn(st.openFilter === 'delai'), fPeriodeStyle: fBtn(st.openFilter === 'periode'),
+      modalOpen: st.modalOpen, modalStatus: st.modalStatus,
+      openModal: () => this.setState({ modalOpen: true, openFilter: null }),
+      closeModal: () => this.setState({ modalOpen: false }),
+      setModalStatus: (s) => this.setState({ modalStatus: s }),
+      stop: (e) => { if (e && e.stopPropagation) e.stopPropagation(); },
+      panelOpen, panelType, panelData,
+      isClientPanel: panelType === 'client', isCommandePanel: panelType === 'commande', isStlPanel: panelType === 'stl',
+      closePanel, advancePanel, onNewDevisPanel: closePanel,
+      notifs, unreadCount, notifOpen: st.notifOpen,
+      toggleNotif: () => this.setState((s) => ({ notifOpen: !s.notifOpen, searchOpen: false })),
+      closeNotif: () => this.setState({ notifOpen: false }),
+      markAllRead: () => this.setState({ notifOpen: false }),
+      authed: st.authed,
+      logout: () => this.setState({ authed: false, notifOpen: false, panel: null, modalOpen: false }),
+      login: () => this.setState({ authed: true }),
+    };
+  }
+}
+</script>
+</body>
+</html>

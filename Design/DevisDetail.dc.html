@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<div style="font-family:'DM Sans',system-ui,sans-serif;color:#1A1A1A;display:flex;flex-direction:column;height:100%;">
+  <!-- header -->
+  <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:20px 22px 16px;border-bottom:1px solid rgba(0,75,50,0.1);">
+    <div>
+      <div style="font-family:'Sora',sans-serif;font-weight:700;font-size:16px;color:#004B32;letter-spacing:-.2px;">DEV-20260606-0037</div>
+      <div style="font-size:12px;color:#888;margin-top:3px;">Créé le 06/06/2026 · 14:32</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <div style="position:relative;">
+        <button onClick="{{ toggleMenu }}" style="{{ statusPillStyle }}">{{ statutLabel }}<span style="font-size:10px;opacity:.7;">▾</span></button>
+        <sc-if value="{{ menuOpen }}" hint-placeholder-val="{{ false }}">
+          <div style="position:absolute;top:calc(100% + 6px);right:0;width:190px;background:#fff;border:1px solid rgba(0,75,50,0.12);border-radius:13px;box-shadow:0 18px 40px -18px rgba(0,75,50,.45);padding:6px;z-index:40;">
+            <div style="font-size:10px;color:#9aa39e;text-transform:uppercase;letter-spacing:.5px;padding:6px 8px 4px;">Changer le statut</div>
+            <sc-for list="{{ menuOptions }}" as="o" hint-placeholder-count="5">
+              <div onClick="{{ o.onClick }}" style="display:flex;align-items:center;gap:9px;padding:8px 8px;border-radius:9px;cursor:pointer;" style-hover="background:#F4F1E7;">
+                <span style="{{ o.dot }}"></span>
+                <span style="{{ o.text }}">{{ o.label }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+      </div>
+      <sc-if value="{{ closable }}" hint-placeholder-val="{{ false }}">
+        <button onClick="{{ onClose }}" style="width:32px;height:32px;border-radius:9px;border:1px solid rgba(0,75,50,0.12);background:#fff;color:#666;cursor:pointer;display:flex;align-items:center;justify-content:center;" style-hover="background:#F4F1E7;color:#1A1A1A;"><svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M5 5l10 10M15 5L5 15"/></svg></button>
+      </sc-if>
+    </div>
+  </div>
+
+  <div style="padding:18px 22px;display:flex;flex-direction:column;gap:18px;overflow-y:auto;">
+    <!-- nature large -->
+    <div style="display:flex;align-items:center;gap:11px;background:#F0F7EC;border:1px solid #AAE66E;border-radius:13px;padding:13px 15px;">
+      <span style="width:36px;height:36px;border-radius:10px;background:#004B32;color:#fff;display:flex;align-items:center;justify-content:center;flex:none;"><svg width="19" height="19" viewBox="0 0 24 24" fill="currentColor"><path d="M11.48 3.5a.6.6 0 0 1 1.04 0l2.2 3.79 4.3.93a.6.6 0 0 1 .32.99l-2.94 3.26.46 4.37a.6.6 0 0 1-.84.61L12 16.2l-4.02 1.75a.6.6 0 0 1-.84-.61l.46-4.37-2.94-3.26a.6.6 0 0 1 .32-.99l4.3-.93z"/></svg></span>
+      <div><div style="font-size:11px;color:#5b6b66;text-transform:uppercase;letter-spacing:.5px;">Nature de l'application</div><div style="font-family:'Sora';font-weight:700;font-size:15px;color:#004B32;">Dispositif médical</div></div>
+    </div>
+
+    <!-- client -->
+    <div>
+      <div style="font-size:11px;color:#9aa39e;text-transform:uppercase;letter-spacing:.5px;margin-bottom:9px;">Client</div>
+      <div style="display:flex;align-items:center;gap:12px;">
+        <div style="width:40px;height:40px;border-radius:99px;background:#004B32;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex:none;">MB</div>
+        <div style="flex:1;min-width:0;"><div style="font-size:14px;font-weight:600;">Dr. Mehdi Bouaziz</div><div style="font-size:12.5px;color:#888;"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="f19cdf939e84908b988bb19e8385999edf9783">[email&#160;protected]</a></div></div>
+        <span style="background:#EEF1F0;color:#5b6b66;font-size:11.5px;font-weight:600;padding:4px 11px;border-radius:99px;flex:none;">FR</span>
+      </div>
+    </div>
+
+    <!-- pieces -->
+    <div>
+      <div style="font-size:11px;color:#9aa39e;text-transform:uppercase;letter-spacing:.5px;margin-bottom:9px;">Pièces · 5 fichiers STL</div>
+      <div style="border:1px solid rgba(0,75,50,0.1);border-radius:13px;overflow:hidden;">
+        <div style="display:grid;grid-template-columns:1.7fr .9fr 38px .8fr;background:#FAF8F0;font-size:10.5px;color:#9aa39e;font-weight:600;text-transform:uppercase;letter-spacing:.4px;"><div style="padding:9px 13px;">Fichier</div><div style="padding:9px 6px;">Volume</div><div style="padding:9px 6px;">Qté</div><div style="padding:9px 13px;text-align:right;">HT</div></div>
+        <div style="display:grid;grid-template-columns:1.7fr .9fr 38px .8fr;border-top:1px solid rgba(0,75,50,0.07);font-size:12.5px;align-items:center;"><div style="padding:10px 13px;font-weight:600;">guide_foret_L.stl</div><div style="padding:10px 6px;color:#666;">12 480 mm³</div><div style="padding:10px 6px;color:#666;">1</div><div style="padding:10px 13px;text-align:right;font-weight:600;">980 €</div></div>
+        <div style="display:grid;grid-template-columns:1.7fr .9fr 38px .8fr;border-top:1px solid rgba(0,75,50,0.07);font-size:12.5px;align-items:center;"><div style="padding:10px 13px;font-weight:600;">guide_foret_R.stl</div><div style="padding:10px 6px;color:#666;">12 310 mm³</div><div style="padding:10px 6px;color:#666;">1</div><div style="padding:10px 13px;text-align:right;font-weight:600;">980 €</div></div>
+        <div style="display:grid;grid-template-columns:1.7fr .9fr 38px .8fr;border-top:1px solid rgba(0,75,50,0.07);font-size:12.5px;align-items:center;"><div style="padding:10px 13px;font-weight:600;">cale_osseuse.stl</div><div style="padding:10px 6px;color:#666;">8 920 mm³</div><div style="padding:10px 6px;color:#666;">3</div><div style="padding:10px 13px;text-align:right;font-weight:600;">1 020 €</div></div>
+      </div>
+    </div>
+
+    <!-- recap -->
+    <div style="background:#FAF8F0;border:1px solid rgba(0,75,50,0.1);border-radius:13px;padding:15px 16px;">
+      <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:12px;">
+        <span style="background:#fff;border:1px solid rgba(0,75,50,0.12);font-size:11px;color:#3f5249;padding:4px 10px;border-radius:99px;">Finition lissée</span>
+        <span style="background:#fff;border:1px solid rgba(0,75,50,0.12);font-size:11px;color:#3f5249;padding:4px 10px;border-radius:99px;">Priority</span>
+        <span style="background:#fff;border:1px solid rgba(0,75,50,0.12);font-size:11px;color:#3f5249;padding:4px 10px;border-radius:99px;">Stérilisable</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:13px;color:#555;padding:3px 0;"><span>Total HT</span><span style="font-weight:600;color:#1A1A1A;">2 980,00 €</span></div>
+      <div style="display:flex;justify-content:space-between;font-size:13px;color:#555;padding:3px 0;"><span>Remise (−5%)</span><span style="font-weight:600;color:#FF6C4F;">−149,00 €</span></div>
+      <div style="display:flex;justify-content:space-between;font-size:13px;color:#555;padding:3px 0;"><span>TVA 20%</span><span style="font-weight:600;color:#1A1A1A;">566,20 €</span></div>
+      <div style="display:flex;justify-content:space-between;font-size:15px;padding:10px 0 0;margin-top:8px;border-top:1px solid rgba(0,75,50,0.12);"><span style="font-weight:700;">Total TTC</span><span style="font-family:'Sora';font-weight:700;color:#004B32;">3 397,20 €</span></div>
+    </div>
+
+    <!-- actions -->
+    <div style="display:flex;flex-direction:column;gap:9px;">
+      <div style="display:grid;grid-template-columns:auto 1fr;gap:9px;">
+        <button style="display:flex;align-items:center;justify-content:center;gap:7px;background:#fff;border:1px solid rgba(0,75,50,0.2);color:#004B32;font-size:13px;font-weight:600;padding:12px 18px;border-radius:99px;cursor:pointer;" style-hover="background:#F0F7EC;"><svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3v9M6.5 9 10 12.5 13.5 9M4 15h12"/></svg>PDF</button>
+        <button onClick="{{ advance }}" style="display:flex;align-items:center;justify-content:center;gap:7px;background:#004B32;color:#fff;font-size:13px;font-weight:700;padding:12px;border-radius:99px;cursor:pointer;" style-hover="background:#00603f;"><svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10.5 8 14l8-8.5"/></svg>{{ primaryLabel }}</button>
+      </div>
+      <sc-if value="{{ showRefuse }}" hint-placeholder-val="{{ false }}">
+        <button onClick="{{ refuse }}" style="display:flex;align-items:center;justify-content:center;gap:7px;background:#fff;border:1px solid rgba(198,40,40,0.4);color:#C62828;font-size:13px;font-weight:600;padding:11px;border-radius:99px;cursor:pointer;" style-hover="background:#FDEAEA;border-color:#C62828;"><svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M6 6l8 8M14 6l-8 8"/></svg>Refuser le devis</button>
+      </sc-if>
+      <button style="display:flex;align-items:center;justify-content:center;gap:7px;background:#fff;border:1px solid rgba(0,75,50,0.14);color:#888;font-size:13px;font-weight:600;padding:11px;border-radius:99px;cursor:pointer;" style-hover="background:#F4F1E7;color:#1A1A1A;">Archiver le devis</button>
+    </div>
+
+    <!-- timeline -->
+    <div style="border-top:1px solid rgba(0,75,50,0.1);padding-top:16px;">
+      <div style="font-size:11px;color:#9aa39e;text-transform:uppercase;letter-spacing:.5px;margin-bottom:16px;">Suivi du statut</div>
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;position:relative;">
+        <div style="position:absolute;top:8px;left:9%;right:9%;height:2px;background:rgba(0,75,50,0.12);"></div>
+        <div style="{{ progressStyle }}"></div>
+        <sc-for list="{{ steps }}" as="step" hint-placeholder-count="5">
+          <div style="display:flex;flex-direction:column;align-items:center;gap:8px;flex:1;z-index:1;">
+            <span style="{{ step.dotStyle }}"></span>
+            <span style="{{ step.labelStyle }}">{{ step.label }}</span>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:440,&quot;height&quot;:840},&quot;statut&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Nouveau&quot;,&quot;Validé&quot;,&quot;Payé&quot;,&quot;En production&quot;,&quot;Expédié&quot;],&quot;default&quot;:&quot;Validé&quot;},&quot;closable&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true},&quot;onChangeStatut&quot;:{&quot;editor&quot;:null},&quot;onClose&quot;:{&quot;editor&quot;:null}}">
+class Component extends DCLogic {
+  state = { menuOpen: false };
+
+  renderVals() {
+    const order = ['Nouveau', 'Validé', 'En production', 'Expédié'];
+    const trackLabels = ['Nouveau', 'Validé', 'Production', 'Expédié'];
+    const menuOrder = ['Nouveau', 'Validé', 'Refusé', 'En production', 'Expédié'];
+    const dotColor = { 'Nouveau': '#FF6C4F', 'Validé': '#004B32', 'Refusé': '#C62828', 'En production': '#1565C0', 'Expédié': '#6A1B9A' };
+    const statut = this.props.statut ?? 'Nouveau';
+    const refused = statut === 'Refusé';
+    let cur = order.indexOf(statut);
+    if (cur < 0) cur = 0;
+
+    const pill = (bg, fg) => ({
+      display: 'flex', alignItems: 'center', gap: '6px', border: 'none',
+      background: bg, color: fg, fontSize: '12.5px', fontWeight: 600,
+      padding: '6px 13px', borderRadius: '99px', cursor: 'pointer',
+    });
+    const pillMap = {
+      'Nouveau': pill('#FFF3E0', '#FF6C4F'), 'Validé': pill('#E8F5E9', '#004B32'),
+      'Refusé': pill('#FDEAEA', '#C62828'), 'En production': pill('#E3F2FD', '#1565C0'),
+      'Expédié': pill('#F3E5F5', '#6A1B9A'),
+    };
+    const primaryMap = {
+      'Nouveau': 'Valider le devis', 'Validé': 'Lancer la production',
+      'En production': 'Marquer expédié', 'Expédié': 'Clôturer le dossier',
+      'Refusé': 'Rouvrir le devis',
+    };
+
+    const change = this.props.onChangeStatut;
+    const setStatut = (s) => () => { this.setState({ menuOpen: false }); if (change) change(s); };
+
+    const menuOptions = menuOrder.map((s) => ({
+      label: s,
+      onClick: setStatut(s),
+      dot: { width: '9px', height: '9px', borderRadius: '99px', background: dotColor[s], flex: 'none' },
+      text: { fontSize: '13px', color: s === statut ? '#004B32' : '#3f5249', fontWeight: s === statut ? 700 : 500 },
+    }));
+
+    const steps = trackLabels.map((label, i) => {
+      let lbl = label, dotStyle, labelStyle;
+      // Refused: step 0 done, step 1 becomes a red "Refusé" terminal, rest greyed out
+      if (refused) {
+        if (i === 0) {
+          dotStyle = { width: '16px', height: '16px', borderRadius: '99px', background: '#004B32' };
+          labelStyle = { fontSize: '10.5px', color: '#004B32', fontWeight: 600, textAlign: 'center' };
+        } else if (i === 1) {
+          lbl = 'Refusé';
+          dotStyle = { width: '16px', height: '16px', borderRadius: '99px', background: '#C62828', border: '3px solid #FDEAEA', boxShadow: '0 0 0 3px #fff' };
+          labelStyle = { fontSize: '10.5px', color: '#C62828', fontWeight: 700, textAlign: 'center' };
+        } else {
+          dotStyle = { width: '16px', height: '16px', borderRadius: '99px', background: '#fff', border: '2px solid rgba(0,75,50,0.2)' };
+          labelStyle = { fontSize: '10.5px', color: '#cdc8bb', textAlign: 'center' };
+        }
+        return { label: lbl, dotStyle, labelStyle };
+      }
+      const state = i < cur ? 'done' : (i === cur ? 'current' : 'future');
+      if (state === 'done') {
+        dotStyle = { width: '16px', height: '16px', borderRadius: '99px', background: '#004B32' };
+        labelStyle = { fontSize: '10.5px', color: '#004B32', fontWeight: 600, textAlign: 'center' };
+      } else if (state === 'current') {
+        dotStyle = { width: '16px', height: '16px', borderRadius: '99px', background: '#004B32', border: '3px solid #AAE66E', boxShadow: '0 0 0 3px #fff' };
+        labelStyle = { fontSize: '10.5px', color: '#004B32', fontWeight: 700, textAlign: 'center' };
+      } else {
+        dotStyle = { width: '16px', height: '16px', borderRadius: '99px', background: '#fff', border: '2px solid rgba(0,75,50,0.2)' };
+        labelStyle = { fontSize: '10.5px', color: '#b3b3b3', textAlign: 'center' };
+      }
+      return { label: lbl, dotStyle, labelStyle };
+    });
+
+    const pct = refused ? 33 : (cur <= 0 ? 0 : (cur / (order.length - 1)) * 100);
+    const progressStyle = { position: 'absolute', top: '8px', left: '9%', width: 'calc((100% - 18%) * ' + (pct / 100) + ')', height: '2px', background: refused ? '#C62828' : '#004B32' };
+
+    return {
+      statutLabel: statut,
+      statusPillStyle: pillMap[statut] || pillMap['Validé'],
+      primaryLabel: primaryMap[statut] || 'Valider le devis',
+      steps, progressStyle, menuOptions,
+      menuOpen: this.state.menuOpen,
+      toggleMenu: () => { if (this.props.onChangeStatut) this.setState((s) => ({ menuOpen: !s.menuOpen })); },
+      advance: () => { if (!change) return; if (refused) { change('Nouveau'); return; } change(order[Math.min(cur + 1, order.length - 1)]); },
+      refuse: () => { if (change) change('Refusé'); },
+      showRefuse: statut === 'Nouveau',
+      closable: this.props.closable ?? true,
+      onClose: this.props.onClose,
+    };
+  }
+}
+</script>
+</body>
+</html>
