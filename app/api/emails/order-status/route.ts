@@ -34,17 +34,13 @@ export async function POST(request: Request) {
   // Seuls certains statuts declenchent un email client.
   if (!STATUT_EMAIL[statut]) return Response.json({ ok: true, skipped: "statut" });
 
+  // Autorisation par RLS (pas de getUser, non fiable en serverless).
+  // admins_select_self ne renvoie que la ligne de l'appelant : une ligne
+  // presente => l'utilisateur est admin.
   const supa = supabaseFromToken(token);
-  const {
-    data: { user },
-  } = await supa.auth.getUser(token);
-  if (!user) return Response.json({ error: "unauthenticated" }, { status: 401 });
-
-  // Autorisation : seul un admin peut declencher une notification de statut.
   const { data: adminRow } = await supa
     .from("admins")
     .select("user_id")
-    .eq("user_id", user.id)
     .maybeSingle();
   if (!adminRow) return Response.json({ error: "forbidden" }, { status: 403 });
 

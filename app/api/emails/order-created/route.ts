@@ -51,11 +51,10 @@ export async function POST(request: Request) {
   const ids = Array.isArray(body.commandeIds) ? body.commandeIds : [];
   if (ids.length === 0) return Response.json({ error: "no_orders" }, { status: 400 });
 
+  // Autorisation par RLS : la requete s'execute sous le token de l'utilisateur,
+  // donc seules ses propres commandes sont retournees. Pas de getUser() (ne
+  // fonctionne pas de maniere fiable dans la fonction serverless).
   const supa = supabaseFromToken(token);
-  const {
-    data: { user },
-  } = await supa.auth.getUser(token);
-  if (!user) return Response.json({ error: "unauthenticated" }, { status: 401 });
 
   const { data, error } = await supa
     .from("commandes")
@@ -90,7 +89,7 @@ export async function POST(request: Request) {
 
   const client = one(rows[0].clients);
   const clientName = client?.raison_sociale ?? "Client";
-  const clientEmail = client?.email ?? user.email ?? null;
+  const clientEmail = client?.email ?? null;
 
   const results: Record<string, unknown> = {};
 
@@ -109,7 +108,7 @@ export async function POST(request: Request) {
     html: internalNotificationHtml(
       {
         raison_sociale: client?.raison_sociale ?? null,
-        email: client?.email ?? user.email ?? null,
+        email: client?.email ?? null,
         telephone: client?.telephone ?? null,
       },
       orders
