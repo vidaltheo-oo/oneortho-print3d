@@ -33,7 +33,7 @@ export async function POST(request: Request) {
   const supa = supabaseFromToken(token);
   const {
     data: { user },
-  } = await supa.auth.getUser();
+  } = await supa.auth.getUser(token);
   if (!user) return Response.json({ error: "unauthenticated" }, { status: 401 });
 
   // Autorisation : seul un admin peut declencher une notification de statut.
