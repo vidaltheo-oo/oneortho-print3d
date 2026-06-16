@@ -38,6 +38,7 @@ export type AdminCommande = {
   natureApplication: string | null;
   client: ClientLite | null;
   filesCount: number;
+  updatedAt: string;
   // Statut du devis lie : le lancement en production exige un devis valide.
   devisStatut: DevisStatut | null;
 };
@@ -97,6 +98,42 @@ export function workflowStep(
   if (devisStatut === "refuse") return "refuse";
   if (devisStatut === "accepte") return "valide";
   return "nouveau";
+}
+
+// Ordre des etapes pour le tri par statut.
+export const WORKFLOW_ORDER: Record<WorkflowStep, number> = {
+  nouveau: 0,
+  valide: 1,
+  en_production: 2,
+  expediee: 3,
+  livree: 4,
+  refuse: 5,
+  annulee: 6,
+};
+
+// Ordre des delais pour le tri (Standard < Priority < Express).
+export const DELAI_ORDER: Record<string, number> = { std: 0, pri: 1, exp: 2 };
+
+// ---------- Filtre par periode ----------
+export type Period = "semaine" | "mois" | "trimestre" | "tout";
+
+export const PERIOD_FILTERS: { key: Period; label: string }[] = [
+  { key: "semaine", label: "Cette semaine" },
+  { key: "mois", label: "Ce mois" },
+  { key: "trimestre", label: "3 mois" },
+  { key: "tout", label: "Tout" },
+];
+
+// Fenetres glissantes (jours) ramenees a maintenant.
+export function isInPeriod(iso: string, period: Period, now: Date): boolean {
+  if (period === "tout") return true;
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return false;
+  const days = (now.getTime() - d.getTime()) / 86400000;
+  if (period === "semaine") return days <= 7;
+  if (period === "mois") return days <= 31;
+  if (period === "trimestre") return days <= 92;
+  return true;
 }
 
 const eur = new Intl.NumberFormat("fr-FR", {
@@ -187,6 +224,7 @@ type CommandeRow = {
   id: string;
   statut: CommandeStatut;
   created_at: string;
+  updated_at: string;
   clients: DevisJoin | DevisJoin[] | null;
   devis:
     | {
@@ -232,7 +270,7 @@ export async function fetchAdminData(): Promise<AdminFetchResult> {
   const commandesQuery = supabase
     .from("commandes")
     .select(
-      "id, statut, created_at, clients:client_id ( raison_sociale, email ), devis:devis_id ( numero, statut, montant_ht, montant_ttc, delai, nature_application, devis_pieces ( quantite ) )"
+      "id, statut, created_at, updated_at, clients:client_id ( raison_sociale, email ), devis:devis_id ( numero, statut, montant_ht, montant_ttc, delai, nature_application, devis_pieces ( quantite ) )"
     )
     .order("created_at", { ascending: false });
 
@@ -273,6 +311,7 @@ export async function fetchAdminData(): Promise<AdminFetchResult> {
       natureApplication: d?.nature_application ?? null,
       client: one(r.clients),
       filesCount: d?.devis_pieces?.length ?? 0,
+      updatedAt: r.updated_at,
       devisStatut: d?.statut ?? null,
     };
   });

@@ -437,6 +437,82 @@
   margin: 0 2px 10px;
 }
 
+/* ---------- Barre de filtres ---------- */
+.filterBar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.filterGroup {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  flex-wrap: wrap;
+}
+
+.filterLabel {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #9aa39e;
+  font-weight: 700;
+  margin-right: 2px;
+}
+
+.resetBtn {
+  margin-left: auto;
+  background: none;
+  border: 1px solid rgba(0, 75, 50, 0.2);
+  color: var(--green);
+  font-family: var(--font-body);
+  font-size: 12.5px;
+  font-weight: 600;
+  padding: 8px 14px;
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.resetBtn:hover {
+  background: rgba(0, 75, 50, 0.06);
+}
+
+/* ---------- En-tetes triables ---------- */
+.thSort {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: none;
+  border: none;
+  color: inherit;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+  transition: background 0.12s ease;
+}
+
+.thSort:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* Colonne de tri active : surlignee sur l'en-tete vert (texte/fleche lime). */
+.thActive {
+  background: rgba(255, 255, 255, 0.14);
+  color: var(--lime);
+}
+
+.sortArrow {
+  font-size: 11px;
+  min-width: 8px;
+  line-height: 1;
+}
+
 /* ---------- Tables ---------- */
 .table {
   background: #fff;
