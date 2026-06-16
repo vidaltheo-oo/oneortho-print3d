@@ -2576,7 +2576,12 @@ const AUTH_I18N = {
   de: { title: "Zum Bestellen anmelden", body: "Deine Konfiguration wurde in den Warenkorb gelegt und bleibt erhalten. Melde dich an oder erstelle ein Konto, um die Bestellung abzuschliessen.", login: "Anmelden", signup: "Konto erstellen", guest: "Ohne Konto fortfahren" },
   pt: { title: "Inicie sessao para encomendar", body: "A sua configuracao foi adicionada ao carrinho e sera mantida. Inicie sessao ou crie uma conta para concluir o pedido.", login: "Iniciar sessao", signup: "Criar uma conta", guest: "Continuar sem conta" },
 };
-function goTop(path) { (window.top || window).location.href = path; }
+// Navigue la page parente Next (meme origine que cet iframe). On vise
+// window.parent et non window.top : en prod l'Espace client est lui-meme
+// embarque en iframe dans le site OneOrtho (origine differente), or ecrire
+// window.top.location est alors bloque (cross-origin) et resoudrait "/panier"
+// sur la mauvaise racine. window.parent reste l'app Next, accessible.
+function goTop(path) { (window.parent || window).location.href = path; }
 function showAuthModal() {
   const tr = AUTH_I18N[currentLang] || AUTH_I18N.fr;
   $('authTitle').textContent = tr.title;
