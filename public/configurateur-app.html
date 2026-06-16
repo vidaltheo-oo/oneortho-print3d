@@ -70,6 +70,46 @@ header{
 }
 .cart-pill.has-items .cart-count{background:var(--lime);color:var(--green)}
 
+/* PASTILLE UTILISATEUR */
+.user-pill-wrap{position:relative;display:inline-flex}
+.user-pill{
+  width:40px;height:40px;border-radius:50%;
+  background:var(--green);border:2px solid rgba(255,255,255,.85);
+  color:#fff;font-family:'Sora',sans-serif;font-weight:700;font-size:.85rem;
+  letter-spacing:.02em;display:flex;align-items:center;justify-content:center;
+  cursor:pointer;padding:0;
+}
+.user-pill:hover{border-color:var(--lime)}
+.user-pill.guest{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.4)}
+.user-tooltip{
+  position:absolute;top:calc(100% + 8px);right:0;
+  background:rgba(0,0,0,.82);color:#fff;font-size:.72rem;font-weight:500;
+  white-space:nowrap;padding:.375rem .625rem;border-radius:8px;
+  pointer-events:none;opacity:0;transform:translateY(-4px);
+  transition:opacity .15s ease,transform .15s ease;z-index:50;
+}
+.user-pill-wrap:hover .user-tooltip{opacity:1;transform:translateY(0)}
+.user-tooltip:empty{display:none}
+.user-menu{
+  position:absolute;top:calc(100% + 8px);right:0;min-width:192px;
+  background:#fff;border-radius:12px;box-shadow:0 4px 24px rgba(0,0,0,.18);
+  padding:6px;display:flex;flex-direction:column;z-index:55;
+}
+.user-menu-head{
+  font-family:'Sora',sans-serif;font-weight:700;font-size:.8rem;color:var(--green);
+  padding:8px 12px 6px;border-bottom:1px solid #f0ece0;margin-bottom:4px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:240px;
+}
+.user-menu-item{
+  background:none;border:none;text-align:left;
+  font-family:'DM Sans',sans-serif;font-size:.84rem;font-weight:500;color:#1c1c1a;
+  padding:9px 12px;border-radius:8px;cursor:pointer;
+}
+.user-menu-item:hover{background:rgba(0,75,50,.07)}
+.user-menu-danger{color:#c62828}
+.user-menu-danger:hover{background:rgba(198,40,40,.08)}
+.user-menu-div{height:1px;background:#f0ece0;margin:4px 6px}
+
 /* BOUTON AJOUTER AU PANIER */
 .btn-cart{
   display:block;width:100%;margin-top:.625rem;
@@ -507,6 +547,27 @@ footer strong{color:var(--orange)}
       </svg>
       <span class="cart-count" id="cartCount">0</span>
     </button>
+
+    <!-- Pastille utilisateur : etat auth lu depuis localStorage (session Supabase
+         partagee, meme origine que l'app Next). -->
+    <div class="user-pill-wrap" id="userPillWrap">
+      <button class="user-pill" id="userPill" aria-haspopup="menu" aria-expanded="false" aria-label="Compte">
+        <span id="userPillInitials"></span>
+        <svg id="userPillGuest" width="18" height="18" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="8" r="3.4"/>
+          <path d="M5 20c0-3.6 3.1-5.6 7-5.6s7 2 7 5.6"/>
+        </svg>
+      </button>
+      <span class="user-tooltip" id="userTooltip"></span>
+      <div class="user-menu" id="userMenu" role="menu" hidden>
+        <div class="user-menu-head" id="userMenuHead"></div>
+        <button class="user-menu-item" id="umAccount" role="menuitem">Mon compte</button>
+        <button class="user-menu-item" id="umOrders" role="menuitem">Mes commandes</button>
+        <div class="user-menu-div" id="umDivider"></div>
+        <button class="user-menu-item user-menu-danger" id="umLogout" role="menuitem">Déconnexion</button>
+      </div>
+    </div>
   </div>
 </header>
 
@@ -2587,19 +2648,26 @@ function buildCartItem() {
 
 // Session Supabase : le client Next stocke la session en localStorage
 // (cle sb-<ref>-auth-token). Meme origine => l'iframe peut la lire.
-function isLoggedIn() {
+function authTokenKeys() {
+  const keys = [];
+  for (let i = 0; i < localStorage.length; i++) {
+    const k = localStorage.key(i);
+    if (k && k.startsWith('sb-') && k.endsWith('-auth-token')) keys.push(k);
+  }
+  return keys;
+}
+// Renvoie la session active (avec user/user_metadata) ou null.
+function getAuthSession() {
   try {
-    for (let i = 0; i < localStorage.length; i++) {
-      const k = localStorage.key(i);
-      if (k && k.startsWith('sb-') && k.endsWith('-auth-token')) {
-        const v = JSON.parse(localStorage.getItem(k) || 'null');
-        const s = v && v.currentSession ? v.currentSession : v;
-        if (s && s.access_token && (!s.expires_at || s.expires_at * 1000 > Date.now())) return true;
-      }
+    for (const k of authTokenKeys()) {
+      const v = JSON.parse(localStorage.getItem(k) || 'null');
+      const s = v && v.currentSession ? v.currentSession : v;
+      if (s && s.access_token && (!s.expires_at || s.expires_at * 1000 > Date.now())) return s;
     }
   } catch (e) {}
-  return false;
+  return null;
 }
+function isLoggedIn() { return !!getAuthSession(); }
 
 // Textes de la modale "connexion requise" (i18n local aux 6 langues de l'app).
 const AUTH_I18N = {
@@ -2654,6 +2722,74 @@ if (cartBtnEl) cartBtnEl.addEventListener('click', addToCart);
 // Icone panier de l'en-tete : ouvre la page /panier (navigation de la page parente).
 const cartPillEl = $('cartPill');
 if (cartPillEl) cartPillEl.addEventListener('click', () => goTop('/panier'));
+
+// ── Pastille utilisateur (initiales + dropdown), alignee sur EspaceHeader ─────
+const PILL_TITLES = new Set(['dr','dr.','pr','pr.','m','m.','mr','mr.','mme','mme.','mlle','mlle.']);
+function pillInitials(name) {
+  if (!name) return '?';
+  const parts = name.trim().split(/\s+/).filter(p => p && !PILL_TITLES.has(p.toLowerCase())).slice(0, 2);
+  return parts.map(p => (p[0] || '').toUpperCase()).join('') || '?';
+}
+function pillFullName(session) {
+  const u = session && session.user ? session.user : {};
+  const m = u.user_metadata || {};
+  return m.nom || m.raison_sociale || u.email || '';
+}
+function setUserMenuOpen(open) {
+  const menu = $('userMenu'), pill = $('userPill');
+  if (!menu || !pill) return;
+  menu.hidden = !open;
+  pill.setAttribute('aria-expanded', open ? 'true' : 'false');
+}
+function initUserPill() {
+  const wrap = $('userPillWrap'), pill = $('userPill');
+  if (!wrap || !pill) return;
+  const session = getAuthSession();
+  const initialsEl = $('userPillInitials'), guestEl = $('userPillGuest');
+  const tooltip = $('userTooltip'), head = $('userMenuHead');
+  const loggedIn = !!session;
+
+  if (loggedIn) {
+    const full = pillFullName(session);
+    pill.classList.remove('guest');
+    initialsEl.textContent = pillInitials(full);
+    initialsEl.style.display = '';
+    guestEl.style.display = 'none';
+    tooltip.textContent = full;
+    head.textContent = full;
+    pill.setAttribute('aria-label', full || 'Compte');
+  } else {
+    pill.classList.add('guest');
+    initialsEl.textContent = '';
+    initialsEl.style.display = 'none';
+    guestEl.style.display = '';
+    tooltip.textContent = '';
+  }
+
+  pill.addEventListener('click', (e) => {
+    e.stopPropagation();
+    // Non connecte : redirige vers la connexion. Connecte : ouvre le menu.
+    if (!loggedIn) { goTop('/connexion'); return; }
+    setUserMenuOpen($('userMenu').hidden);
+  });
+
+  $('umAccount').addEventListener('click', () => { setUserMenuOpen(false); goTop('/mon-compte'); });
+  $('umOrders').addEventListener('click', () => { setUserMenuOpen(false); goTop('/mes-commandes'); });
+  $('umLogout').addEventListener('click', () => {
+    // Deconnexion locale : on retire la session Supabase de ce navigateur puis
+    // on renvoie vers la connexion (meme effet que signOut cote app Next).
+    try { authTokenKeys().forEach(k => localStorage.removeItem(k)); } catch (e) {}
+    setUserMenuOpen(false);
+    goTop('/connexion');
+  });
+
+  // Fermeture au clic exterieur / Echap.
+  document.addEventListener('click', (e) => {
+    if (!wrap.contains(e.target)) setUserMenuOpen(false);
+  });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') setUserMenuOpen(false); });
+}
+initUserPill();
 
 const authLoginEl = $('authLogin');
 if (authLoginEl) authLoginEl.addEventListener('click', () => goTop('/connexion'));

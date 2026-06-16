@@ -5,9 +5,13 @@ import { supabase } from "@/lib/supabaseClient";
 import {
   checkIsAdmin,
   fetchAdminData,
+  fetchAdminClients,
+  fetchAdminStl,
   updateDevisStatut,
   updateCommandeStatut,
   type AdminData,
+  type AdminClient,
+  type AdminStlFile,
   type DevisStatut,
   type CommandeStatut,
 } from "@/lib/admin";
@@ -16,22 +20,26 @@ import styles from "./admin.module.css";
 import AdminDashboard from "./AdminDashboard";
 import AdminDevis from "./AdminDevis";
 import AdminCommandes from "./AdminCommandes";
+import AdminClients from "./AdminClients";
+import AdminStl from "./AdminStl";
 
 type Phase = "checking" | "login" | "denied" | "ready";
-type View = "dashboard" | "devis" | "commandes";
+type View = "dashboard" | "devis" | "commandes" | "clients" | "stl";
 
-const NAV: { key: View | "clients" | "stl"; label: string; enabled: boolean }[] = [
+const NAV: { key: View; label: string; enabled: boolean }[] = [
   { key: "dashboard", label: "Bord", enabled: true },
   { key: "devis", label: "Devis", enabled: true },
   { key: "commandes", label: "Commandes", enabled: true },
-  { key: "clients", label: "Clients", enabled: false },
-  { key: "stl", label: "STL", enabled: false },
+  { key: "clients", label: "Clients", enabled: true },
+  { key: "stl", label: "STL", enabled: true },
 ];
 
 const TITLES: Record<View, string> = {
   dashboard: "tableau de bord",
   devis: "devis",
   commandes: "commandes",
+  clients: "clients",
+  stl: "fichiers STL",
 };
 
 function NavIcon({ k }: { k: string }) {
@@ -91,6 +99,8 @@ export default function AdminApp() {
   const [phase, setPhase] = useState<Phase>("checking");
   const [view, setView] = useState<View>("dashboard");
   const [data, setData] = useState<AdminData>({ devis: [], commandes: [] });
+  const [clients, setClients] = useState<AdminClient[]>([]);
+  const [stlFiles, setStlFiles] = useState<AdminStlFile[]>([]);
   const [dataError, setDataError] = useState<string | null>(null);
   const [adminName, setAdminName] = useState("");
 
@@ -111,13 +121,19 @@ export default function AdminApp() {
       | undefined;
     setAdminName(meta?.raison_sociale ?? userData.user?.email ?? "Admin");
 
-    const result = await fetchAdminData();
+    const [result, clientsRes, stlRes] = await Promise.all([
+      fetchAdminData(),
+      fetchAdminClients(),
+      fetchAdminStl(),
+    ]);
     if (!result.ok) {
       setDataError(result.message ?? "Erreur de chargement");
       setPhase("ready");
       return;
     }
     setData(result.data);
+    if (clientsRes.ok) setClients(clientsRes.clients);
+    if (stlRes.ok) setStlFiles(stlRes.files);
     setPhase("ready");
   }
 
@@ -329,6 +345,8 @@ export default function AdminApp() {
           {view === "commandes" && (
             <AdminCommandes commandes={data.commandes} onUpdate={onUpdateCommande} />
           )}
+          {view === "clients" && <AdminClients clients={clients} />}
+          {view === "stl" && <AdminStl files={stlFiles} />}
         </main>
       </div>
     </div>

@@ -95,6 +95,16 @@ export function formatShort(iso: string): string {
   return Number.isNaN(d.getTime()) ? "—" : shortDate.format(d);
 }
 
+const fullDate = new Intl.DateTimeFormat("fr-FR", {
+  day: "2-digit",
+  month: "2-digit",
+  year: "numeric",
+});
+export function formatDateFr(iso: string): string {
+  const d = new Date(iso);
+  return Number.isNaN(d.getTime()) ? "—" : fullDate.format(d);
+}
+
 export async function checkIsAdmin(): Promise<boolean> {
   const { data: userData } = await supabase.auth.getUser();
   if (!userData.user) return false;
@@ -235,6 +245,185 @@ export async function updateCommandeStatut(
     .update({ statut })
     .eq("id", id);
   return !error;
+}
+
+// ---------- Clients (back-office) ----------
+
+export type AdminClient = {
+  id: string;
+  raisonSociale: string | null;
+  nom: string | null;
+  email: string | null;
+  telephone: string | null;
+  siret: string | null;
+  tvaIntracom: string | null;
+  typeActivite: string | null;
+  fonction: string | null;
+  adresseFacturation: string | null;
+  adresseLivraison: string | null;
+  createdAt: string;
+  ordersCount: number;
+};
+
+type ClientRow = {
+  id: string;
+  raison_sociale: string | null;
+  nom: string | null;
+  email: string | null;
+  telephone: string | null;
+  siret: string | null;
+  tva_intracom: string | null;
+  type_activite: string | null;
+  fonction: string | null;
+  adresse_facturation: string | null;
+  adresse_livraison: string | null;
+  created_at: string;
+  commandes: { count: number }[] | null;
+};
+
+export type AdminClientsResult =
+  | { ok: true; clients: AdminClient[] }
+  | { ok: false; message?: string };
+
+export async function fetchAdminClients(): Promise<AdminClientsResult> {
+  const { data, error } = await supabase
+    .from("clients")
+    .select(
+      "id, raison_sociale, nom, email, telephone, siret, tva_intracom, type_activite, fonction, adresse_facturation, adresse_livraison, created_at, commandes(count)"
+    )
+    .order("created_at", { ascending: false });
+
+  if (error) return { ok: false, message: error.message };
+
+  const clients: AdminClient[] = ((data as ClientRow[] | null) ?? []).map(
+    (r) => ({
+      id: r.id,
+      raisonSociale: r.raison_sociale,
+      nom: r.nom,
+      email: r.email,
+      telephone: r.telephone,
+      siret: r.siret,
+      tvaIntracom: r.tva_intracom,
+      typeActivite: r.type_activite,
+      fonction: r.fonction,
+      adresseFacturation: r.adresse_facturation,
+      adresseLivraison: r.adresse_livraison,
+      createdAt: r.created_at,
+      ordersCount: r.commandes?.[0]?.count ?? 0,
+    })
+  );
+
+  return { ok: true, clients };
+}
+
+export type AdminClientOrder = {
+  id: string;
+  numero: string;
+  statut: CommandeStatut;
+  createdAt: string;
+  montantHt: number;
+};
+
+type ClientOrderRow = {
+  id: string;
+  statut: CommandeStatut;
+  created_at: string;
+  devis:
+    | { numero: string | null; montant_ht: number | null }
+    | { numero: string | null; montant_ht: number | null }[]
+    | null;
+};
+
+// Historique des commandes d'un client (panneau detail), charge a la demande.
+export async function fetchClientOrders(
+  clientId: string
+): Promise<AdminClientOrder[]> {
+  const { data, error } = await supabase
+    .from("commandes")
+    .select("id, statut, created_at, devis:devis_id ( numero, montant_ht )")
+    .eq("client_id", clientId)
+    .order("created_at", { ascending: false });
+
+  if (error) return [];
+
+  return ((data as ClientOrderRow[] | null) ?? []).map((r) => {
+    const d = one(r.devis);
+    return {
+      id: r.id,
+      numero: d?.numero ?? r.id.slice(0, 8),
+      statut: r.statut,
+      createdAt: r.created_at,
+      montantHt: d?.montant_ht ?? 0,
+    };
+  });
+}
+
+// ---------- Fichiers STL (back-office) ----------
+
+export type AdminStlFile = {
+  id: string;
+  nomFichier: string;
+  volumeMm3: number | null;
+  devisNumero: string | null;
+  clientRaisonSociale: string | null;
+  createdAt: string;
+  commandeNumero: string | null;
+};
+
+type StlClientJoin = { raison_sociale: string | null };
+type StlDevisJoin = {
+  numero: string | null;
+  created_at: string | null;
+  clients: StlClientJoin | StlClientJoin[] | null;
+  commandes: { id: string }[] | { id: string } | null;
+};
+type StlPieceRow = {
+  id: string;
+  nom_fichier: string;
+  volume_mm3: number | null;
+  devis: StlDevisJoin | StlDevisJoin[] | null;
+};
+
+export type AdminStlResult =
+  | { ok: true; files: AdminStlFile[] }
+  | { ok: false; message?: string };
+
+export async function fetchAdminStl(): Promise<AdminStlResult> {
+  const { data, error } = await supabase
+    .from("devis_pieces")
+    .select(
+      "id, nom_fichier, volume_mm3, devis:devis_id ( numero, created_at, clients:client_id ( raison_sociale ), commandes ( id ) )"
+    );
+
+  if (error) return { ok: false, message: error.message };
+
+  const files: AdminStlFile[] = ((data as StlPieceRow[] | null) ?? []).map(
+    (r) => {
+      const d = one(r.devis);
+      const client = one(d?.clients ?? null);
+      const commandes = Array.isArray(d?.commandes)
+        ? d?.commandes
+        : d?.commandes
+          ? [d.commandes]
+          : [];
+      const linked = (commandes?.length ?? 0) > 0;
+      return {
+        id: r.id,
+        nomFichier: r.nom_fichier,
+        volumeMm3: r.volume_mm3,
+        devisNumero: d?.numero ?? null,
+        clientRaisonSociale: client?.raison_sociale ?? null,
+        createdAt: d?.created_at ?? "",
+        // La commande herite du numero de devis (convention du reste de l'app).
+        commandeNumero: linked ? (d?.numero ?? null) : null,
+      };
+    }
+  );
+
+  // Tri par date de depot (created_at du devis) decroissante.
+  files.sort((a, b) => (b.createdAt || "").localeCompare(a.createdAt || ""));
+
+  return { ok: true, files };
 }
 
 // ---------- KPI / agrégations ----------
