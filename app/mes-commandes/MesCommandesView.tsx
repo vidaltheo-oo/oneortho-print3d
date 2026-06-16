@@ -3,13 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import {
-  COULEUR_LABELS,
-  FINITION_LABELS,
-  NATURE_LABELS,
-  labelOf,
-  formatEUR,
-} from "@/lib/cart";
+import { formatEUR } from "@/lib/cart";
 import {
   fetchOrders,
   clientStatusMeta,
@@ -19,6 +13,8 @@ import {
   type Order,
 } from "@/lib/orders";
 import { supabase } from "@/lib/supabaseClient";
+import { useI18n } from "@/lib/i18n/provider";
+import { localeOf, type TFunc } from "@/lib/i18n/messages";
 import styles from "./mescommandes.module.css";
 
 const Chevron = () => (
@@ -51,38 +47,18 @@ const Check = () => (
 
 const PieceIcon = () => (
   <svg width="18" height="18" viewBox="0 0 120 120" fill="none">
-    <polygon
-      points="60,12 104,36 60,60 16,36"
-      fill="#AAE66E"
-      fillOpacity=".55"
-      stroke="#004B32"
-      strokeWidth="4"
-      strokeLinejoin="round"
-    />
-    <polygon
-      points="16,36 60,60 60,108 16,84"
-      fill="#004B32"
-      fillOpacity=".16"
-      stroke="#004B32"
-      strokeWidth="4"
-      strokeLinejoin="round"
-    />
-    <polygon
-      points="104,36 60,60 60,108 104,84"
-      fill="#004B32"
-      fillOpacity=".10"
-      stroke="#004B32"
-      strokeWidth="4"
-      strokeLinejoin="round"
-    />
+    <polygon points="60,12 104,36 60,60 16,36" fill="#AAE66E" fillOpacity=".55" stroke="#004B32" strokeWidth="4" strokeLinejoin="round" />
+    <polygon points="16,36 60,60 60,108 16,84" fill="#004B32" fillOpacity=".16" stroke="#004B32" strokeWidth="4" strokeLinejoin="round" />
+    <polygon points="104,36 60,60 60,108 104,84" fill="#004B32" fillOpacity=".10" stroke="#004B32" strokeWidth="4" strokeLinejoin="round" />
   </svg>
 );
 
-function pieceOpts(p: Order["pieces"][number]): string {
-  return `PA2200 · ${labelOf(COULEUR_LABELS, p.couleur)} · ${labelOf(
-    FINITION_LABELS,
-    p.finition
-  )}`;
+function lbl(t: TFunc, prefix: string, key: string | null): string {
+  return key ? t(`${prefix}.${key}`) : "—";
+}
+
+function pieceWord(t: TFunc, n: number): string {
+  return t(n > 1 ? "unit.piece.other" : "unit.piece.one");
 }
 
 function OrderRow({
@@ -94,6 +70,7 @@ function OrderRow({
   past: boolean;
   onOpen: () => void;
 }) {
+  const { t, lang } = useI18n();
   const meta = clientStatusMeta(order);
   const n = pieceCount(order);
   return (
@@ -105,21 +82,18 @@ function OrderRow({
       <div className={styles.orderMain}>
         <div className={styles.orderHead}>
           <span className={styles.orderId}>{order.numero}</span>
-          <span
-            className={styles.badge}
-            style={{ background: meta.bg, color: meta.fg }}
-          >
-            {meta.label}
+          <span className={styles.badge} style={{ background: meta.bg, color: meta.fg }}>
+            {t(`status.${meta.key}`)}
           </span>
         </div>
         <div className={styles.orderMeta}>
-          {formatDate(order.createdAt)} · {n} pièce{n > 1 ? "s" : ""} ·{" "}
-          {labelOf(NATURE_LABELS, order.natureApplication)}
+          {formatDate(order.createdAt, localeOf(lang))} · {n} {pieceWord(t, n)} ·{" "}
+          {lbl(t, "nature", order.natureApplication)}
         </div>
       </div>
       <div className={styles.orderAmount}>
         <div className={styles.orderAmountVal}>{formatEUR(order.montantHt)}</div>
-        <div className={styles.orderAmountLbl}>HT</div>
+        <div className={styles.orderAmountLbl}>{t("common.ht")}</div>
       </div>
       <Chevron />
     </button>
@@ -127,6 +101,7 @@ function OrderRow({
 }
 
 function Tracker({ order }: { order: Order }) {
+  const { t } = useI18n();
   const meta = clientStatusMeta(order);
 
   if (meta.cancelled) {
@@ -134,23 +109,13 @@ function Tracker({ order }: { order: Order }) {
       <div className={styles.tracker}>
         <div className={styles.cancelled}>
           <span className={styles.cancelledIcon}>
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 20 20"
-              fill="none"
-              stroke="#C62828"
-              strokeWidth="1.9"
-              strokeLinecap="round"
-            >
+            <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="#C62828" strokeWidth="1.9" strokeLinecap="round">
               <path d="M6 6l8 8M14 6l-8 8" />
             </svg>
           </span>
           <div>
-            <div className={styles.cancelledTitle}>Commande annulée</div>
-            <div className={styles.cancelledText}>
-              Ce devis n&apos;a pas été retenu. Contactez-nous pour le relancer.
-            </div>
+            <div className={styles.cancelledTitle}>{t("orders.cancelledTitle")}</div>
+            <div className={styles.cancelledText}>{t("orders.cancelledText")}</div>
           </div>
         </div>
       </div>
@@ -166,11 +131,11 @@ function Tracker({ order }: { order: Order }) {
       <div className={styles.trackerRow}>
         <div className={styles.trackBg} />
         <div className={styles.trackFill} style={{ width: fillWidth }} />
-        {TRACKER_STEPS.map((label, i) => {
+        {TRACKER_STEPS.map((step, i) => {
           const done = meta.delivered || i < curIdx;
           const current = !meta.delivered && i === curIdx;
           return (
-            <div key={label} className={styles.step}>
+            <div key={step} className={styles.step}>
               <span
                 className={`${styles.dot} ${done ? styles.dotDone : ""} ${
                   current ? styles.dotCurrent : ""
@@ -183,7 +148,7 @@ function Tracker({ order }: { order: Order }) {
                   done || current ? styles.stepLabelActive : ""
                 } ${current ? styles.stepLabelCurrent : ""}`}
               >
-                {label}
+                {t(`tracker.${step}`)}
               </span>
             </div>
           );
@@ -195,6 +160,7 @@ function Tracker({ order }: { order: Order }) {
 
 export default function MesCommandesView() {
   const router = useRouter();
+  const { t, lang } = useI18n();
   const [loading, setLoading] = useState(true);
   const [dbError, setDbError] = useState(false);
   const [orders, setOrders] = useState<Order[]>([]);
@@ -230,8 +196,8 @@ export default function MesCommandesView() {
   if (loading) {
     return (
       <main className={styles.wrap}>
-        <h1 className={styles.title}>Mon espace</h1>
-        <p className={styles.loading}>Chargement de vos commandes…</p>
+        <h1 className={styles.title}>{t("space.title")}</h1>
+        <p className={styles.loading}>{t("orders.loading")}</p>
       </main>
     );
   }
@@ -239,10 +205,8 @@ export default function MesCommandesView() {
   if (dbError) {
     return (
       <main className={styles.wrap}>
-        <h1 className={styles.title}>Mon espace</h1>
-        <p className={styles.loading}>
-          Impossible de charger vos commandes pour le moment.
-        </p>
+        <h1 className={styles.title}>{t("space.title")}</h1>
+        <p className={styles.loading}>{t("orders.loadError")}</p>
       </main>
     );
   }
@@ -259,46 +223,36 @@ export default function MesCommandesView() {
           className={styles.backLink}
           onClick={() => setSelectedId(null)}
         >
-          <svg
-            width="16"
-            height="16"
-            viewBox="0 0 20 20"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.8"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
+          <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
             <path d="M12 4l-6 6 6 6" />
           </svg>
-          Mes commandes
+          {t("orders.back")}
         </button>
 
         <div className={styles.detailHead}>
           <h1 className={styles.title} style={{ margin: 0 }}>
             {selected.numero}
           </h1>
-          <span
-            className={styles.badge}
-            style={{ background: meta.bg, color: meta.fg }}
-          >
-            {meta.label}
+          <span className={styles.badge} style={{ background: meta.bg, color: meta.fg }}>
+            {t(`status.${meta.key}`)}
           </span>
         </div>
         <p className={styles.detailSub}>
-          Commande passée le {formatDate(selected.createdAt)} · {n} pièce
-          {n > 1 ? "s" : ""}
+          {t("orders.placedOn", { date: formatDate(selected.createdAt, localeOf(lang)) })}{" "}
+          · {n} {pieceWord(t, n)}
         </p>
         <p className={styles.detailAmount}>
-          {formatEUR(selected.montantHt)} HT
-          <small>({formatEUR(selected.montantTtc)} TTC)</small>
+          {formatEUR(selected.montantHt)} {t("common.ht")}
+          <small>
+            ({formatEUR(selected.montantTtc)} {t("common.ttc")})
+          </small>
         </p>
 
         <Tracker order={selected} />
 
         <div className={styles.detailCols}>
           <div className={styles.piecesCard}>
-            <div className={styles.cardTitle}>Pièces ({n})</div>
+            <div className={styles.cardTitle}>{t("orders.piecesTitle", { n })}</div>
             {selected.pieces.map((p, i) => (
               <div key={i} className={styles.pieceRow}>
                 <span className={styles.pieceIcon}>
@@ -306,7 +260,10 @@ export default function MesCommandesView() {
                 </span>
                 <div className={styles.pieceInfo}>
                   <div className={styles.pieceName}>{p.nom_fichier}</div>
-                  <div className={styles.pieceOpts}>{pieceOpts(p)}</div>
+                  <div className={styles.pieceOpts}>
+                    PA2200 · {lbl(t, "couleur", p.couleur)} ·{" "}
+                    {lbl(t, "finition", p.finition)}
+                  </div>
                 </div>
                 <div className={styles.pieceQty}>× {p.quantite}</div>
               </div>
@@ -314,7 +271,7 @@ export default function MesCommandesView() {
           </div>
 
           <div className={styles.deliveryCard}>
-            <div className={styles.cardTitle}>Livraison</div>
+            <div className={styles.cardTitle}>{t("orders.delivery")}</div>
             <div className={styles.deliveryText}>
               {clientName || "—"}
               {clientAddress ? (
@@ -325,9 +282,9 @@ export default function MesCommandesView() {
               ) : null}
             </div>
             <div className={styles.deliveryNote}>
-              Paiement à réception de facture.
+              {t("orders.deliveryNote1")}
               <br />
-              Facture émise à l&apos;expédition.
+              {t("orders.deliveryNote2")}
             </div>
           </div>
         </div>
@@ -338,26 +295,16 @@ export default function MesCommandesView() {
   if (orders.length === 0) {
     return (
       <main className={styles.wrap}>
-        <h1 className={styles.title}>Mon espace</h1>
+        <h1 className={styles.title}>{t("space.title")}</h1>
         {clientName && <p className={styles.sub}>{clientName}</p>}
         <div className={styles.empty}>
-          <svg
-            width="46"
-            height="46"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="#E2DED2"
-            strokeWidth="1.6"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            style={{ margin: "0 auto" }}
-          >
+          <svg width="46" height="46" viewBox="0 0 24 24" fill="none" stroke="#E2DED2" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" style={{ margin: "0 auto" }}>
             <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
             <path d="M3 6h18M16 10a4 4 0 0 1-8 0" />
           </svg>
-          <p className={styles.emptyText}>Vous n&apos;avez pas encore de commande.</p>
+          <p className={styles.emptyText}>{t("orders.emptyText")}</p>
           <Link href="/configurateur" className={styles.emptyCta}>
-            Configurer une pièce
+            {t("cart.emptyCta")}
           </Link>
         </div>
       </main>
@@ -376,20 +323,15 @@ export default function MesCommandesView() {
 
   return (
     <main className={styles.wrap}>
-      <h1 className={styles.title}>Mon espace</h1>
+      <h1 className={styles.title}>{t("space.title")}</h1>
       {clientName && <p className={styles.sub}>{clientName}</p>}
 
       {current.length > 0 && (
         <>
-          <div className={styles.sectionLabel}>En cours</div>
+          <div className={styles.sectionLabel}>{t("orders.sectionCurrent")}</div>
           <div className={styles.list}>
             {current.map((o) => (
-              <OrderRow
-                key={o.id}
-                order={o}
-                past={false}
-                onOpen={() => setSelectedId(o.id)}
-              />
+              <OrderRow key={o.id} order={o} past={false} onOpen={() => setSelectedId(o.id)} />
             ))}
           </div>
         </>
@@ -397,15 +339,10 @@ export default function MesCommandesView() {
 
       {past.length > 0 && (
         <>
-          <div className={styles.sectionLabel}>Passées</div>
+          <div className={styles.sectionLabel}>{t("orders.sectionPast")}</div>
           <div className={styles.list}>
             {past.map((o) => (
-              <OrderRow
-                key={o.id}
-                order={o}
-                past
-                onOpen={() => setSelectedId(o.id)}
-              />
+              <OrderRow key={o.id} order={o} past onOpen={() => setSelectedId(o.id)} />
             ))}
           </div>
         </>

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Sora, DM_Sans } from "next/font/google";
 import "./globals.css";
+import { I18nProvider } from "@/lib/i18n/provider";
 import WelcomeToast from "@/components/WelcomeToast";
 
 const sora = Sora({
@@ -29,8 +30,10 @@ export default function RootLayout({
   return (
     <html lang="fr" className={`${sora.variable} ${dmSans.variable}`}>
       <body>
-        {children}
-        <WelcomeToast />
+        <I18nProvider>
+          {children}
+          <WelcomeToast />
+        </I18nProvider>
       </body>
     </html>
   );

@@ -8,6 +8,7 @@ import {
   saveClient,
   type ClientProfile,
 } from "@/lib/clients";
+import { useT } from "@/lib/i18n/provider";
 import f from "@/components/auth.module.css";
 import styles from "./moncompte.module.css";
 
@@ -15,6 +16,7 @@ type Feedback = { kind: "ok" | "err"; text: string };
 
 export default function MonCompteView() {
   const router = useRouter();
+  const t = useT();
   const [loading, setLoading] = useState(true);
   const [dbError, setDbError] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -66,7 +68,7 @@ export default function MonCompteView() {
   async function onSave() {
     setFeedback(null);
     if (!raisonSociale.trim()) {
-      setFeedback({ kind: "err", text: "La raison sociale est obligatoire." });
+      setFeedback({ kind: "err", text: t("signup.err.raison") });
       return;
     }
     setSaving(true);
@@ -87,17 +89,14 @@ export default function MonCompteView() {
 
     if (result.ok) {
       setClientId(result.id);
-      setFeedback({ kind: "ok", text: "Fiche enregistrée." });
+      setFeedback({ kind: "ok", text: t("account.saved") });
       return;
     }
     if (result.reason === "auth") {
       router.replace("/connexion");
       return;
     }
-    setFeedback({
-      kind: "err",
-      text: "Échec de l'enregistrement. Réessayez.",
-    });
+    setFeedback({ kind: "err", text: t("account.saveError") });
   }
 
   async function logout() {
@@ -108,8 +107,8 @@ export default function MonCompteView() {
   if (loading) {
     return (
       <main className={styles.wrap}>
-        <h1 className={styles.title}>Mon espace</h1>
-        <p className={styles.loading}>Chargement de votre fiche…</p>
+        <h1 className={styles.title}>{t("space.title")}</h1>
+        <p className={styles.loading}>{t("account.loading")}</p>
       </main>
     );
   }
@@ -117,17 +116,15 @@ export default function MonCompteView() {
   if (dbError) {
     return (
       <main className={styles.wrap}>
-        <h1 className={styles.title}>Mon espace</h1>
-        <p className={styles.loading}>
-          Impossible de charger votre fiche pour le moment.
-        </p>
+        <h1 className={styles.title}>{t("space.title")}</h1>
+        <p className={styles.loading}>{t("account.loadError")}</p>
       </main>
     );
   }
 
   return (
     <main className={styles.wrap}>
-      <h1 className={styles.title}>Mon espace</h1>
+      <h1 className={styles.title}>{t("space.title")}</h1>
       {raisonSociale && <p className={styles.sub}>{raisonSociale}</p>}
 
       <div className={styles.tabs}>
@@ -136,10 +133,10 @@ export default function MonCompteView() {
           className={styles.tab}
           onClick={() => router.push("/mes-commandes")}
         >
-          Mes commandes
+          {t("menu.orders")}
         </button>
         <button type="button" className={`${styles.tab} ${styles.tabActive}`}>
-          Ma fiche
+          {t("account.tab.profile")}
         </button>
       </div>
 
@@ -157,19 +154,18 @@ export default function MonCompteView() {
           <circle cx="10" cy="10" r="8" />
           <path d="M10 9v4M10 6.5v.5" />
         </svg>
-        Ces informations constituent votre fiche client et sont transmises à notre
-        équipe ONE PRINT.
+        {t("account.info")}
       </div>
 
       <div className={f.card}>
         <div className={f.section}>
           <div className={f.sectionTitle}>
             <span className={f.dot} />
-            Société
+            {t("section.company")}
           </div>
           <div className={f.grid2}>
             <label className={`${f.label} ${f.full}`}>
-              Raison sociale
+              {t("field.raison")}
               <input
                 className={f.input}
                 value={raisonSociale}
@@ -177,7 +173,7 @@ export default function MonCompteView() {
               />
             </label>
             <label className={f.label}>
-              SIRET / N° client
+              {t("field.siret")}
               <input
                 className={f.input}
                 value={siret}
@@ -185,7 +181,7 @@ export default function MonCompteView() {
               />
             </label>
             <label className={f.label}>
-              N° TVA intracom.
+              {t("field.tva")}
               <input
                 className={f.input}
                 value={tva}
@@ -198,11 +194,11 @@ export default function MonCompteView() {
         <div className={f.section}>
           <div className={f.sectionTitle}>
             <span className={f.dot} />
-            Contact
+            {t("section.contact")}
           </div>
           <div className={f.grid2}>
             <label className={f.label}>
-              Nom du contact
+              {t("field.contactName")}
               <input
                 className={f.input}
                 value={nom}
@@ -210,7 +206,7 @@ export default function MonCompteView() {
               />
             </label>
             <label className={f.label}>
-              Fonction
+              {t("field.fonction")}
               <input
                 className={f.input}
                 value={fonction}
@@ -218,7 +214,7 @@ export default function MonCompteView() {
               />
             </label>
             <label className={f.label}>
-              Email
+              {t("field.email")}
               <input
                 className={f.input}
                 type="email"
@@ -227,7 +223,7 @@ export default function MonCompteView() {
               />
             </label>
             <label className={f.label}>
-              Téléphone
+              {t("field.phone")}
               <input
                 className={f.input}
                 value={telephone}
@@ -240,11 +236,11 @@ export default function MonCompteView() {
         <div className={f.section}>
           <div className={f.sectionTitle}>
             <span className={f.dot} />
-            Adresses
+            {t("section.addresses")}
           </div>
           <div className={f.grid2}>
             <label className={`${f.label} ${f.full}`}>
-              Adresse de facturation
+              {t("section.billing")}
               <input
                 className={f.input}
                 placeholder="12 rue de la Santé, 69007 Lyon, France"
@@ -253,10 +249,10 @@ export default function MonCompteView() {
               />
             </label>
             <label className={`${f.label} ${f.full}`}>
-              Adresse de livraison (si différente)
+              {t("account.shippingOpt")}
               <input
                 className={f.input}
-                placeholder="Laisser vide si identique à la facturation"
+                placeholder={t("account.ph.shipping")}
                 value={adresseLivraison}
                 onChange={(e) => setAdresseLivraison(e.target.value)}
               />
@@ -281,10 +277,10 @@ export default function MonCompteView() {
             onClick={onSave}
             disabled={saving}
           >
-            {saving ? "Enregistrement…" : "Enregistrer les modifications"}
+            {saving ? t("account.saving") : t("account.save")}
           </button>
           <button type="button" className={styles.logoutBtn} onClick={logout}>
-            Se déconnecter
+            {t("logout")}
           </button>
         </div>
       </div>

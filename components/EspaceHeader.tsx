@@ -7,11 +7,9 @@ import type { User } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabaseClient";
 import { loadCart, cartPieceCount, CART_CHANGED_EVENT } from "@/lib/cart";
 import { initialsOf } from "@/lib/profile";
+import { useI18n } from "@/lib/i18n/provider";
+import { LANGS, LANG_LABELS } from "@/lib/i18n/messages";
 import styles from "./EspaceHeader.module.css";
-
-// Langues prevues par la maquette. Selecteur visuel uniquement pour l'instant ;
-// l'i18n complet (6 langues) sera branche dans un point ulterieur.
-const LANGS = ["FR", "EN", "ES", "IT", "DE", "PT"];
 
 // Icone personne neutre (pastille non connectee).
 const PersonIcon = () => (
@@ -24,6 +22,7 @@ const PersonIcon = () => (
 export default function EspaceHeader() {
   const pathname = usePathname();
   const router = useRouter();
+  const { lang, setLang, t } = useI18n();
   const [user, setUser] = useState<User | null>(null);
   const [cartCount, setCartCount] = useState(0);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -92,14 +91,14 @@ export default function EspaceHeader() {
           <div className={styles.brandTitle}>
             ONE <span className={styles.accent}>PRINT</span>
           </div>
-          <div className={styles.brandSub}>Espace client — OneOrtho Medical</div>
+          <div className={styles.brandSub}>{t("header.brandSub")}</div>
         </Link>
         <nav className={styles.nav}>
           <Link
             href="/configurateur"
             className={`${styles.navLink} ${isConfig ? styles.navLinkActive : ""}`}
           >
-            Configurateur
+            {t("header.nav.configurator")}
           </Link>
           <Link
             href={user ? "/mes-commandes" : "/connexion"}
@@ -107,26 +106,29 @@ export default function EspaceHeader() {
               pathname?.startsWith("/mes-commandes") ? styles.navLinkActive : ""
             }`}
           >
-            Mon espace
+            {t("header.nav.space")}
           </Link>
         </nav>
       </div>
 
       <div className={styles.right}>
-        <div className={styles.langs} aria-label="Langue (FR uniquement pour l'instant)">
+        <div className={styles.langs} aria-label={t("header.langLabel")}>
           {LANGS.map((code) => (
-            <span
+            <button
               key={code}
+              type="button"
               className={`${styles.langPill} ${
-                code === "FR" ? styles.langPillActive : ""
+                code === lang ? styles.langPillActive : ""
               }`}
+              onClick={() => setLang(code)}
+              aria-pressed={code === lang}
             >
-              {code}
-            </span>
+              {LANG_LABELS[code]}
+            </button>
           ))}
         </div>
 
-        <Link href="/panier" title="Panier" className={styles.cart}>
+        <Link href="/panier" title={t("header.cart")} className={styles.cart}>
           <svg
             width="20"
             height="20"
@@ -151,7 +153,7 @@ export default function EspaceHeader() {
             onClick={() => setMenuOpen((v) => !v)}
             aria-haspopup="menu"
             aria-expanded={menuOpen}
-            aria-label={user ? fullName : "Compte"}
+            aria-label={user ? fullName : t("header.account")}
           >
             {user ? initialsOf(fullName) : <PersonIcon />}
           </button>
@@ -173,7 +175,7 @@ export default function EspaceHeader() {
                     role="menuitem"
                     onClick={() => go("/mon-compte")}
                   >
-                    Mon compte
+                    {t("menu.account")}
                   </button>
                   <button
                     type="button"
@@ -181,7 +183,7 @@ export default function EspaceHeader() {
                     role="menuitem"
                     onClick={() => go("/mes-commandes")}
                   >
-                    Mes commandes
+                    {t("menu.orders")}
                   </button>
                   <div className={styles.menuDivider} />
                   <button
@@ -190,7 +192,7 @@ export default function EspaceHeader() {
                     role="menuitem"
                     onClick={logout}
                   >
-                    Se déconnecter
+                    {t("logout")}
                   </button>
                 </>
               ) : (
@@ -201,7 +203,7 @@ export default function EspaceHeader() {
                     role="menuitem"
                     onClick={() => go("/connexion")}
                   >
-                    Se connecter
+                    {t("menu.login")}
                   </button>
                   <button
                     type="button"
@@ -209,7 +211,7 @@ export default function EspaceHeader() {
                     role="menuitem"
                     onClick={() => go("/inscription")}
                   >
-                    S&apos;inscrire
+                    {t("menu.signup")}
                   </button>
                 </>
               )}

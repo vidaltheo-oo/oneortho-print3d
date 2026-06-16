@@ -2,12 +2,14 @@
 
 import { useEffect, useState } from "react";
 import { WELCOME_KEY, WELCOME_EVENT } from "@/lib/welcome";
+import { useT } from "@/lib/i18n/provider";
 import styles from "./WelcomeToast.module.css";
 
 // Toast d'accueil affiche ~3,5 s apres une connexion reussie. Monte une seule
 // fois dans le layout racine ; ecoute l'evenement (navigation client) et lit la
 // sessionStorage au montage (chargement complet de page).
 export default function WelcomeToast() {
+  const t = useT();
   const [name, setName] = useState<string | null>(null);
 
   useEffect(() => {
@@ -43,7 +45,7 @@ export default function WelcomeToast() {
   if (!name) return null;
   return (
     <div className={styles.toast} role="status" aria-live="polite">
-      Bonjour {name} !
+      {t("welcome.hello", { name })}
     </div>
   );
 }

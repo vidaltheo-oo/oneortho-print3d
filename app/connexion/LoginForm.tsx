@@ -8,6 +8,7 @@ import { ensureClientRecord, type ClientProfile } from "@/lib/clients";
 import { checkIsAdmin } from "@/lib/admin";
 import { firstNameOf } from "@/lib/profile";
 import { triggerWelcome } from "@/lib/welcome";
+import { useT } from "@/lib/i18n/provider";
 import PasswordInput from "@/components/PasswordInput";
 import styles from "@/components/auth.module.css";
 
@@ -17,6 +18,7 @@ const AFTER_AUTH = "/configurateur";
 
 export default function LoginForm() {
   const router = useRouter();
+  const t = useT();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -27,7 +29,7 @@ export default function LoginForm() {
     setError(null);
     setInfo(null);
     if (!email.trim()) {
-      setError("Saisissez votre email ci-dessus puis cliquez à nouveau.");
+      setError(t("login.forgotNeedEmail"));
       return;
     }
     await supabase.auth.resetPasswordForEmail(email.trim(), {
@@ -37,9 +39,7 @@ export default function LoginForm() {
           : undefined,
     });
     // Message neutre (ne revele pas si le compte existe).
-    setInfo(
-      "Si un compte existe pour cet email, un lien de réinitialisation vient d'être envoyé."
-    );
+    setInfo(t("login.forgotSent"));
   }
 
   async function onSubmit(e: React.FormEvent) {
@@ -53,7 +53,7 @@ export default function LoginForm() {
     });
 
     if (authError) {
-      setError("Email ou mot de passe incorrect.");
+      setError(t("login.errorInvalid"));
       setPending(false);
       return;
     }
@@ -81,8 +81,8 @@ export default function LoginForm() {
   return (
     <main className={styles.wrapLogin}>
       <form className={styles.cardLogin} onSubmit={onSubmit}>
-        <div className={styles.loginTitle}>Connexion</div>
-        <p className={styles.loginSub}>Accédez à votre espace client ONE PRINT</p>
+        <div className={styles.loginTitle}>{t("login.title")}</div>
+        <p className={styles.loginSub}>{t("login.subtitle")}</p>
 
         {error && (
           <div className={styles.error} style={{ marginBottom: 14 }}>
@@ -96,7 +96,7 @@ export default function LoginForm() {
         )}
 
         <label className={`${styles.label} ${styles.mb14}`}>
-          Email
+          {t("login.email")}
           <input
             className={styles.input}
             type="email"
@@ -109,7 +109,7 @@ export default function LoginForm() {
         </label>
 
         <label className={`${styles.label} ${styles.mb6}`}>
-          Mot de passe
+          {t("login.password")}
           <PasswordInput
             autoComplete="current-password"
             placeholder="••••••••"
@@ -125,18 +125,18 @@ export default function LoginForm() {
             className={styles.forgotLink}
             onClick={onForgotPassword}
           >
-            Mot de passe oublié ?
+            {t("login.forgot")}
           </button>
         </div>
 
         <button type="submit" className={styles.primaryBtn} disabled={pending}>
-          {pending ? "Connexion…" : "Se connecter"}
+          {pending ? t("login.submitting") : t("login.submit")}
         </button>
 
         <p className={styles.switch}>
-          Nouveau client ?{" "}
+          {t("login.switchText")}{" "}
           <Link href="/inscription" className={styles.switchLink}>
-            Créer un compte
+            {t("login.switchLink")}
           </Link>
         </p>
       </form>

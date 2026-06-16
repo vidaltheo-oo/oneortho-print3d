@@ -7,17 +7,13 @@ import {
   loadCart,
   saveCart,
   cartPieceCount,
-  labelOf,
   formatEUR,
-  NATURE_LABELS,
-  FINITION_LABELS,
-  COULEUR_LABELS,
-  DELAI_LABELS,
   CART_CHANGED_EVENT,
   type CartEntry,
 } from "@/lib/cart";
 import { submitCart } from "@/lib/checkout";
 import { notifyOrderCreated } from "@/lib/notifications";
+import { useT } from "@/lib/i18n/provider";
 import styles from "./panier.module.css";
 
 const PieceIcon = () => (
@@ -53,6 +49,10 @@ type Feedback = { kind: "ok" | "err"; text: string };
 
 export default function CartView() {
   const router = useRouter();
+  const t = useT();
+  // Libellé traduit pour une valeur d'option (couleur/finition/délai/nature).
+  const lbl = (prefix: string, key: string | null) =>
+    key ? t(`${prefix}.${key}`) : "—";
   const [mounted, setMounted] = useState(false);
   const [cart, setCart] = useState<CartEntry[]>([]);
   const [pending, setPending] = useState(false);
@@ -95,7 +95,7 @@ export default function CartView() {
       setCart([]);
       setFeedback({
         kind: "ok",
-        text: `Demande envoyée (${result.count} devis). Un email de confirmation vous a été adressé. Notre équipe vous recontacte sous 24 h.`,
+        text: t("cart.fb.sent", { n: result.count }),
       });
       return;
     }
@@ -105,19 +105,13 @@ export default function CartView() {
         router.push("/connexion");
         break;
       case "no_client":
-        setFeedback({
-          kind: "err",
-          text: "Complétez votre fiche client avant de demander la production.",
-        });
+        setFeedback({ kind: "err", text: t("cart.fb.noClient") });
         break;
       case "empty":
-        setFeedback({ kind: "err", text: "Votre panier est vide." });
+        setFeedback({ kind: "err", text: t("cart.empty") });
         break;
       default:
-        setFeedback({
-          kind: "err",
-          text: "Échec de l'envoi. Réessayez ou contactez-nous.",
-        });
+        setFeedback({ kind: "err", text: t("cart.fb.error") });
     }
   }
 
@@ -132,7 +126,7 @@ export default function CartView() {
   if (cart.length === 0) {
     return (
       <main className={styles.wrap}>
-        <h1 className={styles.title}>Mon panier</h1>
+        <h1 className={styles.title}>{t("cart.title")}</h1>
         {feedback && (
           <div
             className={`${styles.feedback} ${
@@ -158,9 +152,9 @@ export default function CartView() {
             <circle cx="17" cy="20" r="1.4" />
             <path d="M2 3h2.2l2.1 12.2a1.6 1.6 0 0 0 1.6 1.3h8.7a1.6 1.6 0 0 0 1.57-1.27L21 7H5.2" />
           </svg>
-          <p className={styles.emptyText}>Votre panier est vide.</p>
+          <p className={styles.emptyText}>{t("cart.empty")}</p>
           <Link href="/configurateur" className={styles.emptyCta}>
-            Configurer une pièce
+            {t("cart.emptyCta")}
           </Link>
         </div>
       </main>
@@ -168,14 +162,16 @@ export default function CartView() {
   }
 
   const cfgCount = cart.length;
-  const s1 = cfgCount > 1 ? "s" : "";
-  const s2 = pieceCount > 1 ? "s" : "";
+  const cfgLabel = t(
+    cfgCount > 1 ? "unit.configuration.other" : "unit.configuration.one"
+  );
+  const pieceLabel = t(pieceCount > 1 ? "unit.piece.other" : "unit.piece.one");
 
   return (
     <main className={styles.wrap}>
-      <h1 className={styles.title}>Mon panier</h1>
+      <h1 className={styles.title}>{t("cart.title")}</h1>
       <p className={styles.sub}>
-        {cfgCount} configuration{s1} · {pieceCount} pièce{s2}
+        {cfgCount} {cfgLabel} · {pieceCount} {pieceLabel}
       </p>
 
       <div className={styles.layout}>
@@ -184,19 +180,17 @@ export default function CartView() {
             <div key={entry.id} className={styles.entry}>
               <div className={styles.entryHead}>
                 <span className={styles.badge}>
-                  {labelOf(NATURE_LABELS, entry.nature_application)}
+                  {lbl("nature", entry.nature_application)}
                 </span>
                 <span className={styles.numero}>{entry.numero}</span>
-                <span className={styles.delai}>
-                  {labelOf(DELAI_LABELS, entry.delai)}
-                </span>
+                <span className={styles.delai}>{lbl("delai", entry.delai)}</span>
                 <span className={styles.entryTotal}>
                   {formatEUR(entry.montant_ttc)}
                 </span>
                 <button
                   type="button"
                   className={styles.remove}
-                  title="Retirer"
+                  title={t("cart.remove")}
                   onClick={() => removeEntry(entry.id)}
                 >
                   <svg
@@ -221,8 +215,8 @@ export default function CartView() {
                   <div className={styles.pieceInfo}>
                     <div className={styles.pieceName}>{p.nom_fichier}</div>
                     <div className={styles.pieceOpts}>
-                      PA2200 · {labelOf(COULEUR_LABELS, p.couleur)} ·{" "}
-                      {labelOf(FINITION_LABELS, p.finition)} ·{" "}
+                      PA2200 · {lbl("couleur", p.couleur)} ·{" "}
+                      {lbl("finition", p.finition)} ·{" "}
                       {Math.round(p.volume_mm3).toLocaleString("fr-FR")} mm³
                     </div>
                   </div>
@@ -246,30 +240,32 @@ export default function CartView() {
             >
               <path d="M12 4l-6 6 6 6" />
             </svg>
-            Continuer le chiffrage
+            {t("cart.back")}
           </Link>
         </div>
 
         <div className={styles.summary}>
-          <div className={styles.summaryTitle}>Récapitulatif</div>
+          <div className={styles.summaryTitle}>{t("cart.summary")}</div>
           {remise > 0 && (
             <div className={styles.srow}>
-              <span>Remise</span>
+              <span>{t("cart.discount")}</span>
               <span>−{formatEUR(remise)}</span>
             </div>
           )}
           <div className={styles.srow}>
-            <span>Sous-total HT</span>
+            <span>{t("cart.subtotalHt")}</span>
             <span>{formatEUR(subHt)}</span>
           </div>
           <div className={`${styles.srow} ${styles.srowBorder}`}>
-            <span>TVA 20 %</span>
+            <span>{t("cart.vat")}</span>
             <span>{formatEUR(tva)}</span>
           </div>
           <div className={styles.totalBox}>
-            <div className={styles.totalLbl}>Total HT</div>
+            <div className={styles.totalLbl}>{t("cart.totalHt")}</div>
             <div className={styles.totalVal}>{formatEUR(subHt)}</div>
-            <div className={styles.totalTtc}>({formatEUR(ttc)} TTC)</div>
+            <div className={styles.totalTtc}>
+              ({formatEUR(ttc)} {t("common.ttc")})
+            </div>
           </div>
 
           <button
@@ -278,7 +274,7 @@ export default function CartView() {
             onClick={onCheckout}
             disabled={pending}
           >
-            {pending ? "Envoi…" : "Demander la production"}
+            {pending ? t("cart.checkingOut") : t("cart.checkout")}
           </button>
 
           {feedback && (
@@ -291,12 +287,7 @@ export default function CartView() {
             </div>
           )}
 
-          <p className={styles.note}>
-            Devis indicatif HT, sous réserve de validation technique.
-            <br />
-            Paiement à réception de facture. Sans engagement, validation par notre
-            équipe sous 24 h.
-          </p>
+          <p className={styles.note}>{t("cart.note")}</p>
         </div>
       </div>
     </main>

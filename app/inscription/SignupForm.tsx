@@ -8,15 +8,16 @@ import { ensureClientRecord, type ClientProfile } from "@/lib/clients";
 import { firstNameOf } from "@/lib/profile";
 import { triggerWelcome } from "@/lib/welcome";
 import { PASSWORD_RULES, isPasswordValid } from "@/lib/password";
+import { useT } from "@/lib/i18n/provider";
 import PasswordInput from "@/components/PasswordInput";
 import styles from "@/components/auth.module.css";
 
 const AFTER_AUTH = "/configurateur";
 
 const ACTIVITES = [
-  { value: "dispositif_medical", label: "Dispositif médical" },
-  { value: "prototype", label: "Prototype" },
-  { value: "autre", label: "Autre" },
+  { value: "dispositif_medical", tkey: "activity.md" },
+  { value: "prototype", tkey: "activity.proto" },
+  { value: "autre", tkey: "activity.other" },
 ];
 
 // Concatene les champs d'adresse en une seule chaine (la table clients stocke
@@ -60,6 +61,7 @@ const RuleCross = () => (
 
 export default function SignupForm() {
   const router = useRouter();
+  const t = useT();
 
   const [raisonSociale, setRaisonSociale] = useState("");
   const [siret, setSiret] = useState("");
@@ -95,15 +97,15 @@ export default function SignupForm() {
     setSuccess(null);
 
     if (!raisonSociale.trim()) {
-      setError("La raison sociale est obligatoire.");
+      setError(t("signup.err.raison"));
       return;
     }
     if (!isPasswordValid(password)) {
-      setError("Le mot de passe ne respecte pas tous les critères de sécurité.");
+      setError(t("signup.err.password"));
       return;
     }
     if (password !== password2) {
-      setError("Les deux mots de passe ne correspondent pas.");
+      setError(t("signup.err.passwordMatch"));
       return;
     }
 
@@ -154,20 +156,15 @@ export default function SignupForm() {
     }
 
     setPending(false);
-    setSuccess(
-      "Compte créé. Vérifiez votre email pour activer votre espace, puis connectez-vous."
-    );
+    setSuccess(t("signup.success"));
   }
 
   const pwValid = isPasswordValid(password);
 
   return (
     <main className={styles.wrapSignup}>
-      <h1 className={styles.pageTitle}>Créer mon compte</h1>
-      <p className={styles.pageSub}>
-        Vos informations alimentent votre fiche client ONE PRINT et accélèrent vos
-        commandes.
-      </p>
+      <h1 className={styles.pageTitle}>{t("signup.title")}</h1>
+      <p className={styles.pageSub}>{t("signup.subtitle")}</p>
 
       <form className={styles.card} onSubmit={onSubmit}>
         {error && <div className={styles.error}>{error}</div>}
@@ -177,11 +174,11 @@ export default function SignupForm() {
         <div className={styles.section}>
           <div className={styles.sectionTitle}>
             <span className={styles.dot} />
-            Société
+            {t("section.company")}
           </div>
           <div className={styles.grid2}>
             <label className={`${styles.label} ${styles.full}`}>
-              Raison sociale
+              {t("field.raison")}
               <input
                 className={styles.input}
                 required
@@ -191,7 +188,7 @@ export default function SignupForm() {
               />
             </label>
             <label className={styles.label}>
-              SIRET / N° client
+              {t("field.siret")}
               <input
                 className={styles.input}
                 placeholder="123 456 789 00012"
@@ -200,7 +197,7 @@ export default function SignupForm() {
               />
             </label>
             <label className={styles.label}>
-              N° TVA intracom.
+              {t("field.tva")}
               <input
                 className={styles.input}
                 placeholder="FR 00 123456789"
@@ -210,7 +207,7 @@ export default function SignupForm() {
             </label>
           </div>
 
-          <div className={styles.subLabel}>Type d&apos;activité</div>
+          <div className={styles.subLabel}>{t("field.activity")}</div>
           <div className={styles.pills}>
             {ACTIVITES.map((a) => (
               <button
@@ -221,7 +218,7 @@ export default function SignupForm() {
                 }`}
                 onClick={() => setTypeActivite(a.value)}
               >
-                {a.label}
+                {t(a.tkey)}
               </button>
             ))}
           </div>
@@ -231,11 +228,11 @@ export default function SignupForm() {
         <div className={styles.section}>
           <div className={styles.sectionTitle}>
             <span className={styles.dot} />
-            Contact
+            {t("section.contact")}
           </div>
           <div className={styles.grid2}>
             <label className={styles.label}>
-              Nom du contact
+              {t("field.contactName")}
               <input
                 className={styles.input}
                 placeholder="Dr. Camille Mercier"
@@ -244,7 +241,7 @@ export default function SignupForm() {
               />
             </label>
             <label className={styles.label}>
-              Fonction
+              {t("field.fonction")}
               <input
                 className={styles.input}
                 placeholder="Responsable achats"
@@ -253,7 +250,7 @@ export default function SignupForm() {
               />
             </label>
             <label className={styles.label}>
-              Email
+              {t("field.email")}
               <input
                 className={styles.input}
                 type="email"
@@ -265,7 +262,7 @@ export default function SignupForm() {
               />
             </label>
             <label className={styles.label}>
-              Téléphone
+              {t("field.phone")}
               <input
                 className={styles.input}
                 placeholder="+33 4 26 00 00 00"
@@ -280,11 +277,11 @@ export default function SignupForm() {
         <div className={styles.section}>
           <div className={styles.sectionTitle}>
             <span className={styles.dot} />
-            Adresse de facturation
+            {t("section.billing")}
           </div>
           <div className={styles.grid3}>
             <label className={`${styles.label} ${styles.full}`}>
-              Adresse
+              {t("field.address")}
               <input
                 className={styles.input}
                 placeholder="12 rue de la Santé"
@@ -293,7 +290,7 @@ export default function SignupForm() {
               />
             </label>
             <label className={styles.label}>
-              Code postal
+              {t("field.zip")}
               <input
                 className={styles.input}
                 placeholder="69007"
@@ -302,7 +299,7 @@ export default function SignupForm() {
               />
             </label>
             <label className={styles.label}>
-              Ville
+              {t("field.city")}
               <input
                 className={styles.input}
                 placeholder="Lyon"
@@ -311,7 +308,7 @@ export default function SignupForm() {
               />
             </label>
             <label className={styles.label}>
-              Pays
+              {t("field.country")}
               <input
                 className={styles.input}
                 placeholder="France"
@@ -333,7 +330,7 @@ export default function SignupForm() {
             >
               {shipDiff && <Check />}
             </span>
-            Adresse de livraison différente
+            {t("signup.shipDiff")}
           </label>
         </div>
 
@@ -342,11 +339,11 @@ export default function SignupForm() {
           <div className={styles.section}>
             <div className={styles.sectionTitle}>
               <span className={styles.dot} />
-              Adresse de livraison
+              {t("section.shipping")}
             </div>
             <div className={styles.grid3}>
               <label className={`${styles.label} ${styles.full}`}>
-                Adresse
+                {t("field.address")}
                 <input
                   className={styles.input}
                   placeholder="Quai de livraison — Bât. C"
@@ -355,7 +352,7 @@ export default function SignupForm() {
                 />
               </label>
               <label className={styles.label}>
-                Code postal
+                {t("field.zip")}
                 <input
                   className={styles.input}
                   placeholder="69007"
@@ -364,7 +361,7 @@ export default function SignupForm() {
                 />
               </label>
               <label className={styles.label}>
-                Ville
+                {t("field.city")}
                 <input
                   className={styles.input}
                   placeholder="Lyon"
@@ -373,7 +370,7 @@ export default function SignupForm() {
                 />
               </label>
               <label className={styles.label}>
-                Pays
+                {t("field.country")}
                 <input
                   className={styles.input}
                   placeholder="France"
@@ -389,11 +386,11 @@ export default function SignupForm() {
         <div className={styles.section}>
           <div className={styles.sectionTitle}>
             <span className={styles.dot} />
-            Mot de passe
+            {t("section.password")}
           </div>
           <div className={styles.grid2}>
             <label className={styles.label}>
-              Mot de passe
+              {t("field.password")}
               <PasswordInput
                 autoComplete="new-password"
                 placeholder="••••••••"
@@ -403,7 +400,7 @@ export default function SignupForm() {
               />
             </label>
             <label className={styles.label}>
-              Confirmer
+              {t("field.confirm")}
               <PasswordInput
                 autoComplete="new-password"
                 placeholder="••••••••"
@@ -425,7 +422,7 @@ export default function SignupForm() {
                   <span className={styles.pwRuleIcon}>
                     {ok ? <RuleCheck /> : <RuleCross />}
                   </span>
-                  {rule.label}
+                  {t(`pwrule.${rule.key}`)}
                 </li>
               );
             })}
@@ -437,12 +434,12 @@ export default function SignupForm() {
           className={styles.primaryBtn}
           disabled={pending || !pwValid}
         >
-          {pending ? "Création…" : "Créer mon compte"}
+          {pending ? t("signup.submitting") : t("signup.submit")}
         </button>
         <p className={styles.switch}>
-          Déjà un compte ?{" "}
+          {t("signup.switchText")}{" "}
           <Link href="/connexion" className={styles.switchLink}>
-            Se connecter
+            {t("signup.switchLink")}
           </Link>
         </p>
       </form>

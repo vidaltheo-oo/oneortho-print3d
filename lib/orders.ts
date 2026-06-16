@@ -30,15 +30,12 @@ export type Order = {
   pieces: OrderPiece[];
 };
 
-// Etapes du suivi de production (tracker 4 etapes).
-export const TRACKER_STEPS = [
-  "Commande reçue",
-  "Confirmée",
-  "En fabrication",
-  "Expédiée",
-];
+// Etapes du suivi de production (tracker 4 etapes). Clés i18n (tracker.*).
+export const TRACKER_STEPS = ["received", "confirmed", "production", "shipped"];
 
+// `key` => clé i18n status.* ; `label` reste un repli FR.
 type StatutMeta = {
+  key: string;
   label: string;
   bg: string;
   fg: string;
@@ -48,11 +45,11 @@ type StatutMeta = {
 };
 
 export const STATUT_META: Record<CommandeStatut, StatutMeta> = {
-  en_attente: { label: "En traitement", bg: "#FFF3E0", fg: "#B26A00", trackerIdx: 0 },
-  en_production: { label: "En fabrication", bg: "#E3F2FD", fg: "#1565C0", trackerIdx: 2 },
-  expediee: { label: "Expédiée", bg: "#F3E5F5", fg: "#6A1B9A", trackerIdx: 3 },
-  livree: { label: "Livrée", bg: "#E8F5E9", fg: "#004B32", trackerIdx: 3, delivered: true },
-  annulee: { label: "Annulée", bg: "#FDEAEA", fg: "#C62828", cancelled: true, trackerIdx: 0 },
+  en_attente: { key: "processing", label: "En traitement", bg: "#FFF3E0", fg: "#B26A00", trackerIdx: 0 },
+  en_production: { key: "production", label: "En fabrication", bg: "#E3F2FD", fg: "#1565C0", trackerIdx: 2 },
+  expediee: { key: "shipped", label: "Expédiée", bg: "#F3E5F5", fg: "#6A1B9A", trackerIdx: 3 },
+  livree: { key: "delivered", label: "Livrée", bg: "#E8F5E9", fg: "#004B32", trackerIdx: 3, delivered: true },
+  annulee: { key: "cancelled", label: "Annulée", bg: "#FDEAEA", fg: "#C62828", cancelled: true, trackerIdx: 0 },
 };
 
 export function statutMeta(statut: CommandeStatut): StatutMeta {
@@ -66,10 +63,10 @@ export function statutMeta(statut: CommandeStatut): StatutMeta {
 // passe a "Confirmée" (tracker index 1, jusque-la jamais atteint).
 export function clientStatusMeta(order: Order): StatutMeta {
   if (order.devisStatut === "refuse") {
-    return { label: "Annulée", bg: "#FDEAEA", fg: "#C62828", cancelled: true, trackerIdx: 0 };
+    return { key: "cancelled", label: "Annulée", bg: "#FDEAEA", fg: "#C62828", cancelled: true, trackerIdx: 0 };
   }
   if (order.statut === "en_attente" && order.devisStatut === "accepte") {
-    return { label: "Confirmée", bg: "#E3F2FD", fg: "#1565C0", trackerIdx: 1 };
+    return { key: "confirmed", label: "Confirmée", bg: "#E3F2FD", fg: "#1565C0", trackerIdx: 1 };
   }
   return statutMeta(order.statut);
 }
@@ -79,15 +76,14 @@ export function isCurrent(statut: CommandeStatut): boolean {
   return statut === "en_attente" || statut === "en_production" || statut === "expediee";
 }
 
-const dateFormatter = new Intl.DateTimeFormat("fr-FR", {
-  day: "2-digit",
-  month: "long",
-  year: "numeric",
-});
-
-export function formatDate(iso: string): string {
+export function formatDate(iso: string, locale = "fr-FR"): string {
   const d = new Date(iso);
-  return Number.isNaN(d.getTime()) ? "—" : dateFormatter.format(d);
+  if (Number.isNaN(d.getTime())) return "—";
+  return new Intl.DateTimeFormat(locale, {
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+  }).format(d);
 }
 
 export function pieceCount(order: Order): number {

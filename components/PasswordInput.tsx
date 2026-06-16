@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useT } from "@/lib/i18n/provider";
 import styles from "@/components/auth.module.css";
 
 type Props = {
@@ -35,6 +36,7 @@ export default function PasswordInput({
   required,
 }: Props) {
   const [visible, setVisible] = useState(false);
+  const t = useT();
   return (
     <div className={styles.pwWrap}>
       <input
@@ -50,10 +52,8 @@ export default function PasswordInput({
         type="button"
         className={styles.pwToggle}
         onClick={() => setVisible((v) => !v)}
-        aria-label={
-          visible ? "Masquer le mot de passe" : "Afficher le mot de passe"
-        }
-        title={visible ? "Masquer" : "Afficher"}
+        aria-label={visible ? t("pw.hide") : t("pw.show")}
+        title={visible ? t("pw.hideShort") : t("pw.showShort")}
       >
         {visible ? <EyeOff /> : <EyeOpen />}
       </button>

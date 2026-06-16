@@ -92,14 +92,19 @@
   font-size: 11px;
   text-transform: uppercase;
   padding: 5px 9px;
-  cursor: not-allowed;
+  cursor: pointer;
 }
 
-.langPillActive {
+.langPill:hover {
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.langPillActive,
+.langPillActive:hover {
   background: var(--lime);
   border-color: var(--lime);
   color: var(--green);
-  cursor: default;
 }
 
 .cart {
