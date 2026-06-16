@@ -173,29 +173,40 @@ export default function AdminApp() {
     setPhase("login");
   }
 
+  // Recharge devis + commandes depuis la base. On ne se fie pas a un etat local
+  // optimiste : il divergerait du statut reel (et entre admins) et laisserait la
+  // vue Devis afficher un ancien statut de commande liee.
+  async function reloadData() {
+    const result = await fetchAdminData();
+    if (result.ok) setData(result.data);
+  }
+
   async function onUpdateDevis(id: string, statut: DevisStatut) {
     const ok = await updateDevisStatut(id, statut);
-    if (ok) {
-      setData((prev) => ({
-        ...prev,
-        devis: prev.devis.map((d) => (d.id === id ? { ...d, statut } : d)),
-      }));
-    }
+    if (ok) await reloadData();
   }
 
   async function onUpdateCommande(id: string, statut: CommandeStatut) {
     const ok = await updateCommandeStatut(id, statut);
     if (ok) {
-      setData((prev) => ({
-        ...prev,
-        commandes: prev.commandes.map((c) =>
-          c.id === id ? { ...c, statut } : c
-        ),
-      }));
       // Email client pour les statuts notifiables (en_production/expediee/livree).
       void notifyOrderStatus(id, statut);
+      // Relit la base : la vue Devis (statut derive de la commande) reste alignee.
+      await reloadData();
     }
   }
+
+  // Rafraichit au retour sur l'onglet : un autre admin a pu changer des statuts.
+  useEffect(() => {
+    if (phase !== "ready") return;
+    const onFocus = () => {
+      void reloadData();
+    };
+    window.addEventListener("focus", onFocus);
+    return () => window.removeEventListener("focus", onFocus);
+    // reloadData est stable (n'utilise que setData) ; pas de dependance requise.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [phase]);
 
   if (phase === "checking") {
     return <div className={styles.loading}>Chargement de l&apos;espace admin…</div>;

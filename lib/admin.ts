@@ -22,6 +22,9 @@ export type AdminDevis = {
   createdAt: string;
   client: ClientLite | null;
   filesCount: number;
+  // Statut de la commande liee (le checkout cree devis + commande ensemble).
+  // Quand il existe, c'est lui qui reflete le cycle de vie reel, pas devis.statut.
+  commandeStatut: CommandeStatut | null;
 };
 
 export type AdminCommande = {
@@ -145,6 +148,7 @@ type DevisRow = {
   created_at: string;
   clients: DevisJoin | DevisJoin[] | null;
   devis_pieces: { quantite: number | null }[] | null;
+  commandes: { statut: CommandeStatut }[] | { statut: CommandeStatut } | null;
 };
 
 type CommandeRow = {
@@ -187,7 +191,7 @@ export async function fetchAdminData(): Promise<AdminFetchResult> {
   const devisQuery = supabase
     .from("devis")
     .select(
-      "id, numero, statut, montant_ht, montant_ttc, remise, delai, nature_application, created_at, clients:client_id ( raison_sociale, email ), devis_pieces ( quantite )"
+      "id, numero, statut, montant_ht, montant_ttc, remise, delai, nature_application, created_at, clients:client_id ( raison_sociale, email ), devis_pieces ( quantite ), commandes ( statut )"
     )
     .order("created_at", { ascending: false });
 
@@ -216,6 +220,7 @@ export async function fetchAdminData(): Promise<AdminFetchResult> {
       createdAt: r.created_at,
       client: one(r.clients),
       filesCount: r.devis_pieces?.length ?? 0,
+      commandeStatut: one(r.commandes)?.statut ?? null,
     })
   );
 

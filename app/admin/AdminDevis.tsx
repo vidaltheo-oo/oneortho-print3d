@@ -4,6 +4,7 @@ import { useState } from "react";
 import { NATURE_LABELS, DELAI_LABELS, labelOf } from "@/lib/cart";
 import {
   DEVIS_STATUT_META,
+  COMMANDE_STATUT_META,
   formatEUR2,
   formatShort,
   type AdminDevis as AdminDevisType,
@@ -81,7 +82,11 @@ export default function AdminDevis({
           </div>
         ) : (
           rows.map((d) => {
-            const meta = DEVIS_STATUT_META[d.statut];
+            // Le statut affiche reflete la commande liee quand elle existe
+            // (cycle de vie reel), sinon le statut du devis.
+            const meta = d.commandeStatut
+              ? COMMANDE_STATUT_META[d.commandeStatut]
+              : DEVIS_STATUT_META[d.statut];
             return (
               <div key={d.id} className={styles.tRow} style={{ gridTemplateColumns: GRID }}>
                 <div className={`${styles.td} ${styles.cellStrong}`}>{d.numero}</div>
@@ -110,7 +115,10 @@ export default function AdminDevis({
                 </div>
                 <div className={styles.td}>
                   <div className={styles.rowActions}>
-                    {d.statut === "envoye" && (
+                    {/* Actions devis uniquement sans commande liee : un devis
+                        issu du checkout a deja une commande, gere dans l'onglet
+                        Commandes (sa production y avance). */}
+                    {!d.commandeStatut && d.statut === "envoye" && (
                       <>
                         <button
                           type="button"
