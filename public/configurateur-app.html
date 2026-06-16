@@ -149,15 +149,26 @@ header{
 
 /* PARSING */
 .parse-state{
-  display:flex;align-items:center;justify-content:center;
-  gap:.625rem;padding:1.5rem;font-size:.875rem;color:var(--green);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:.75rem;padding:1.5rem;font-size:.875rem;color:var(--green);
 }
+.parse-row{display:flex;align-items:center;justify-content:center;gap:.625rem}
 .spinner{
   width:18px;height:18px;border:2px solid var(--lime);
   border-top-color:var(--green);border-radius:50%;
   animation:spin .65s linear infinite;
 }
 @keyframes spin{to{transform:rotate(360deg)}}
+/* Barre de progression chargement/parsing STL */
+.parse-bar{
+  width:100%;max-width:280px;height:7px;border-radius:999px;
+  background:rgba(0,75,50,.12);overflow:hidden;
+}
+.parse-bar-fill{
+  height:100%;width:0;border-radius:999px;
+  background:linear-gradient(90deg,var(--green),var(--lime));
+  transition:width .18s ease;
+}
 
 /* FILE LOADED */
 .finfo{
@@ -755,8 +766,11 @@ footer strong{color:var(--orange)}
       </div>
 
       <div class="parse-state hidden" id="ps">
-        <div class="spinner"></div>
-        <span id="u_parsing_el"></span>
+        <div class="parse-row">
+          <div class="spinner"></div>
+          <span id="u_parsing_el"></span>
+        </div>
+        <div class="parse-bar"><div class="parse-bar-fill" id="psBar"></div></div>
       </div>
 
       <div class="hidden fi" id="fl">
@@ -2116,13 +2130,23 @@ async function processFiles(files) {
   }
   hide($('err'));
   hide($('dz'));
+  setParseProgress(0);
   show($('ps'));
   hide($('err'));
 
+  // Progression repartie sur les N fichiers : lecture (70 % de la part de
+  // chaque fichier) puis parsing du volume (30 %). La barre reste affichee
+  // jusqu'a addPieces, qui declenche viewer 3D + prix.
+  const total = stlFiles.length;
   const loaded = [];
-  for (const file of stlFiles) {
+  for (let i = 0; i < total; i++) {
+    const file = stlFiles[i];
+    const base = i / total;
     try {
-      const buf = await readFileAsBuffer(file);
+      const buf = await readFileAsBuffer(file, frac => {
+        setParseProgress((base + (frac * 0.7) / total) * 100);
+      });
+      setParseProgress((base + 0.7 / total) * 100);
       const v = getVol(buf);
       if (!isFinite(v) || v <= 0) {
         showErr(t('err_vol'));
@@ -2130,6 +2154,7 @@ async function processFiles(files) {
         return;
       }
       loaded.push({ name: file.name, vol: v, buf });
+      setParseProgress(((i + 1) / total) * 100);
     } catch(ex) {
       showErr(t('err_corrupt') + ex.message);
       resetDrop();
@@ -2137,23 +2162,32 @@ async function processFiles(files) {
     }
   }
 
+  setParseProgress(100);
   hide($('ps'));
   show($('dz'));
   $('fi').value = '';
   addPieces(loaded);
 }
 
-function readFileAsBuffer(file) {
+function readFileAsBuffer(file, onProgress) {
   return new Promise((resolve, reject) => {
     const r = new FileReader();
-    r.onload = e => resolve(e.target.result);
+    r.onprogress = e => {
+      if (onProgress && e.lengthComputable) onProgress(e.loaded / e.total);
+    };
+    r.onload = e => { if (onProgress) onProgress(1); resolve(e.target.result); };
     r.onerror = () => reject(new Error(t('err_read')));
     r.readAsArrayBuffer(file);
   });
 }
 
+function setParseProgress(pct) {
+  const bar = $('psBar');
+  if (bar) bar.style.width = Math.max(0, Math.min(100, pct)) + '%';
+}
+
 function showErr(msg) { $('err').textContent = msg; show($('err')); }
-function resetDrop() { show($('dz')); hide($('ps')); }
+function resetDrop() { show($('dz')); hide($('ps')); setParseProgress(0); }
 
 function resetAll() {
   cleanupViewer();

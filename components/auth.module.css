@@ -272,3 +272,61 @@
 .mb6 {
   margin-bottom: 6px;
 }
+
+/* Champ mot de passe + bascule oeil */
+.pwWrap {
+  position: relative;
+  margin-top: 6px;
+}
+
+.pwInput {
+  margin-top: 0;
+  padding-right: 44px;
+}
+
+.pwToggle {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  padding: 4px;
+  cursor: pointer;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+}
+
+.pwToggle:hover {
+  color: var(--green);
+}
+
+/* Politique de mot de passe (criteres temps reel) */
+.pwRules {
+  list-style: none;
+  margin: 10px 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px 14px;
+}
+
+.pwRule {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12.5px;
+  color: var(--muted);
+}
+
+.pwRuleOk {
+  color: var(--green);
+}
+
+.pwRuleIcon {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+}
+

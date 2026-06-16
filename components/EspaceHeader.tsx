@@ -2,27 +2,32 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { User } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabaseClient";
 import { loadCart, cartPieceCount, CART_CHANGED_EVENT } from "@/lib/cart";
+import { initialsOf } from "@/lib/profile";
 import styles from "./EspaceHeader.module.css";
 
 // Langues prevues par la maquette. Selecteur visuel uniquement pour l'instant ;
 // l'i18n complet (6 langues) sera branche dans un point ulterieur.
 const LANGS = ["FR", "EN", "ES", "IT", "DE", "PT"];
 
-function initials(name: string | undefined): string {
-  if (!name) return "??";
-  const parts = name.trim().split(/\s+/).slice(0, 2);
-  return parts.map((p) => p[0]?.toUpperCase() ?? "").join("") || "??";
-}
+// Icone personne neutre (pastille non connectee).
+const PersonIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="8" r="3.4" />
+    <path d="M5 20c0-3.6 3.1-5.6 7-5.6s7 2 7 5.6" />
+  </svg>
+);
 
 export default function EspaceHeader() {
   const pathname = usePathname();
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
   const [cartCount, setCartCount] = useState(0);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const avatarRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => setUser(data.user ?? null));
@@ -42,13 +47,42 @@ export default function EspaceHeader() {
     };
   }, []);
 
+  // Fermeture du dropdown au clic exterieur / touche Echap.
+  useEffect(() => {
+    if (!menuOpen) return;
+    const onDown = (e: MouseEvent) => {
+      if (avatarRef.current && !avatarRef.current.contains(e.target as Node)) {
+        setMenuOpen(false);
+      }
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setMenuOpen(false);
+    };
+    document.addEventListener("mousedown", onDown);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onDown);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [menuOpen]);
+
   const isConfig = pathname?.startsWith("/configurateur");
-  const clientName =
-    (user?.user_metadata?.raison_sociale as string | undefined) ?? user?.email;
+  const contactName = user?.user_metadata?.nom as string | undefined;
+  const raisonSociale = user?.user_metadata?.raison_sociale as
+    | string
+    | undefined;
+  // Nom complet pour le tooltip : contact, sinon raison sociale, sinon email.
+  const fullName = contactName || raisonSociale || user?.email || "";
 
   async function logout() {
+    setMenuOpen(false);
     await supabase.auth.signOut();
     router.push("/configurateur");
+  }
+
+  function go(path: string) {
+    setMenuOpen(false);
+    router.push(path);
   }
 
   return (
@@ -110,20 +144,78 @@ export default function EspaceHeader() {
           {cartCount > 0 && <span className={styles.cartBadge}>{cartCount}</span>}
         </Link>
 
-        {user ? (
-          <button type="button" className={styles.btnLogin} onClick={logout}>
-            {initials(clientName)} · Déconnexion
+        <div className={styles.avatarWrap} ref={avatarRef}>
+          <button
+            type="button"
+            className={`${styles.avatar} ${user ? "" : styles.avatarGuest}`}
+            onClick={() => setMenuOpen((v) => !v)}
+            aria-haspopup="menu"
+            aria-expanded={menuOpen}
+            aria-label={user ? fullName : "Compte"}
+          >
+            {user ? initialsOf(fullName) : <PersonIcon />}
           </button>
-        ) : (
-          <div className={styles.authButtons}>
-            <Link href="/connexion" className={styles.btnLogin}>
-              Se connecter
-            </Link>
-            <Link href="/inscription" className={styles.btnSignup}>
-              S&apos;inscrire
-            </Link>
-          </div>
-        )}
+
+          {user && fullName && !menuOpen && (
+            <span className={styles.tooltip} role="tooltip">
+              {fullName}
+            </span>
+          )}
+
+          {menuOpen && (
+            <div className={styles.menu} role="menu">
+              {user ? (
+                <>
+                  <div className={styles.menuHead}>{fullName}</div>
+                  <button
+                    type="button"
+                    className={styles.menuItem}
+                    role="menuitem"
+                    onClick={() => go("/mon-compte")}
+                  >
+                    Mon compte
+                  </button>
+                  <button
+                    type="button"
+                    className={styles.menuItem}
+                    role="menuitem"
+                    onClick={() => go("/mes-commandes")}
+                  >
+                    Mes commandes
+                  </button>
+                  <div className={styles.menuDivider} />
+                  <button
+                    type="button"
+                    className={`${styles.menuItem} ${styles.menuItemDanger}`}
+                    role="menuitem"
+                    onClick={logout}
+                  >
+                    Se déconnecter
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button
+                    type="button"
+                    className={styles.menuItem}
+                    role="menuitem"
+                    onClick={() => go("/connexion")}
+                  >
+                    Se connecter
+                  </button>
+                  <button
+                    type="button"
+                    className={styles.menuItem}
+                    role="menuitem"
+                    onClick={() => go("/inscription")}
+                  >
+                    S&apos;inscrire
+                  </button>
+                </>
+              )}
+            </div>
+          )}
+        </div>
       </div>
     </header>
   );

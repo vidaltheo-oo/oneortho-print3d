@@ -6,6 +6,9 @@ import { useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { ensureClientRecord, type ClientProfile } from "@/lib/clients";
 import { checkIsAdmin } from "@/lib/admin";
+import { firstNameOf } from "@/lib/profile";
+import { triggerWelcome } from "@/lib/welcome";
+import PasswordInput from "@/components/PasswordInput";
 import styles from "@/components/auth.module.css";
 
 // Destination apres connexion. L'espace client (/mes-commandes) n'est pas encore
@@ -37,12 +40,14 @@ export default function LoginForm() {
 
     // Reconcilie la fiche client si elle n'a pas pu etre creee a l'inscription
     // (cas confirmation email). Le profil est lu depuis user_metadata.
+    const meta = data.user?.user_metadata as ClientProfile | undefined;
     if (data.user) {
-      await ensureClientRecord(
-        data.user.id,
-        data.user.user_metadata as ClientProfile
-      );
+      await ensureClientRecord(data.user.id, meta);
     }
+
+    // Message d'accueil (prenom du contact, sinon raison sociale).
+    const first = firstNameOf(meta?.nom) || meta?.raison_sociale || "";
+    if (first) triggerWelcome(first);
 
     // Les administrateurs sont rediriges vers le back-office.
     const admin = await checkIsAdmin();
@@ -76,14 +81,12 @@ export default function LoginForm() {
 
         <label className={`${styles.label} ${styles.mb6}`}>
           Mot de passe
-          <input
-            className={styles.input}
-            type="password"
-            required
+          <PasswordInput
             autoComplete="current-password"
             placeholder="••••••••"
+            required
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={setPassword}
           />
         </label>
 

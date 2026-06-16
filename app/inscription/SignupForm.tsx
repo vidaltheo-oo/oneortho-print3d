@@ -5,6 +5,10 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { ensureClientRecord, type ClientProfile } from "@/lib/clients";
+import { firstNameOf } from "@/lib/profile";
+import { triggerWelcome } from "@/lib/welcome";
+import { PASSWORD_RULES, isPasswordValid } from "@/lib/password";
+import PasswordInput from "@/components/PasswordInput";
 import styles from "@/components/auth.module.css";
 
 const AFTER_AUTH = "/configurateur";
@@ -37,6 +41,20 @@ const Check = () => (
       strokeLinecap="round"
       strokeLinejoin="round"
     />
+  </svg>
+);
+
+// Critere valide (coche verte) / invalide (croix rouge).
+const RuleCheck = () => (
+  <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+    <circle cx="7" cy="7" r="7" fill="#004B32" />
+    <path d="M4 7l2 2 4-4" stroke="#fff" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+const RuleCross = () => (
+  <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+    <circle cx="7" cy="7" r="7" fill="#d1ccbf" />
+    <path d="M4.8 4.8l4.4 4.4M9.2 4.8l-4.4 4.4" stroke="#fff" strokeWidth="1.6" strokeLinecap="round" />
   </svg>
 );
 
@@ -80,8 +98,8 @@ export default function SignupForm() {
       setError("La raison sociale est obligatoire.");
       return;
     }
-    if (password.length < 8) {
-      setError("Le mot de passe doit contenir au moins 8 caractères.");
+    if (!isPasswordValid(password)) {
+      setError("Le mot de passe ne respecte pas tous les critères de sécurité.");
       return;
     }
     if (password !== password2) {
@@ -129,6 +147,8 @@ export default function SignupForm() {
     // client tout de suite. Sinon elle sera creee a la premiere connexion.
     if (data.session && data.user) {
       await ensureClientRecord(data.user.id, profile);
+      const first = firstNameOf(profile.nom) || profile.raison_sociale || "";
+      if (first) triggerWelcome(first);
       router.push(AFTER_AUTH);
       return;
     }
@@ -138,6 +158,8 @@ export default function SignupForm() {
       "Compte créé. Vérifiez votre email pour activer votre espace, puis connectez-vous."
     );
   }
+
+  const pwValid = isPasswordValid(password);
 
   return (
     <main className={styles.wrapSignup}>
@@ -372,32 +394,49 @@ export default function SignupForm() {
           <div className={styles.grid2}>
             <label className={styles.label}>
               Mot de passe
-              <input
-                className={styles.input}
-                type="password"
-                required
+              <PasswordInput
                 autoComplete="new-password"
                 placeholder="••••••••"
+                required
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={setPassword}
               />
             </label>
             <label className={styles.label}>
               Confirmer
-              <input
-                className={styles.input}
-                type="password"
-                required
+              <PasswordInput
                 autoComplete="new-password"
                 placeholder="••••••••"
+                required
                 value={password2}
-                onChange={(e) => setPassword2(e.target.value)}
+                onChange={setPassword2}
               />
             </label>
           </div>
+
+          <ul className={styles.pwRules}>
+            {PASSWORD_RULES.map((rule) => {
+              const ok = rule.test(password);
+              return (
+                <li
+                  key={rule.key}
+                  className={`${styles.pwRule} ${ok ? styles.pwRuleOk : ""}`}
+                >
+                  <span className={styles.pwRuleIcon}>
+                    {ok ? <RuleCheck /> : <RuleCross />}
+                  </span>
+                  {rule.label}
+                </li>
+              );
+            })}
+          </ul>
         </div>
 
-        <button type="submit" className={styles.primaryBtn} disabled={pending}>
+        <button
+          type="submit"
+          className={styles.primaryBtn}
+          disabled={pending || !pwValid}
+        >
           {pending ? "Création…" : "Créer mon compte"}
         </button>
         <p className={styles.switch}>
