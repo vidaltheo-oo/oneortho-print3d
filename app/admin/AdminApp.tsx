@@ -330,30 +330,13 @@ export default function AdminApp() {
       <div className={styles.content}>
         <header className={styles.header}>
           <h1 className={styles.pageTitle}>{TITLES[view]}</h1>
-          <div className={styles.search}>
-            <svg
-              width="17"
-              height="17"
-              viewBox="0 0 20 20"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.8"
-              strokeLinecap="round"
-            >
-              <circle cx="9" cy="9" r="6" />
-              <path d="M14 14l4 4" />
-            </svg>
-            <input
-              className={styles.searchInput}
-              placeholder="Rechercher un devis, un client…"
-              disabled
-            />
-          </div>
+          {/* Recherche disponible directement dans les vues Devis/Clients/STL. */}
           <button
             type="button"
             className={styles.headerAvatar}
             onClick={logout}
             title="Se déconnecter"
+            style={{ marginLeft: "auto" }}
           >
             {adminName.slice(0, 2).toUpperCase()}
           </button>

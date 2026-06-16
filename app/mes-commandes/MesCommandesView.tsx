@@ -12,8 +12,7 @@ import {
 } from "@/lib/cart";
 import {
   fetchOrders,
-  statutMeta,
-  isCurrent,
+  clientStatusMeta,
   formatDate,
   pieceCount,
   TRACKER_STEPS,
@@ -95,7 +94,7 @@ function OrderRow({
   past: boolean;
   onOpen: () => void;
 }) {
-  const meta = statutMeta(order.statut);
+  const meta = clientStatusMeta(order);
   const n = pieceCount(order);
   return (
     <button
@@ -128,7 +127,7 @@ function OrderRow({
 }
 
 function Tracker({ order }: { order: Order }) {
-  const meta = statutMeta(order.statut);
+  const meta = clientStatusMeta(order);
 
   if (meta.cancelled) {
     return (
@@ -251,7 +250,7 @@ export default function MesCommandesView() {
   const selected = orders.find((o) => o.id === selectedId) ?? null;
 
   if (selected) {
-    const meta = statutMeta(selected.statut);
+    const meta = clientStatusMeta(selected);
     const n = pieceCount(selected);
     return (
       <main className={styles.wrap}>
@@ -365,8 +364,15 @@ export default function MesCommandesView() {
     );
   }
 
-  const current = orders.filter((o) => isCurrent(o.statut));
-  const past = orders.filter((o) => !isCurrent(o.statut));
+  // En cours = ni livrée ni annulée (statut effectif tenant compte du devis).
+  const current = orders.filter((o) => {
+    const m = clientStatusMeta(o);
+    return !m.cancelled && !m.delivered;
+  });
+  const past = orders.filter((o) => {
+    const m = clientStatusMeta(o);
+    return m.cancelled || m.delivered;
+  });
 
   return (
     <main className={styles.wrap}>

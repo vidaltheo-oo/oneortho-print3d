@@ -9,7 +9,13 @@ import {
   formatEUR,
 } from "./cart";
 
-export const EMAIL_FROM = "onboarding@resend.dev";
+// Expediteur configurable par variable d'env (Vercel). IMPORTANT : tant qu'il
+// vaut le sandbox "onboarding@resend.dev", Resend ne livre qu'a l'adresse du
+// proprietaire du compte Resend (mode test) ; aucune notification n'arrive a
+// 3Dprinting@oneortho-medical.com. Pour livrer reellement : verifier un domaine
+// sur resend.com/domains, puis definir RESEND_FROM (ex. "ONE PRINT
+// <noreply@oneortho-medical.com>") dans les variables d'environnement.
+export const EMAIL_FROM = process.env.RESEND_FROM || "onboarding@resend.dev";
 export const INTERNAL_EMAIL = "3Dprinting@oneortho-medical.com";
 
 export type EmailPiece = {
@@ -68,11 +74,17 @@ export async function sendEmail(params: {
     });
     if (!res.ok) {
       const detail = await res.text();
-      return { ok: false, error: `Resend ${res.status}: ${detail.slice(0, 300)}` };
+      const error = `Resend ${res.status}: ${detail.slice(0, 300)}`;
+      // Echec non bloquant mais visible : sinon un 403 (domaine non verifie)
+      // passe totalement inapercu.
+      console.error("sendEmail failed", { to: params.to, error });
+      return { ok: false, error };
     }
     return { ok: true };
   } catch (e) {
-    return { ok: false, error: e instanceof Error ? e.message : "send failed" };
+    const error = e instanceof Error ? e.message : "send failed";
+    console.error("sendEmail error", { to: params.to, error });
+    return { ok: false, error };
   }
 }
 

@@ -20,7 +20,27 @@ export default function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [info, setInfo] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
+
+  async function onForgotPassword() {
+    setError(null);
+    setInfo(null);
+    if (!email.trim()) {
+      setError("Saisissez votre email ci-dessus puis cliquez à nouveau.");
+      return;
+    }
+    await supabase.auth.resetPasswordForEmail(email.trim(), {
+      redirectTo:
+        typeof window !== "undefined"
+          ? `${window.location.origin}/connexion`
+          : undefined,
+    });
+    // Message neutre (ne revele pas si le compte existe).
+    setInfo(
+      "Si un compte existe pour cet email, un lien de réinitialisation vient d'être envoyé."
+    );
+  }
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -45,13 +65,16 @@ export default function LoginForm() {
       await ensureClientRecord(data.user.id, meta);
     }
 
-    // Message d'accueil (prenom du contact, sinon raison sociale).
-    const first = firstNameOf(meta?.nom) || meta?.raison_sociale || "";
-    if (first) triggerWelcome(first);
-
     // Les administrateurs sont rediriges vers le back-office. On passe l'id issu
     // de la connexion (pas de getUser() supplementaire qui pourrait echouer).
     const admin = await checkIsAdmin(data.user?.id);
+
+    // Message d'accueil client uniquement (pas sur le back-office admin).
+    if (!admin) {
+      const first = firstNameOf(meta?.nom) || meta?.raison_sociale || "";
+      if (first) triggerWelcome(first);
+    }
+
     router.push(admin ? "/admin" : AFTER_AUTH);
   }
 
@@ -64,6 +87,11 @@ export default function LoginForm() {
         {error && (
           <div className={styles.error} style={{ marginBottom: 14 }}>
             {error}
+          </div>
+        )}
+        {info && (
+          <div className={styles.success} style={{ marginBottom: 14 }}>
+            {info}
           </div>
         )}
 
@@ -92,7 +120,11 @@ export default function LoginForm() {
         </label>
 
         <div className={styles.forgot}>
-          <button type="button" className={styles.forgotLink}>
+          <button
+            type="button"
+            className={styles.forgotLink}
+            onClick={onForgotPassword}
+          >
             Mot de passe oublié ?
           </button>
         </div>

@@ -19,6 +19,9 @@ export type Order = {
   id: string;
   numero: string;
   statut: CommandeStatut;
+  // Statut du devis lie : permet de distinguer l'etape "Validé" (devis accepté,
+  // commande encore en_attente) de l'etape "Nouveau" cote suivi client.
+  devisStatut: string | null;
   createdAt: string;
   montantHt: number;
   montantTtc: number;
@@ -56,6 +59,21 @@ export function statutMeta(statut: CommandeStatut): StatutMeta {
   return STATUT_META[statut] ?? STATUT_META.en_attente;
 }
 
+// Statut effectif cote client a partir du workflow devis + commande :
+//   Nouveau (recue) -> Confirmée (devis validé) -> En fabrication -> Expédiée -> Livrée
+// La commande nait "en_attente" : tant que le devis n'est pas accepté on reste a
+// l'etape "Commande reçue" ; une fois accepté (mais pas encore en production) on
+// passe a "Confirmée" (tracker index 1, jusque-la jamais atteint).
+export function clientStatusMeta(order: Order): StatutMeta {
+  if (order.devisStatut === "refuse") {
+    return { label: "Annulée", bg: "#FDEAEA", fg: "#C62828", cancelled: true, trackerIdx: 0 };
+  }
+  if (order.statut === "en_attente" && order.devisStatut === "accepte") {
+    return { label: "Confirmée", bg: "#E3F2FD", fg: "#1565C0", trackerIdx: 1 };
+  }
+  return statutMeta(order.statut);
+}
+
 // En cours : non terminees ; Passees : livrees ou annulees.
 export function isCurrent(statut: CommandeStatut): boolean {
   return statut === "en_attente" || statut === "en_production" || statut === "expediee";
@@ -78,6 +96,7 @@ export function pieceCount(order: Order): number {
 
 type DevisRow = {
   numero: string | null;
+  statut: string | null;
   montant_ht: number | null;
   montant_ttc: number | null;
   delai: string | null;
@@ -104,7 +123,7 @@ export async function fetchOrders(): Promise<FetchResult> {
   const { data, error } = await supabase
     .from("commandes")
     .select(
-      "id, statut, created_at, devis:devis_id ( numero, montant_ht, montant_ttc, delai, nature_application, devis_pieces ( nom_fichier, quantite, finition, couleur, volume_mm3 ) )"
+      "id, statut, created_at, devis:devis_id ( numero, statut, montant_ht, montant_ttc, delai, nature_application, devis_pieces ( nom_fichier, quantite, finition, couleur, volume_mm3 ) )"
     )
     .order("created_at", { ascending: false });
 
@@ -116,6 +135,7 @@ export async function fetchOrders(): Promise<FetchResult> {
       id: row.id,
       numero: devis?.numero ?? row.id.slice(0, 8),
       statut: row.statut,
+      devisStatut: devis?.statut ?? null,
       createdAt: row.created_at,
       montantHt: devis?.montant_ht ?? 0,
       montantTtc: devis?.montant_ttc ?? 0,
