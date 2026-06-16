@@ -22,6 +22,7 @@ import AdminDevis from "./AdminDevis";
 import AdminCommandes from "./AdminCommandes";
 import AdminClients from "./AdminClients";
 import AdminStl from "./AdminStl";
+import { EyeOpen, EyeOff } from "@/components/PasswordInput";
 
 type Phase = "checking" | "login" | "denied" | "ready";
 type View = "dashboard" | "devis" | "commandes" | "clients" | "stl";
@@ -106,16 +107,17 @@ export default function AdminApp() {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [loginError, setLoginError] = useState<string | null>(null);
   const [loginPending, setLoginPending] = useState(false);
 
   async function loadAfterAuth() {
-    const admin = await checkIsAdmin();
+    const { data: userData } = await supabase.auth.getUser();
+    const admin = await checkIsAdmin(userData.user?.id);
     if (!admin) {
       setPhase("denied");
       return;
     }
-    const { data: userData } = await supabase.auth.getUser();
     const meta = userData.user?.user_metadata as
       | { raison_sociale?: string }
       | undefined;
@@ -224,14 +226,30 @@ export default function AdminApp() {
           </label>
           <label className={styles.gateField}>
             Mot de passe
-            <input
-              className={styles.gateInput}
-              type="password"
-              required
-              autoComplete="current-password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
+            <div className={styles.gatePwWrap}>
+              <input
+                className={styles.gateInput}
+                style={{ marginTop: 0, paddingRight: 44 }}
+                type={showPassword ? "text" : "password"}
+                required
+                autoComplete="current-password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+              <button
+                type="button"
+                className={styles.gatePwToggle}
+                onClick={() => setShowPassword((v) => !v)}
+                aria-label={
+                  showPassword
+                    ? "Masquer le mot de passe"
+                    : "Afficher le mot de passe"
+                }
+                title={showPassword ? "Masquer" : "Afficher"}
+              >
+                {showPassword ? <EyeOff /> : <EyeOpen />}
+              </button>
+            </div>
           </label>
           <button type="submit" className={styles.gateBtn} disabled={loginPending}>
             {loginPending ? "Connexion…" : "Se connecter"}

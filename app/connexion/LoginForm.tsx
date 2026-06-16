@@ -49,8 +49,9 @@ export default function LoginForm() {
     const first = firstNameOf(meta?.nom) || meta?.raison_sociale || "";
     if (first) triggerWelcome(first);
 
-    // Les administrateurs sont rediriges vers le back-office.
-    const admin = await checkIsAdmin();
+    // Les administrateurs sont rediriges vers le back-office. On passe l'id issu
+    // de la connexion (pas de getUser() supplementaire qui pourrait echouer).
+    const admin = await checkIsAdmin(data.user?.id);
     router.push(admin ? "/admin" : AFTER_AUTH);
   }
 

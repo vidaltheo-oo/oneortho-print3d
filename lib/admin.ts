@@ -105,14 +105,26 @@ export function formatDateFr(iso: string): string {
   return Number.isNaN(d.getTime()) ? "—" : fullDate.format(d);
 }
 
-export async function checkIsAdmin(): Promise<boolean> {
-  const { data: userData } = await supabase.auth.getUser();
-  if (!userData.user) return false;
-  const { data } = await supabase
+// Detecte si l'utilisateur est administrateur (presence dans la table admins).
+// On accepte un userId explicite : juste apres signInWithPassword l'appelant
+// dispose deja de l'id, ce qui evite un aller-retour getUser() supplementaire
+// (source de fausses negatives au moment de la redirection post-connexion).
+export async function checkIsAdmin(userId?: string): Promise<boolean> {
+  let uid = userId;
+  if (!uid) {
+    const { data: userData } = await supabase.auth.getUser();
+    uid = userData.user?.id;
+  }
+  if (!uid) return false;
+  const { data, error } = await supabase
     .from("admins")
     .select("user_id")
-    .eq("user_id", userData.user.id)
+    .eq("user_id", uid)
     .maybeSingle();
+  if (error) {
+    console.error("checkIsAdmin:", error.message);
+    return false;
+  }
   return !!data;
 }
 
