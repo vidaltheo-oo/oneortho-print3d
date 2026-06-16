@@ -3,22 +3,24 @@
 import { useState } from "react";
 import { DELAI_LABELS, labelOf } from "@/lib/cart";
 import {
-  COMMANDE_STATUT_META,
-  COMMANDE_NEXT,
+  WORKFLOW_META,
+  workflowStep,
   computeCommandeKpis,
   formatEUR2,
   formatEURk,
   formatShort,
   type AdminCommande,
   type CommandeStatut,
+  type WorkflowStep,
 } from "@/lib/admin";
 import styles from "./admin.module.css";
 
 const GRID = "150px 84px 1.5fr 50px 116px 92px 1fr 168px";
 
-const FILTERS: { key: "tous" | CommandeStatut; label: string }[] = [
+const FILTERS: { key: "tous" | WorkflowStep; label: string }[] = [
   { key: "tous", label: "Toutes" },
-  { key: "en_attente", label: "À lancer" },
+  { key: "nouveau", label: "Nouveau" },
+  { key: "valide", label: "Validé" },
   { key: "en_production", label: "En production" },
   { key: "expediee", label: "Expédiées" },
   { key: "livree", label: "Livrées" },
@@ -43,12 +45,15 @@ export default function AdminCommandes({
   commandes: AdminCommande[];
   onUpdate: (id: string, statut: CommandeStatut) => Promise<void>;
 }) {
-  const [filter, setFilter] = useState<"tous" | CommandeStatut>("tous");
+  const [filter, setFilter] = useState<"tous" | WorkflowStep>("tous");
   const [busyId, setBusyId] = useState<string | null>(null);
   const now = new Date();
   const kpis = computeCommandeKpis(commandes, now);
 
-  const rows = commandes.filter((c) => filter === "tous" || c.statut === filter);
+  const rows = commandes.filter(
+    (c) =>
+      filter === "tous" || workflowStep(c.devisStatut, c.statut) === filter
+  );
 
   async function act(id: string, statut: CommandeStatut) {
     setBusyId(id);
@@ -115,8 +120,18 @@ export default function AdminCommandes({
           </div>
         ) : (
           rows.map((c) => {
-            const meta = COMMANDE_STATUT_META[c.statut];
-            const next = COMMANDE_NEXT[c.statut];
+            const step = workflowStep(c.devisStatut, c.statut);
+            const meta = WORKFLOW_META[step];
+            // Action gardee : on ne saute pas d'etape. Le lancement en production
+            // n'est propose qu'apres validation du devis (etape "valide").
+            const next: { to: CommandeStatut; label: string } | null =
+              step === "valide"
+                ? { to: "en_production", label: "Lancer la production" }
+                : c.statut === "en_production"
+                  ? { to: "expediee", label: "Marquer expédiée" }
+                  : c.statut === "expediee"
+                    ? { to: "livree", label: "Marquer livrée" }
+                    : null;
             return (
               <div key={c.id} className={styles.tRow} style={{ gridTemplateColumns: GRID }}>
                 <div className={`${styles.td} ${styles.cellStrong}`}>{c.numero}</div>
@@ -144,7 +159,7 @@ export default function AdminCommandes({
                 </div>
                 <div className={styles.td}>
                   <div className={styles.rowActions}>
-                    {next && (
+                    {next ? (
                       <button
                         type="button"
                         className={styles.actBtn}
@@ -153,7 +168,11 @@ export default function AdminCommandes({
                       >
                         {next.label}
                       </button>
-                    )}
+                    ) : step === "nouveau" ? (
+                      <span className={styles.cellEmail}>
+                        À valider dans Devis
+                      </span>
+                    ) : null}
                   </div>
                 </div>
               </div>

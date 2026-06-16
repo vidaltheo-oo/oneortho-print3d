@@ -3,8 +3,8 @@
 import { useState } from "react";
 import { NATURE_LABELS, DELAI_LABELS, labelOf } from "@/lib/cart";
 import {
-  DEVIS_STATUT_META,
-  COMMANDE_STATUT_META,
+  WORKFLOW_META,
+  workflowStep,
   formatEUR2,
   formatShort,
   type AdminDevis as AdminDevisType,
@@ -55,7 +55,10 @@ export default function AdminDevis({
       </div>
 
       <div className={styles.count}>
-        {rows.length} devis{filter !== "tous" ? ` · ${DEVIS_STATUT_META[filter].label}` : ""}
+        {rows.length} devis
+        {filter !== "tous"
+          ? ` · ${FILTERS.find((f) => f.key === filter)?.label ?? ""}`
+          : ""}
       </div>
 
       <div className={styles.table}>
@@ -82,11 +85,9 @@ export default function AdminDevis({
           </div>
         ) : (
           rows.map((d) => {
-            // Le statut affiche reflete la commande liee quand elle existe
-            // (cycle de vie reel), sinon le statut du devis.
-            const meta = d.commandeStatut
-              ? COMMANDE_STATUT_META[d.commandeStatut]
-              : DEVIS_STATUT_META[d.statut];
+            // Etape de workflow unifiee (devis + commande liee).
+            const step = workflowStep(d.statut, d.commandeStatut);
+            const meta = WORKFLOW_META[step];
             return (
               <div key={d.id} className={styles.tRow} style={{ gridTemplateColumns: GRID }}>
                 <div className={`${styles.td} ${styles.cellStrong}`}>{d.numero}</div>
@@ -115,10 +116,8 @@ export default function AdminDevis({
                 </div>
                 <div className={styles.td}>
                   <div className={styles.rowActions}>
-                    {/* Actions devis uniquement sans commande liee : un devis
-                        issu du checkout a deja une commande, gere dans l'onglet
-                        Commandes (sa production y avance). */}
-                    {!d.commandeStatut && d.statut === "envoye" && (
+                    {/* Etape 1 -> 2 : validation du devis avant toute production. */}
+                    {step === "nouveau" && (
                       <>
                         <button
                           type="button"

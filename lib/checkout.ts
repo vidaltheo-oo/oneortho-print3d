@@ -6,7 +6,9 @@ export type CheckoutResult =
   | { ok: false; reason: "auth" | "no_client" | "empty" | "db"; message?: string };
 
 // Persiste le panier : chaque ligne devient un devis (statut "envoye") avec ses
-// devis_pieces, puis une commande (statut "en_attente") = demande de production.
+// devis_pieces, puis une commande (statut "en_attente"). Cet etat initial
+// correspond a l'etape "Nouveau" du workflow admin (en attente de validation du
+// devis) : la production ne peut etre lancee qu'une fois le devis valide.
 // Les RLS exigent que le client_id appartienne a l'utilisateur authentifie.
 export async function submitCart(cart: CartEntry[]): Promise<CheckoutResult> {
   if (!cart.length) return { ok: false, reason: "empty" };

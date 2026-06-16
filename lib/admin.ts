@@ -38,6 +38,8 @@ export type AdminCommande = {
   natureApplication: string | null;
   client: ClientLite | null;
   filesCount: number;
+  // Statut du devis lie : le lancement en production exige un devis valide.
+  devisStatut: DevisStatut | null;
 };
 
 type BadgeMeta = { label: string; bg: string; fg: string };
@@ -58,14 +60,44 @@ export const COMMANDE_STATUT_META: Record<CommandeStatut, BadgeMeta> = {
   annulee: { label: "Annulée", bg: "#FDEAEA", fg: "#C62828" },
 };
 
-// Transition de statut commande proposee a l'admin (action principale).
-export const COMMANDE_NEXT: Partial<
-  Record<CommandeStatut, { to: CommandeStatut; label: string }>
-> = {
-  en_attente: { to: "en_production", label: "Lancer la production" },
-  en_production: { to: "expediee", label: "Marquer expédiée" },
-  expediee: { to: "livree", label: "Marquer livrée" },
+// ---------- Workflow unifie (devis + commande) ----------
+// Le checkout cree un devis (envoye) ET une commande (en_attente). Le cycle de
+// vie reel se lit en combinant les deux statuts en 5 etapes :
+//   nouveau -> valide -> en_production -> expediee -> livree
+// Etapes 1-2 pilotees dans /admin/devis (validation), 3-5 dans /admin/commandes.
+export type WorkflowStep =
+  | "nouveau"
+  | "valide"
+  | "en_production"
+  | "expediee"
+  | "livree"
+  | "refuse"
+  | "annulee";
+
+export const WORKFLOW_META: Record<WorkflowStep, BadgeMeta> = {
+  nouveau: { label: "Nouveau", bg: "#FFF3E0", fg: "#FF6C4F" },
+  valide: { label: "Validé", bg: "#E8F5E9", fg: "#004B32" },
+  en_production: { label: "En production", bg: "#E3F2FD", fg: "#1565C0" },
+  expediee: { label: "Expédiée", bg: "#F3E5F5", fg: "#6A1B9A" },
+  livree: { label: "Livrée", bg: "#E8F5E9", fg: "#004B32" },
+  refuse: { label: "Refusé", bg: "#FDEAEA", fg: "#C62828" },
+  annulee: { label: "Annulée", bg: "#FDEAEA", fg: "#C62828" },
 };
+
+// Etape effective a partir des deux statuts. Une commande avancee (production,
+// expediee, livree, annulee) prime ; sinon l'etat depend de la validation devis.
+export function workflowStep(
+  devisStatut: DevisStatut | null,
+  commandeStatut: CommandeStatut | null
+): WorkflowStep {
+  if (commandeStatut === "en_production") return "en_production";
+  if (commandeStatut === "expediee") return "expediee";
+  if (commandeStatut === "livree") return "livree";
+  if (commandeStatut === "annulee") return "annulee";
+  if (devisStatut === "refuse") return "refuse";
+  if (devisStatut === "accepte") return "valide";
+  return "nouveau";
+}
 
 const eur = new Intl.NumberFormat("fr-FR", {
   style: "currency",
@@ -159,6 +191,7 @@ type CommandeRow = {
   devis:
     | {
         numero: string | null;
+        statut: DevisStatut | null;
         montant_ht: number | null;
         montant_ttc: number | null;
         delai: string | null;
@@ -168,6 +201,7 @@ type CommandeRow = {
     | null
     | Array<{
         numero: string | null;
+        statut: DevisStatut | null;
         montant_ht: number | null;
         montant_ttc: number | null;
         delai: string | null;
@@ -198,7 +232,7 @@ export async function fetchAdminData(): Promise<AdminFetchResult> {
   const commandesQuery = supabase
     .from("commandes")
     .select(
-      "id, statut, created_at, clients:client_id ( raison_sociale, email ), devis:devis_id ( numero, montant_ht, montant_ttc, delai, nature_application, devis_pieces ( quantite ) )"
+      "id, statut, created_at, clients:client_id ( raison_sociale, email ), devis:devis_id ( numero, statut, montant_ht, montant_ttc, delai, nature_application, devis_pieces ( quantite ) )"
     )
     .order("created_at", { ascending: false });
 
@@ -239,6 +273,7 @@ export async function fetchAdminData(): Promise<AdminFetchResult> {
       natureApplication: d?.nature_application ?? null,
       client: one(r.clients),
       filesCount: d?.devis_pieces?.length ?? 0,
+      devisStatut: d?.statut ?? null,
     };
   });
 
@@ -519,7 +554,10 @@ export function computeCommandeKpis(
   now: Date
 ): CommandeKpis {
   return {
-    aLancer: commandes.filter((c) => c.statut === "en_attente").length,
+    // "A lancer" = devis valide, commande pas encore en production.
+    aLancer: commandes.filter(
+      (c) => workflowStep(c.devisStatut, c.statut) === "valide"
+    ).length,
     enProduction: commandes.filter((c) => c.statut === "en_production").length,
     expedieesMois: commandes.filter(
       (c) => c.statut === "expediee" && isSameMonth(c.createdAt, now)
