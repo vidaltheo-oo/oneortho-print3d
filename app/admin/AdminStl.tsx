@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { formatDateFr, type AdminStlFile } from "@/lib/admin";
+import StlFileDetail from "./StlFileDetail";
 import styles from "./admin.module.css";
 
 const GRID = "2fr 1.5fr 130px 120px 130px";
@@ -13,6 +14,7 @@ function formatVolume(mm3: number | null): string {
 
 export default function AdminStl({ files }: { files: AdminStlFile[] }) {
   const [query, setQuery] = useState("");
+  const [selected, setSelected] = useState<AdminStlFile | null>(null);
 
   const q = query.trim().toLowerCase();
   const rows = q
@@ -73,7 +75,16 @@ export default function AdminStl({ files }: { files: AdminStlFile[] }) {
             <div
               key={f.id}
               className={styles.tRow}
-              style={{ gridTemplateColumns: GRID }}
+              style={{ gridTemplateColumns: GRID, cursor: "pointer" }}
+              onClick={() => setSelected(f)}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  setSelected(f);
+                }
+              }}
             >
               <div
                 className={styles.td}
@@ -110,6 +121,10 @@ export default function AdminStl({ files }: { files: AdminStlFile[] }) {
           ))
         )}
       </div>
+
+      {selected && (
+        <StlFileDetail file={selected} onClose={() => setSelected(null)} />
+      )}
     </>
   );
 }

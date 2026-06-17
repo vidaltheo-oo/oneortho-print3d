@@ -458,6 +458,7 @@ export async function fetchClientOrders(
 export type AdminStlFile = {
   id: string;
   nomFichier: string;
+  storagePath: string | null;
   volumeMm3: number | null;
   devisNumero: string | null;
   clientRaisonSociale: string | null;
@@ -475,6 +476,7 @@ type StlDevisJoin = {
 type StlPieceRow = {
   id: string;
   nom_fichier: string;
+  storage_path: string | null;
   volume_mm3: number | null;
   devis: StlDevisJoin | StlDevisJoin[] | null;
 };
@@ -487,7 +489,7 @@ export async function fetchAdminStl(): Promise<AdminStlResult> {
   const { data, error } = await supabase
     .from("devis_pieces")
     .select(
-      "id, nom_fichier, volume_mm3, devis:devis_id ( numero, created_at, clients:client_id ( raison_sociale ), commandes ( id ) )"
+      "id, nom_fichier, storage_path, volume_mm3, devis:devis_id ( numero, created_at, clients:client_id ( raison_sociale ), commandes ( id ) )"
     );
 
   if (error) return { ok: false, message: error.message };
@@ -505,6 +507,7 @@ export async function fetchAdminStl(): Promise<AdminStlResult> {
       return {
         id: r.id,
         nomFichier: r.nom_fichier,
+        storagePath: r.storage_path,
         volumeMm3: r.volume_mm3,
         devisNumero: d?.numero ?? null,
         clientRaisonSociale: client?.raison_sociale ?? null,
