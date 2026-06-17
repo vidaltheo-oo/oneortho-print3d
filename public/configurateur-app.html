@@ -2677,6 +2677,28 @@ function loadCart() {
 function saveCart(cart) {
   try { localStorage.setItem(CART_KEY, JSON.stringify(cart)); } catch (e) {}
 }
+
+// IndexedDB : binaires STL conserves localement (partage same-origin avec l'app
+// Next, qui les lit au checkout pour l'upload). Meme base/store que lib/stlStore.
+function idbOpen() {
+  return new Promise((res, rej) => {
+    const r = indexedDB.open('oneprint', 1);
+    r.onupgradeneeded = () => {
+      const d = r.result;
+      if (!d.objectStoreNames.contains('stl')) d.createObjectStore('stl');
+    };
+    r.onsuccess = () => res(r.result);
+    r.onerror = () => rej(r.error);
+  });
+}
+function idbPutStl(key, buf) {
+  return idbOpen().then(db => new Promise((res, rej) => {
+    const tx = db.transaction('stl', 'readwrite');
+    tx.objectStore('stl').put(buf, key);
+    tx.oncomplete = () => res();
+    tx.onerror = () => rej(tx.error);
+  }));
+}
 function cartItemCount(cart) {
   // total des pieces (somme des quantites de toutes les lignes du panier)
   return cart.reduce((s, it) =>
@@ -2767,9 +2789,21 @@ function showAuthModal() {
 }
 function hideAuthModal() { const m = $('authModal'); if (m) m.style.display = 'none'; }
 
-function addToCart() {
+async function addToCart() {
   const item = buildCartItem();
   if (!item) return;
+  // Persiste chaque binaire STL en IndexedDB et tague la piece (stl_key).
+  // L'app Next lira ces binaires au checkout pour les uploader vers Storage.
+  try {
+    for (let i = 0; i < item.pieces.length; i++) {
+      const buf = pieces[i] && pieces[i].buf;
+      if (buf) {
+        const key = item.id + '/' + item.pieces[i].nom_fichier;
+        await idbPutStl(key, buf);
+        item.pieces[i].stl_key = key;
+      }
+    }
+  } catch (e) { /* IndexedDB indisponible : on garde au moins les metadonnees */ }
   const cart = loadCart();
   cart.push(item);
   saveCart(cart);

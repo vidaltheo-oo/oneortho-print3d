@@ -1,4 +1,5 @@
 import { supabase } from "./supabaseClient";
+import { STL_BUCKET } from "./checkout";
 
 export type DevisStatut = "brouillon" | "envoye" | "accepte" | "refuse" | "expire";
 export type CommandeStatut =
@@ -39,6 +40,7 @@ export type AdminCommande = {
   client: ClientLite | null;
   filesCount: number;
   updatedAt: string;
+  devisId: string | null;
   // Statut du devis lie : le lancement en production exige un devis valide.
   devisStatut: DevisStatut | null;
 };
@@ -225,6 +227,7 @@ type CommandeRow = {
   statut: CommandeStatut;
   created_at: string;
   updated_at: string;
+  devis_id: string | null;
   clients: DevisJoin | DevisJoin[] | null;
   devis:
     | {
@@ -270,7 +273,7 @@ export async function fetchAdminData(): Promise<AdminFetchResult> {
   const commandesQuery = supabase
     .from("commandes")
     .select(
-      "id, statut, created_at, updated_at, clients:client_id ( raison_sociale, email ), devis:devis_id ( numero, statut, montant_ht, montant_ttc, delai, nature_application, devis_pieces ( quantite ) )"
+      "id, statut, created_at, updated_at, devis_id, clients:client_id ( raison_sociale, email ), devis:devis_id ( numero, statut, montant_ht, montant_ttc, delai, nature_application, devis_pieces ( quantite ) )"
     )
     .order("created_at", { ascending: false });
 
@@ -312,6 +315,7 @@ export async function fetchAdminData(): Promise<AdminFetchResult> {
       client: one(r.clients),
       filesCount: d?.devis_pieces?.length ?? 0,
       updatedAt: r.updated_at,
+      devisId: r.devis_id,
       devisStatut: d?.statut ?? null,
     };
   });
@@ -515,6 +519,56 @@ export async function fetchAdminStl(): Promise<AdminStlResult> {
   files.sort((a, b) => (b.createdAt || "").localeCompare(a.createdAt || ""));
 
   return { ok: true, files };
+}
+
+// ---------- Fichiers STL d'un devis (panneau detail admin) ----------
+
+export type AdminPiece = {
+  nomFichier: string;
+  storagePath: string | null;
+  volumeMm3: number | null;
+  quantite: number;
+  couleur: string | null;
+  finition: string | null;
+};
+
+type PieceRow = {
+  nom_fichier: string;
+  storage_path: string | null;
+  volume_mm3: number | null;
+  quantite: number | null;
+  couleur: string | null;
+  finition: string | null;
+};
+
+export async function fetchDevisPieces(devisId: string): Promise<AdminPiece[]> {
+  const { data, error } = await supabase
+    .from("devis_pieces")
+    .select("nom_fichier, storage_path, volume_mm3, quantite, couleur, finition")
+    .eq("devis_id", devisId);
+  if (error) return [];
+  return ((data as PieceRow[] | null) ?? []).map((r) => ({
+    nomFichier: r.nom_fichier,
+    storagePath: r.storage_path,
+    volumeMm3: r.volume_mm3,
+    quantite: r.quantite ?? 1,
+    couleur: r.couleur,
+    finition: r.finition,
+  }));
+}
+
+// URL signee (RLS : admin autorise en lecture). expiresIn en secondes.
+// `download` force le telechargement (nom de fichier).
+export async function signedStlUrl(
+  path: string,
+  opts?: { expiresIn?: number; download?: string }
+): Promise<string | null> {
+  const { data } = await supabase.storage
+    .from(STL_BUCKET)
+    .createSignedUrl(path, opts?.expiresIn ?? 3600, {
+      download: opts?.download,
+    });
+  return data?.signedUrl ?? null;
 }
 
 // ---------- KPI / agrégations ----------

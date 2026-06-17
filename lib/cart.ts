@@ -15,6 +15,9 @@ export type CartPiece = {
   prix_ht: number;
   finition: string;
   couleur: string;
+  // Cle IndexedDB du binaire STL (ecrite par le configurateur a l'ajout au
+  // panier ; lue au checkout pour l'upload vers Supabase Storage).
+  stl_key?: string;
 };
 
 export type CartEntry = {

@@ -16,6 +16,7 @@ import {
   type WorkflowStep,
   type Period,
 } from "@/lib/admin";
+import StlFilesPanel from "./StlFilesPanel";
 import styles from "./admin.module.css";
 
 const GRID = "150px 80px 1.6fr 52px 1.1fr 110px 96px 1fr 132px";
@@ -48,6 +49,9 @@ export default function AdminDevis({
   onUpdate: (id: string, statut: DevisStatut) => Promise<void>;
 }) {
   const [busyId, setBusyId] = useState<string | null>(null);
+  const [filesOf, setFilesOf] = useState<{ devisId: string; numero: string } | null>(
+    null
+  );
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState<"tous" | WorkflowStep>("tous");
   const [delai, setDelai] = useState<"tous" | string>("tous");
@@ -250,7 +254,12 @@ export default function AdminDevis({
             const step = workflowStep(d.statut, d.commandeStatut);
             const meta = WORKFLOW_META[step];
             return (
-              <div key={d.id} className={styles.tRow} style={{ gridTemplateColumns: GRID }}>
+              <div
+                key={d.id}
+                className={styles.tRow}
+                style={{ gridTemplateColumns: GRID, cursor: "pointer" }}
+                onClick={() => setFilesOf({ devisId: d.id, numero: d.numero })}
+              >
                 <div className={`${styles.td} ${styles.cellStrong}`}>{d.numero}</div>
                 <div className={styles.td}>{formatShort(d.createdAt)}</div>
                 <div className={styles.td}>
@@ -284,7 +293,10 @@ export default function AdminDevis({
                           type="button"
                           className={`${styles.actBtn} ${styles.actBtnValidate}`}
                           disabled={busyId === d.id}
-                          onClick={() => act(d.id, "accepte")}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            act(d.id, "accepte");
+                          }}
                         >
                           Valider
                         </button>
@@ -292,7 +304,10 @@ export default function AdminDevis({
                           type="button"
                           className={`${styles.actBtn} ${styles.actBtnRefuse}`}
                           disabled={busyId === d.id}
-                          onClick={() => act(d.id, "refuse")}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            act(d.id, "refuse");
+                          }}
                         >
                           Refuser
                         </button>
@@ -305,6 +320,14 @@ export default function AdminDevis({
           })
         )}
       </div>
+
+      {filesOf && (
+        <StlFilesPanel
+          devisId={filesOf.devisId}
+          numero={filesOf.numero}
+          onClose={() => setFilesOf(null)}
+        />
+      )}
     </>
   );
 }

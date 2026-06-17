@@ -16,6 +16,7 @@ import {
   type WorkflowStep,
   type Period,
 } from "@/lib/admin";
+import StlFilesPanel from "./StlFilesPanel";
 import styles from "./admin.module.css";
 
 const GRID = "150px 84px 1.4fr 48px 112px 1fr 92px 168px";
@@ -52,6 +53,9 @@ export default function AdminCommandes({
   onUpdate: (id: string, statut: CommandeStatut) => Promise<void>;
 }) {
   const [busyId, setBusyId] = useState<string | null>(null);
+  const [filesOf, setFilesOf] = useState<{ devisId: string; numero: string } | null>(
+    null
+  );
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState<"tous" | WorkflowStep>("tous");
   const [period, setPeriod] = useState<Period>("tout");
@@ -263,7 +267,14 @@ export default function AdminCommandes({
                     ? { to: "livree", label: "Marquer livrée" }
                     : null;
             return (
-              <div key={c.id} className={styles.tRow} style={{ gridTemplateColumns: GRID }}>
+              <div
+                key={c.id}
+                className={styles.tRow}
+                style={{ gridTemplateColumns: GRID, cursor: c.devisId ? "pointer" : "default" }}
+                onClick={() =>
+                  c.devisId && setFilesOf({ devisId: c.devisId, numero: c.numero })
+                }
+              >
                 <div className={`${styles.td} ${styles.cellStrong}`}>{c.numero}</div>
                 <div className={styles.td}>{formatShort(c.createdAt)}</div>
                 <div className={styles.td} style={{ display: "flex", alignItems: "center", gap: 10 }}>
@@ -294,7 +305,10 @@ export default function AdminCommandes({
                         type="button"
                         className={styles.actBtn}
                         disabled={busyId === c.id}
-                        onClick={() => act(c.id, next.to)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          act(c.id, next.to);
+                        }}
                       >
                         {next.label}
                       </button>
@@ -310,6 +324,14 @@ export default function AdminCommandes({
           })
         )}
       </div>
+
+      {filesOf && (
+        <StlFilesPanel
+          devisId={filesOf.devisId}
+          numero={filesOf.numero}
+          onClose={() => setFilesOf(null)}
+        />
+      )}
     </>
   );
 }

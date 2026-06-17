@@ -56,6 +56,7 @@ export default function CartView() {
   const [mounted, setMounted] = useState(false);
   const [cart, setCart] = useState<CartEntry[]>([]);
   const [pending, setPending] = useState(false);
+  const [progress, setProgress] = useState(0);
   const [feedback, setFeedback] = useState<Feedback | null>(null);
 
   useEffect(() => {
@@ -84,8 +85,9 @@ export default function CartView() {
 
   async function onCheckout() {
     setFeedback(null);
+    setProgress(0);
     setPending(true);
-    const result = await submitCart(cart);
+    const result = await submitCart(cart, setProgress);
     setPending(false);
 
     if (result.ok) {
@@ -276,6 +278,29 @@ export default function CartView() {
           >
             {pending ? t("cart.checkingOut") : t("cart.checkout")}
           </button>
+
+          {pending && (
+            <div
+              aria-label={`${progress}%`}
+              style={{
+                height: 7,
+                borderRadius: 999,
+                background: "rgba(0,75,50,.12)",
+                overflow: "hidden",
+                marginTop: 12,
+              }}
+            >
+              <div
+                style={{
+                  height: "100%",
+                  width: `${progress}%`,
+                  borderRadius: 999,
+                  background: "linear-gradient(90deg,#004B32,#AAE66E)",
+                  transition: "width .2s ease",
+                }}
+              />
+            </div>
+          )}
 
           {feedback && (
             <div
