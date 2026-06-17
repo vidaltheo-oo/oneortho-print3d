@@ -257,15 +257,8 @@ export default function AdminDevis({
     },
     {
       key: "nettoyage",
-      label: "Nettoyage",
-      w: "100px",
-      extra: true,
-      render: (d) => <OuiNon value={d.nettoyage} />,
-    },
-    {
-      key: "emballage",
-      label: "Emballage",
-      w: "105px",
+      label: "Nettoyage / Emballage",
+      w: "150px",
       extra: true,
       render: (d) => <OuiNon value={d.nettoyage} />,
     },

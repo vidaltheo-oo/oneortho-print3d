@@ -186,11 +186,7 @@ export default function StlFilesPanel({
                 </span>
               </div>
               <div className={styles.optRow}>
-                <span className={styles.infoLabel}>Nettoyage</span>
-                <OuiNon value={detail.nettoyage} />
-              </div>
-              <div className={styles.optRow}>
-                <span className={styles.infoLabel}>Emballage médical</span>
+                <span className={styles.infoLabel}>Nettoyage / Emballage médical</span>
                 <OuiNon value={detail.nettoyage} />
               </div>
               <div className={styles.optRow}>
