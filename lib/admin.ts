@@ -26,6 +26,14 @@ export type AdminDevis = {
   // Statut de la commande liee (le checkout cree devis + commande ensemble).
   // Quand il existe, c'est lui qui reflete le cycle de vie reel, pas devis.statut.
   commandeStatut: CommandeStatut | null;
+  // Options de configuration. finition/couleur vivent sur les pieces mais sont
+  // identiques pour toutes les pieces d'un devis : on prend la premiere.
+  finition: string | null;
+  couleur: string | null;
+  teintureTotal: number;
+  nettoyage: boolean;
+  dossierLot: boolean;
+  livraison: string | null;
 };
 
 export type AdminCommande = {
@@ -216,9 +224,15 @@ type DevisRow = {
   remise: number | null;
   delai: string | null;
   nature_application: string | null;
+  livraison: string | null;
+  nettoyage: boolean | null;
+  dossier_lot: boolean | null;
+  teinture_total: number | null;
   created_at: string;
   clients: DevisJoin | DevisJoin[] | null;
-  devis_pieces: { quantite: number | null }[] | null;
+  devis_pieces:
+    | { quantite: number | null; finition: string | null; couleur: string | null }[]
+    | null;
   commandes: { statut: CommandeStatut }[] | { statut: CommandeStatut } | null;
 };
 
@@ -266,7 +280,7 @@ export async function fetchAdminData(): Promise<AdminFetchResult> {
   const devisQuery = supabase
     .from("devis")
     .select(
-      "id, numero, statut, montant_ht, montant_ttc, remise, delai, nature_application, created_at, clients:client_id ( raison_sociale, email ), devis_pieces ( quantite ), commandes ( statut )"
+      "id, numero, statut, montant_ht, montant_ttc, remise, delai, nature_application, livraison, nettoyage, dossier_lot, teinture_total, created_at, clients:client_id ( raison_sociale, email ), devis_pieces ( quantite, finition, couleur ), commandes ( statut )"
     )
     .order("created_at", { ascending: false });
 
@@ -283,20 +297,29 @@ export async function fetchAdminData(): Promise<AdminFetchResult> {
   if (commandesRes.error) return { ok: false, message: commandesRes.error.message };
 
   const devis: AdminDevis[] = ((devisRes.data as DevisRow[] | null) ?? []).map(
-    (r) => ({
-      id: r.id,
-      numero: r.numero ?? r.id.slice(0, 8),
-      statut: r.statut,
-      montantHt: r.montant_ht ?? 0,
-      montantTtc: r.montant_ttc ?? 0,
-      remise: r.remise ?? 0,
-      delai: r.delai,
-      natureApplication: r.nature_application,
-      createdAt: r.created_at,
-      client: one(r.clients),
-      filesCount: r.devis_pieces?.length ?? 0,
-      commandeStatut: one(r.commandes)?.statut ?? null,
-    })
+    (r) => {
+      const firstPiece = r.devis_pieces?.[0] ?? null;
+      return {
+        id: r.id,
+        numero: r.numero ?? r.id.slice(0, 8),
+        statut: r.statut,
+        montantHt: r.montant_ht ?? 0,
+        montantTtc: r.montant_ttc ?? 0,
+        remise: r.remise ?? 0,
+        delai: r.delai,
+        natureApplication: r.nature_application,
+        createdAt: r.created_at,
+        client: one(r.clients),
+        filesCount: r.devis_pieces?.length ?? 0,
+        commandeStatut: one(r.commandes)?.statut ?? null,
+        finition: firstPiece?.finition ?? null,
+        couleur: firstPiece?.couleur ?? null,
+        teintureTotal: r.teinture_total ?? 0,
+        nettoyage: r.nettoyage ?? false,
+        dossierLot: r.dossier_lot ?? false,
+        livraison: r.livraison,
+      };
+    }
   );
 
   const commandes: AdminCommande[] = (
@@ -531,6 +554,7 @@ export type AdminPiece = {
   storagePath: string | null;
   volumeMm3: number | null;
   quantite: number;
+  prixHt: number;
   couleur: string | null;
   finition: string | null;
 };
@@ -540,6 +564,7 @@ type PieceRow = {
   storage_path: string | null;
   volume_mm3: number | null;
   quantite: number | null;
+  prix_ht: number | null;
   couleur: string | null;
   finition: string | null;
 };
@@ -547,7 +572,9 @@ type PieceRow = {
 export async function fetchDevisPieces(devisId: string): Promise<AdminPiece[]> {
   const { data, error } = await supabase
     .from("devis_pieces")
-    .select("nom_fichier, storage_path, volume_mm3, quantite, couleur, finition")
+    .select(
+      "nom_fichier, storage_path, volume_mm3, quantite, prix_ht, couleur, finition"
+    )
     .eq("devis_id", devisId);
   if (error) return [];
   return ((data as PieceRow[] | null) ?? []).map((r) => ({
@@ -555,9 +582,90 @@ export async function fetchDevisPieces(devisId: string): Promise<AdminPiece[]> {
     storagePath: r.storage_path,
     volumeMm3: r.volume_mm3,
     quantite: r.quantite ?? 1,
+    prixHt: r.prix_ht ?? 0,
     couleur: r.couleur,
     finition: r.finition,
   }));
+}
+
+// ---------- Detail complet d'un devis (panneau lateral admin) ----------
+
+export type AdminDevisDetail = {
+  numero: string;
+  statut: DevisStatut;
+  montantHt: number;
+  tva: number;
+  montantTtc: number;
+  remise: number;
+  delai: string | null;
+  langue: string | null;
+  natureApplication: string | null;
+  createdAt: string;
+  teintureTotal: number;
+  nettoyage: boolean;
+  dossierLot: boolean;
+  livraison: string | null;
+  finition: string | null;
+  couleur: string | null;
+  pieces: AdminPiece[];
+};
+
+type DevisDetailRow = {
+  numero: string | null;
+  statut: DevisStatut;
+  montant_ht: number | null;
+  tva: number | null;
+  montant_ttc: number | null;
+  remise: number | null;
+  delai: string | null;
+  langue: string | null;
+  nature_application: string | null;
+  created_at: string;
+  teinture_total: number | null;
+  nettoyage: boolean | null;
+  dossier_lot: boolean | null;
+  livraison: string | null;
+};
+
+// Charge l'en-tete du devis (options, tarification, infos) et ses pieces en
+// une seule passe, pour alimenter le panneau de detail (devis et commandes).
+export async function fetchDevisDetail(
+  devisId: string
+): Promise<AdminDevisDetail | null> {
+  const [devisRes, pieces] = await Promise.all([
+    supabase
+      .from("devis")
+      .select(
+        "numero, statut, montant_ht, tva, montant_ttc, remise, delai, langue, nature_application, created_at, teinture_total, nettoyage, dossier_lot, livraison"
+      )
+      .eq("id", devisId)
+      .maybeSingle(),
+    fetchDevisPieces(devisId),
+  ]);
+
+  if (devisRes.error || !devisRes.data) return null;
+  const r = devisRes.data as DevisDetailRow;
+  const firstPiece = pieces[0] ?? null;
+
+  return {
+    numero: r.numero ?? devisId.slice(0, 8),
+    statut: r.statut,
+    montantHt: r.montant_ht ?? 0,
+    tva: r.tva ?? 0,
+    montantTtc: r.montant_ttc ?? 0,
+    remise: r.remise ?? 0,
+    delai: r.delai,
+    langue: r.langue,
+    natureApplication: r.nature_application,
+    createdAt: r.created_at,
+    teintureTotal: r.teinture_total ?? 0,
+    nettoyage: r.nettoyage ?? false,
+    dossierLot: r.dossier_lot ?? false,
+    livraison: r.livraison,
+    finition: firstPiece?.finition ?? null,
+    couleur: firstPiece?.couleur ?? null,
+    pieces,
+  };
 }
 
 // URL signee (RLS : admin autorise en lecture). expiresIn en secondes.

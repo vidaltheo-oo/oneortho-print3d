@@ -26,11 +26,30 @@ export type CartEntry = {
   langue: string;
   nature_application: string | null;
   delai: string | null;
+  // Options de configuration (peuvent manquer sur d'anciens paniers localStorage).
+  livraison?: string | null;
+  nettoyage?: boolean;
+  dossier_lot?: boolean;
+  teinture_total?: number;
   remise: number;
   montant_ht: number;
   tva: number;
   montant_ttc: number;
   pieces: CartPiece[];
+};
+
+export const LIVRAISON_LABELS: Record<string, string> = {
+  std: "Standard",
+  j1: "J+1",
+};
+
+export const LANGUE_LABELS: Record<string, string> = {
+  fr: "Français",
+  en: "Anglais",
+  es: "Espagnol",
+  it: "Italien",
+  de: "Allemand",
+  pt: "Portugais",
 };
 
 export function loadCart(): CartEntry[] {

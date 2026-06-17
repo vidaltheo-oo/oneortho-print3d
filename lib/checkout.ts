@@ -63,6 +63,10 @@ export async function submitCart(
         delai: entry.delai,
         langue: entry.langue || "fr",
         nature_application: entry.nature_application,
+        livraison: entry.livraison ?? "std",
+        nettoyage: entry.nettoyage ?? false,
+        dossier_lot: entry.dossier_lot ?? false,
+        teinture_total: entry.teinture_total ?? 0,
       })
       .select("id")
       .single();
