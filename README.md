@@ -1,36 +1,48 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# ONE PRINT — oneortho-print3d
 
-## Getting Started
+Plateforme de chiffrage et de commande d'impression 3D SLS (PA2200) de OneOrtho Medical. Projet **non réglementé** (hors périmètre dispositif médical).
 
-First, run the development server:
+## Vue d'ensemble
+
+Trois briques dans un seul déploiement Next.js (App Router) :
+
+| Brique | Où | Description |
+|---|---|---|
+| Configurateur | `public/configurateur-app.html` (iframe sur `/configurateur`) | Upload STL, viewer 3D (three.js), simulation de devis, export PDF, ajout au panier |
+| Espace client | `app/` (pages Next) | Inscription/connexion, panier, checkout, suivi de commandes, fiche client — i18n 6 langues |
+| Back-office | `/admin` | Dashboard, devis, commandes, clients, fichiers STL — réservé à la table `admins` |
+
+Backend : Supabase (auth, Postgres + RLS, Storage). Emails transactionnels : Resend. Hébergement : Vercel.
+
+Voir `docs/ARCHITECTURE.md` pour le schéma des données, le workflow de commande et l'intégration configurateur ↔ espace client.
+
+## Démarrage
 
 ```bash
+npm install
+cp .env.example .env.local   # puis renseigner les valeurs
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Ouvrir http://localhost:3000 (redirige vers `/configurateur`).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Variables d'environnement
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Variable | Obligatoire | Usage |
+|---|---|---|
+| `NEXT_PUBLIC_SUPABASE_URL` | oui | URL du projet Supabase |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | oui | Clé anon (toutes les requêtes passent par la RLS ; aucune clé service-role dans le code) |
+| `RESEND_API_KEY` | non | Clé API Resend. Absente : les emails sont ignorés silencieusement (best-effort) |
+| `RESEND_FROM` | non | Expéditeur. Défaut `onboarding@resend.dev` = sandbox : livraison uniquement vers l'adresse du compte Resend. Pour livrer réellement, vérifier un domaine sur resend.com/domains puis définir p. ex. `ONE PRINT <noreply@oneortho-medical.com>` |
 
-## Learn More
+## Scripts
 
-To learn more about Next.js, take a look at the following resources:
+- `npm run dev` — serveur de développement
+- `npm run build` — build de production (à faire passer avant tout commit)
+- `npm run lint` — ESLint
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Notes
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Cette version de Next.js diverge des conventions historiques : lire `node_modules/next/dist/docs/` avant de modifier le routage ou les APIs (cf. `AGENTS.md`).
+- Le back-office `/admin` est volontairement en français uniquement (outil interne).
+- L'accès admin s'accorde en insérant le `user_id` du compte dans la table `admins` (voir `docs/ARCHITECTURE.md`).
