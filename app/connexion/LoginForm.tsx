@@ -35,7 +35,7 @@ export default function LoginForm() {
     await supabase.auth.resetPasswordForEmail(email.trim(), {
       redirectTo:
         typeof window !== "undefined"
-          ? `${window.location.origin}/connexion`
+          ? `${window.location.origin}/reinitialisation`
           : undefined,
     });
     // Message neutre (ne revele pas si le compte existe).
