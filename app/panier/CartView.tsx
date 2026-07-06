@@ -102,6 +102,17 @@ export default function CartView() {
       return;
     }
 
+    // Echec partiel : certaines entrees sont deja persistees (et retirees du
+    // panier par submitCart) ; on notifie leurs commandes et on l'explique.
+    if (result.commandeIds.length > 0) {
+      void notifyOrderCreated(result.commandeIds);
+      setFeedback({
+        kind: "err",
+        text: t("cart.fb.errorPartial", { n: result.persistedCount }),
+      });
+      return;
+    }
+
     switch (result.reason) {
       case "auth":
         router.push("/connexion");
@@ -226,6 +237,25 @@ export default function CartView() {
                   <span className={styles.piecePrice}>{formatEUR(p.prix_ht)}</span>
                 </div>
               ))}
+
+              {/* Options facturees au niveau du devis (absentes des pieces). */}
+              {(entry.livraison === "j1" ||
+                entry.nettoyage ||
+                entry.dossier_lot ||
+                (entry.teinture_total ?? 0) > 0) && (
+                <div className={styles.pieceOpts} style={{ padding: "8px 2px 0" }}>
+                  {[
+                    entry.livraison === "j1" ? t("opt.livJ1") : null,
+                    entry.nettoyage ? t("opt.nettoyage") : null,
+                    entry.dossier_lot ? t("opt.dossier") : null,
+                    (entry.teinture_total ?? 0) > 0
+                      ? `${t("opt.teinture")} ${formatEUR(entry.teinture_total ?? 0)}`
+                      : null,
+                  ]
+                    .filter(Boolean)
+                    .join(" · ")}
+                </div>
+              )}
             </div>
           ))}
 
@@ -248,16 +278,18 @@ export default function CartView() {
 
         <div className={styles.summary}>
           <div className={styles.summaryTitle}>{t("cart.summary")}</div>
+          {/* montant_ht est deja net de remise : le sous-total affiche le brut
+              (net + remise) pour que la ligne remise soit coherente. */}
+          <div className={styles.srow}>
+            <span>{t("cart.subtotalHt")}</span>
+            <span>{formatEUR(subHt + remise)}</span>
+          </div>
           {remise > 0 && (
             <div className={styles.srow}>
               <span>{t("cart.discount")}</span>
               <span>−{formatEUR(remise)}</span>
             </div>
           )}
-          <div className={styles.srow}>
-            <span>{t("cart.subtotalHt")}</span>
-            <span>{formatEUR(subHt)}</span>
-          </div>
           <div className={`${styles.srow} ${styles.srowBorder}`}>
             <span>{t("cart.vat")}</span>
             <span>{formatEUR(tva)}</span>

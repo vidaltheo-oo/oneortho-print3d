@@ -1,30 +1,59 @@
 import { supabase } from "./supabaseClient";
-import type { CartEntry } from "./cart";
+import { loadCart, saveCart, type CartEntry } from "./cart";
 import { getStl, deleteStl } from "./stlStore";
 
 export const STL_BUCKET = "stl-files";
 
 export type CheckoutResult =
   | { ok: true; count: number; commandeIds: string[] }
-  | { ok: false; reason: "auth" | "no_client" | "empty" | "db"; message?: string };
+  | {
+      ok: false;
+      reason: "auth" | "no_client" | "empty" | "db";
+      message?: string;
+      // Entrees deja persistees (devis + commande crees) avant l'echec : elles
+      // ont ete retirees du panier et ne seront pas re-soumises au prochain essai.
+      persistedCount: number;
+      commandeIds: string[];
+    };
+
+// Nom de fichier sur pour une cle Storage : pas de separateurs de chemin ni de
+// caracteres speciaux (le nom vient du poste client, non fiable).
+function safeFileName(name: string): string {
+  const base = name.split(/[\\/]/).pop() ?? "";
+  const cleaned = base.replace(/[^A-Za-z0-9._\-() ]/g, "_").slice(-100);
+  return cleaned || "piece.stl";
+}
 
 // Persiste le panier : chaque ligne devient un devis (statut "envoye") avec ses
 // devis_pieces, puis une commande (statut "en_attente"). Cet etat initial
 // correspond a l'etape "Nouveau" du workflow admin (en attente de validation du
 // devis) : la production ne peut etre lancee qu'une fois le devis valide.
 // Chaque binaire STL (conserve en IndexedDB par le configurateur) est uploade
-// vers Supabase Storage sous {user_id}/{devis_id}/{nom_fichier} et son chemin est
-// enregistre dans devis_pieces.storage_path.
+// vers Supabase Storage sous {user_id}/{devis_id}/{index}-{nom_fichier} (l'index
+// evite l'ecrasement de deux pieces homonymes) et son chemin est enregistre dans
+// devis_pieces.storage_path.
 // Les RLS exigent que le client_id appartienne a l'utilisateur authentifie.
+//
+// Idempotence : la creation n'est pas transactionnelle (plusieurs requetes),
+// donc chaque entree entierement persistee est retiree du panier localStorage
+// immediatement. Un echec en milieu de panier laisse uniquement les entrees non
+// soumises ; re-cliquer ne cree pas de doublon.
 export async function submitCart(
   cart: CartEntry[],
   onProgress?: (pct: number) => void
 ): Promise<CheckoutResult> {
-  if (!cart.length) return { ok: false, reason: "empty" };
+  const commandeIds: string[] = [];
+  let persistedCount = 0;
+  const fail = (
+    reason: "auth" | "no_client" | "empty" | "db",
+    message?: string
+  ): CheckoutResult => ({ ok: false, reason, message, persistedCount, commandeIds });
+
+  if (!cart.length) return fail("empty");
 
   const { data: userData } = await supabase.auth.getUser();
   const user = userData.user;
-  if (!user) return { ok: false, reason: "auth" };
+  if (!user) return fail("auth");
 
   const { data: client, error: clientError } = await supabase
     .from("clients")
@@ -32,22 +61,19 @@ export async function submitCart(
     .eq("user_id", user.id)
     .maybeSingle();
 
-  if (clientError) return { ok: false, reason: "db", message: clientError.message };
-  if (!client) return { ok: false, reason: "no_client" };
+  if (clientError) return fail("db", clientError.message);
+  if (!client) return fail("no_client");
 
-  // Progression : ponderee sur le nombre total de pieces a uploader.
-  const totalFiles = cart.reduce((s, e) => s + e.pieces.length, 0);
-  let uploaded = 0;
+  // Progression : uploads de binaires + 3 etapes DB par entree (devis, pieces,
+  // commande), pour que la barre ne stagne pas a 100 % pendant les insertions.
+  const totalUnits =
+    cart.reduce((s, e) => s + e.pieces.length, 0) + cart.length * 3;
+  let doneUnits = 0;
   const bump = () => {
-    uploaded += 1;
-    if (onProgress && totalFiles > 0) {
-      onProgress(Math.round((uploaded / totalFiles) * 100));
-    }
+    doneUnits += 1;
+    onProgress?.(Math.min(100, Math.round((doneUnits / totalUnits) * 100)));
   };
   onProgress?.(0);
-
-  const commandeIds: string[] = [];
-  const uploadedKeys: string[] = [];
 
   for (const entry of cart) {
     const { data: devis, error: devisError } = await supabase
@@ -71,50 +97,52 @@ export async function submitCart(
       .select("id")
       .single();
 
-    if (devisError || !devis) {
-      return { ok: false, reason: "db", message: devisError?.message };
-    }
+    if (devisError || !devis) return fail("db", devisError?.message);
+    bump();
+
+    const entryKeys: string[] = [];
 
     if (entry.pieces.length) {
-      // Upload des binaires (si presents en IndexedDB) puis insertion des pieces.
-      const rows = [];
-      for (const p of entry.pieces) {
-        let storagePath: string | null = null;
-        const buf = p.stl_key ? await getStl(p.stl_key) : null;
-        if (buf) {
-          const path = `${user.id}/${devis.id}/${p.nom_fichier}`;
-          const { error: upErr } = await supabase.storage
-            .from(STL_BUCKET)
-            .upload(path, buf, {
-              contentType: "model/stl",
-              upsert: true,
-            });
-          if (upErr) {
-            return { ok: false, reason: "db", message: upErr.message };
-          }
-          storagePath = path;
-          if (p.stl_key) uploadedKeys.push(p.stl_key);
-        }
-        bump();
-        rows.push({
-          devis_id: devis.id,
-          nom_fichier: p.nom_fichier,
-          volume_mm3: p.volume_mm3,
-          quantite: p.quantite,
-          prix_ht: p.prix_ht,
-          finition: p.finition,
-          couleur: p.couleur,
-          storage_path: storagePath,
-        });
+      // Upload des binaires en parallele (si presents en IndexedDB), puis
+      // insertion des pieces en un seul insert.
+      let rows: Array<Record<string, unknown>>;
+      try {
+        rows = await Promise.all(
+          entry.pieces.map(async (p, i) => {
+            let storagePath: string | null = null;
+            const buf = p.stl_key ? await getStl(p.stl_key) : null;
+            if (buf) {
+              const path = `${user.id}/${devis.id}/${i + 1}-${safeFileName(p.nom_fichier)}`;
+              const { error: upErr } = await supabase.storage
+                .from(STL_BUCKET)
+                .upload(path, buf, { contentType: "model/stl", upsert: true });
+              if (upErr) throw new Error(upErr.message);
+              storagePath = path;
+              if (p.stl_key) entryKeys.push(p.stl_key);
+            }
+            bump();
+            return {
+              devis_id: devis.id,
+              nom_fichier: p.nom_fichier,
+              volume_mm3: p.volume_mm3,
+              quantite: p.quantite,
+              prix_ht: p.prix_ht,
+              finition: p.finition,
+              couleur: p.couleur,
+              storage_path: storagePath,
+            };
+          })
+        );
+      } catch (e) {
+        return fail("db", e instanceof Error ? e.message : "upload failed");
       }
 
       const { error: piecesError } = await supabase
         .from("devis_pieces")
         .insert(rows);
-      if (piecesError) {
-        return { ok: false, reason: "db", message: piecesError.message };
-      }
+      if (piecesError) return fail("db", piecesError.message);
     }
+    bump();
 
     const { data: commande, error: commandeError } = await supabase
       .from("commandes")
@@ -125,14 +153,18 @@ export async function submitCart(
       })
       .select("id")
       .single();
-    if (commandeError || !commande) {
-      return { ok: false, reason: "db", message: commandeError?.message };
-    }
+    if (commandeError || !commande) return fail("db", commandeError?.message);
+    bump();
+
     commandeIds.push(commande.id);
+    persistedCount += 1;
+
+    // L'entree est entierement persistee : on la retire du panier stocke et on
+    // libere ses binaires IndexedDB (desormais dans Storage).
+    saveCart(loadCart().filter((e) => e.id !== entry.id));
+    for (const key of entryKeys) await deleteStl(key);
   }
 
-  // Nettoyage IndexedDB : les binaires vivent desormais dans Storage.
-  for (const key of uploadedKeys) await deleteStl(key);
   onProgress?.(100);
 
   return { ok: true, count: cart.length, commandeIds };
