@@ -134,8 +134,11 @@ export async function saveClient(
     savedId = data.id;
   }
 
-  // Sync metadata (non bloquant pour le resultat).
-  await supabase.auth.updateUser({ data: { ...profile } });
+  // Sync metadata (non bloquant pour le resultat). Fusion avec l'existant :
+  // un remplacement sec perdrait toute metadonnee posee hors ClientProfile.
+  await supabase.auth.updateUser({
+    data: { ...(user.user_metadata ?? {}), ...profile },
+  });
 
   return { ok: true, id: savedId as string };
 }

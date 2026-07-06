@@ -12,8 +12,8 @@ import { useT } from "@/lib/i18n/provider";
 import PasswordInput from "@/components/PasswordInput";
 import styles from "@/components/auth.module.css";
 
-// Destination apres connexion. L'espace client (/mes-commandes) n'est pas encore
-// integre : on renvoie pour l'instant vers le configurateur.
+// Destination apres connexion : le configurateur, point d'entree du parcours
+// de commande (le panier localStorage y est conserve).
 const AFTER_AUTH = "/configurateur";
 
 export default function LoginForm() {
