@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import {
   checkIsAdmin,
@@ -104,6 +104,10 @@ export default function AdminApp() {
   const [stlFiles, setStlFiles] = useState<AdminStlFile[]>([]);
   const [dataError, setDataError] = useState<string | null>(null);
   const [adminName, setAdminName] = useState("");
+  // Vues Clients / STL chargees a la premiere ouverture de leur onglet
+  // (pas au login : ce sont potentiellement les jeux de donnees les plus lourds).
+  const loadedViewsRef = useRef<Set<View>>(new Set());
+  const lastLoadRef = useRef(0);
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -123,19 +127,14 @@ export default function AdminApp() {
       | undefined;
     setAdminName(meta?.raison_sociale ?? userData.user?.email ?? "Admin");
 
-    const [result, clientsRes, stlRes] = await Promise.all([
-      fetchAdminData(),
-      fetchAdminClients(),
-      fetchAdminStl(),
-    ]);
+    const result = await fetchAdminData();
+    lastLoadRef.current = Date.now();
     if (!result.ok) {
       setDataError(result.message ?? "Erreur de chargement");
       setPhase("ready");
       return;
     }
     setData(result.data);
-    if (clientsRes.ok) setClients(clientsRes.clients);
-    if (stlRes.ok) setStlFiles(stlRes.files);
     setPhase("ready");
   }
 
@@ -178,6 +177,7 @@ export default function AdminApp() {
   // vue Devis afficher un ancien statut de commande liee.
   async function reloadData() {
     const result = await fetchAdminData();
+    lastLoadRef.current = Date.now();
     if (result.ok) setData(result.data);
   }
 
@@ -196,16 +196,37 @@ export default function AdminApp() {
     }
   }
 
+  // Chargement paresseux des vues Clients et STL a leur premiere ouverture.
+  useEffect(() => {
+    if (phase !== "ready") return;
+    const loaded = loadedViewsRef.current;
+    if (view === "clients" && !loaded.has("clients")) {
+      loaded.add("clients");
+      void fetchAdminClients().then((r) => {
+        if (r.ok) setClients(r.clients);
+        else setDataError(r.message ?? "Erreur de chargement des clients");
+      });
+    }
+    if (view === "stl" && !loaded.has("stl")) {
+      loaded.add("stl");
+      void fetchAdminStl().then((r) => {
+        if (r.ok) setStlFiles(r.files);
+        else setDataError(r.message ?? "Erreur de chargement des fichiers STL");
+      });
+    }
+  }, [phase, view]);
+
   // Rafraichit au retour sur l'onglet : un autre admin a pu changer des statuts.
+  // Throttle 30 s : chaque alt-tab ne redeclenche pas un rechargement complet.
   useEffect(() => {
     if (phase !== "ready") return;
     const onFocus = () => {
+      if (Date.now() - lastLoadRef.current < 30_000) return;
       void reloadData();
     };
     window.addEventListener("focus", onFocus);
     return () => window.removeEventListener("focus", onFocus);
     // reloadData est stable (n'utilise que setData) ; pas de dependance requise.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phase]);
 
   if (phase === "checking") {

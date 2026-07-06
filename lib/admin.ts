@@ -272,6 +272,12 @@ function one<T>(v: T | T[] | null): T | null {
 
 export type AdminData = { devis: AdminDevis[]; commandes: AdminCommande[] };
 
+// Plafonds des listes admin : borne le volume transfere (les requetes n'ont pas
+// encore de pagination). Les listes etant triees par date decroissante, on perd
+// seulement l'historique le plus ancien au-dela du plafond.
+const MAX_ROWS = 500;
+const MAX_STL_ROWS = 1000;
+
 export type AdminFetchResult =
   | { ok: true; data: AdminData }
   | { ok: false; message?: string };
@@ -282,14 +288,16 @@ export async function fetchAdminData(): Promise<AdminFetchResult> {
     .select(
       "id, numero, statut, montant_ht, montant_ttc, remise, delai, nature_application, livraison, nettoyage, dossier_lot, teinture_total, created_at, clients:client_id ( raison_sociale, email ), devis_pieces ( quantite, finition, couleur ), commandes ( statut )"
     )
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: false })
+    .limit(MAX_ROWS);
 
   const commandesQuery = supabase
     .from("commandes")
     .select(
       "id, statut, created_at, updated_at, devis_id, clients:client_id ( raison_sociale, email ), devis:devis_id ( numero, statut, montant_ht, montant_ttc, delai, nature_application, devis_pieces ( quantite ) )"
     )
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: false })
+    .limit(MAX_ROWS);
 
   const [devisRes, commandesRes] = await Promise.all([devisQuery, commandesQuery]);
 
@@ -409,7 +417,8 @@ export async function fetchAdminClients(): Promise<AdminClientsResult> {
     .select(
       "id, raison_sociale, nom, email, telephone, siret, tva_intracom, type_activite, fonction, adresse_facturation, adresse_livraison, created_at, commandes(count)"
     )
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: false })
+    .limit(MAX_ROWS);
 
   if (error) return { ok: false, message: error.message };
 
@@ -513,7 +522,8 @@ export async function fetchAdminStl(): Promise<AdminStlResult> {
     .from("devis_pieces")
     .select(
       "id, nom_fichier, storage_path, volume_mm3, devis:devis_id ( numero, created_at, clients:client_id ( raison_sociale ), commandes ( id ) )"
-    );
+    )
+    .limit(MAX_STL_ROWS);
 
   if (error) return { ok: false, message: error.message };
 
