@@ -3,6 +3,8 @@ import {
   sendEmail,
   clientConfirmationHtml,
   internalNotificationHtml,
+  confirmSubject,
+  emailLang,
   INTERNAL_EMAIL,
   type EmailOrder,
 } from "@/lib/email";
@@ -21,6 +23,7 @@ type DevisJoin = {
   tva: number | null;
   montant_ttc: number | null;
   delai: string | null;
+  langue: string | null;
   nature_application: string | null;
   devis_pieces: Piece[] | null;
 };
@@ -59,7 +62,7 @@ export async function POST(request: Request) {
   const { data, error } = await supa
     .from("commandes")
     .select(
-      "id, devis:devis_id ( numero, montant_ht, tva, montant_ttc, delai, nature_application, devis_pieces ( nom_fichier, quantite, finition, couleur, volume_mm3 ) ), clients:client_id ( raison_sociale, email, telephone )"
+      "id, devis:devis_id ( numero, montant_ht, tva, montant_ttc, delai, langue, nature_application, devis_pieces ( nom_fichier, quantite, finition, couleur, volume_mm3 ) ), clients:client_id ( raison_sociale, email, telephone )"
     )
     .in("id", ids);
 
@@ -90,14 +93,17 @@ export async function POST(request: Request) {
   const client = one(rows[0].clients);
   const clientName = client?.raison_sociale ?? "Client";
   const clientEmail = client?.email ?? null;
+  // Langue du client : celle du devis (les entrees d'un meme checkout partagent
+  // la langue courante du configurateur).
+  const lang = emailLang(one(rows[0].devis)?.langue);
 
   const results: Record<string, unknown> = {};
 
   if (clientEmail) {
     results.client = await sendEmail({
       to: clientEmail,
-      subject: "Votre demande de production ONE PRINT est confirmée",
-      html: clientConfirmationHtml(clientName, orders),
+      subject: confirmSubject(lang),
+      html: clientConfirmationHtml(clientName, orders, lang),
       replyTo: INTERNAL_EMAIL,
     });
   }

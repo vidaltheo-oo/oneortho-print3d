@@ -1,8 +1,15 @@
 import { bearerFromRequest, supabaseFromToken } from "@/lib/supabaseServer";
-import { sendEmail, statusUpdateHtml, STATUT_EMAIL, INTERNAL_EMAIL } from "@/lib/email";
+import {
+  sendEmail,
+  statusUpdateHtml,
+  statusSubject,
+  emailLang,
+  STATUT_EMAIL,
+  INTERNAL_EMAIL,
+} from "@/lib/email";
 
 type Join = { raison_sociale: string | null; email: string | null };
-type DevisJoin = { numero: string | null };
+type DevisJoin = { numero: string | null; langue: string | null };
 type Row = {
   id: string;
   devis: DevisJoin | DevisJoin[] | null;
@@ -46,7 +53,7 @@ export async function POST(request: Request) {
 
   const { data, error } = await supa
     .from("commandes")
-    .select("id, devis:devis_id ( numero ), clients:client_id ( raison_sociale, email )")
+    .select("id, devis:devis_id ( numero, langue ), clients:client_id ( raison_sociale, email )")
     .eq("id", commandeId)
     .maybeSingle();
 
@@ -55,15 +62,17 @@ export async function POST(request: Request) {
 
   const row = data as Row;
   const client = one(row.clients);
-  const numero = one(row.devis)?.numero ?? row.id.slice(0, 8);
+  const devis = one(row.devis);
+  const numero = devis?.numero ?? row.id.slice(0, 8);
+  const lang = emailLang(devis?.langue);
   const clientEmail = client?.email ?? null;
 
   if (!clientEmail) return Response.json({ ok: true, skipped: "no_email" });
 
   const result = await sendEmail({
     to: clientEmail,
-    subject: `Votre commande ${numero} — ${STATUT_EMAIL[statut]!.label}`,
-    html: statusUpdateHtml(client?.raison_sociale ?? "Client", numero, statut),
+    subject: statusSubject(numero, statut, lang),
+    html: statusUpdateHtml(client?.raison_sociale ?? "Client", numero, statut, lang),
     replyTo: INTERNAL_EMAIL,
   });
 
