@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script type="importmap">
 {
   "imports": {
@@ -1609,6 +1609,10 @@ const I18N_MAP = [
 function applyLang(l) {
   currentLang = l;
   document.documentElement.lang = l;
+  // Preference partagee avec les pages Next (meme cle) : le header Espace
+  // client et le configurateur restent synchronises. setItem d'une valeur
+  // identique ne redeclenche pas d'evenement storage (pas de boucle).
+  try { localStorage.setItem('oneprint_lang', l); } catch (e) {}
 
   document.querySelectorAll('.lang-btn').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.lang === l);
@@ -2389,6 +2393,11 @@ function generatePDF() {
     alert(t('pdf_app_req'));
     return;
   }
+  // jsPDF est charge en defer : encore absent si clic tres precoce ou CDN indisponible.
+  if (!window.jspdf) {
+    alert(t('err_read'));
+    return;
+  }
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
   const W = 210;
@@ -2675,7 +2684,12 @@ function loadCart() {
   catch (e) { return []; }
 }
 function saveCart(cart) {
-  try { localStorage.setItem(CART_KEY, JSON.stringify(cart)); } catch (e) {}
+  try { localStorage.setItem(CART_KEY, JSON.stringify(cart)); } catch (e) { return false; }
+  // Notifie la page parente Next (meme onglet : l'evenement natif "storage" ne
+  // se declenche que dans les autres contextes ; le header ecoute aussi cet
+  // evenement custom).
+  try { (window.parent || window).dispatchEvent(new Event('oneprint-cart-change')); } catch (e) {}
+  return true;
 }
 
 // IndexedDB : binaires STL conserves localement (partage same-origin avec l'app
@@ -2720,7 +2734,12 @@ function buildCartItem() {
   const p = multi ? calcPrice() : calcPrice(opts.qty);
   if (!p) return null;
   return {
-    id: QUOTE_NUM + '-' + (loadCart().length + 1),
+    // Suffixe aleatoire : un compteur base sur la taille du panier produisait
+    // des collisions d'id apres suppression (suppression croisee + ecrasement
+    // du binaire IndexedDB de l'autre entree).
+    id: QUOTE_NUM + '-' + (window.crypto && crypto.randomUUID
+      ? crypto.randomUUID().slice(0, 8)
+      : Date.now().toString(36) + Math.random().toString(36).slice(2, 6)),
     numero: QUOTE_NUM,
     langue: currentLang,
     nature_application: opts.app,
@@ -2754,15 +2773,19 @@ function authTokenKeys() {
   }
   return keys;
 }
-// Renvoie la session active (avec user/user_metadata) ou null.
+// Renvoie la session active (avec user/user_metadata) ou null. Un access_token
+// expire avec refresh_token present compte comme connecte : le client Next
+// rafraichit la session de son cote.
 function getAuthSession() {
-  try {
-    for (const k of authTokenKeys()) {
+  for (const k of authTokenKeys()) {
+    try {
       const v = JSON.parse(localStorage.getItem(k) || 'null');
       const s = v && v.currentSession ? v.currentSession : v;
-      if (s && s.access_token && (!s.expires_at || s.expires_at * 1000 > Date.now())) return s;
-    }
-  } catch (e) {}
+      if (!s) continue;
+      const fresh = s.access_token && (!s.expires_at || s.expires_at * 1000 > Date.now());
+      if (fresh || s.refresh_token) return s;
+    } catch (e) { /* entree illisible : on essaie la suivante */ }
+  }
   return null;
 }
 function isLoggedIn() { return !!getAuthSession(); }
@@ -2810,7 +2833,20 @@ async function addToCart() {
   } catch (e) { /* IndexedDB indisponible : on garde au moins les metadonnees */ }
   const cart = loadCart();
   cart.push(item);
-  saveCart(cart);
+  if (!saveCart(cart)) {
+    // localStorage indisponible (navigation privee, quota) : sans ce message
+    // l'ajout echouait silencieusement.
+    const errs = {
+      fr: "Impossible d'enregistrer le panier (stockage du navigateur indisponible).",
+      en: "Unable to save the cart (browser storage unavailable).",
+      es: "No se puede guardar el carrito (almacenamiento del navegador no disponible).",
+      it: "Impossibile salvare il carrello (memoria del browser non disponibile).",
+      de: "Der Warenkorb kann nicht gespeichert werden (Browser-Speicher nicht verfügbar).",
+      pt: "Não é possível guardar o carrinho (armazenamento do navegador indisponível).",
+    };
+    alert(errs[currentLang] || errs.fr);
+    return;
+  }
   updateCartCount();
   // retour visuel
   const pill = $('cartPill');
@@ -2924,7 +2960,21 @@ const authModalEl = $('authModal');
 if (authModalEl) authModalEl.addEventListener('click', (e) => { if (e.target === authModalEl) hideAuthModal(); });
 
 // ── Init ──────────────────────────────────────────────────────────────────────
-applyLang('fr');
+// Langue : reprend la preference partagee avec les pages Next, puis suit les
+// changements faits dans le header parent (evenement storage, autre contexte).
+applyLang((() => {
+  try {
+    const l = localStorage.getItem('oneprint_lang');
+    if (l && TRANSLATIONS[l]) return l;
+  } catch (e) {}
+  return 'fr';
+})());
+window.addEventListener('storage', (e) => {
+  if (e.key === 'oneprint_lang' && e.newValue && TRANSLATIONS[e.newValue] && e.newValue !== currentLang) {
+    applyLang(e.newValue);
+  }
+  if (e.key === CART_KEY) updateCartCount();
+});
 updateCartCount();
 </script>
 </body>
