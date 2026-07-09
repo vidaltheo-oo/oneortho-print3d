@@ -1,0 +1,114 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-07-09T00:00:00Z",
+  "title": "Design System: ONE PRINT",
+  "extensions": {
+    "colorMeta": {
+      "green-deep": { "role": "primary", "displayName": "Vert OneOrtho", "canonical": "#004b32", "tonalRamp": ["#001a11", "#00301f", "#004b32", "#00603f", "#1d7a55", "#4f9f79", "#8cc4a5", "#cfe6da"] },
+      "green-hover": { "role": "primary", "displayName": "Vert survol", "canonical": "#00603f" },
+      "lime": { "role": "secondary", "displayName": "Lime", "canonical": "#aae66e", "tonalRamp": ["#2a4014", "#4a6f26", "#6f9f40", "#8fc957", "#aae66e", "#c2ee94", "#d9f4bb", "#effae0"] },
+      "orange": { "role": "tertiary", "displayName": "Orange", "canonical": "#ff6c4f", "tonalRamp": ["#5a1608", "#8f2a13", "#c44526", "#e85838", "#ff6c4f", "#ff9179", "#ffb8a8", "#ffdcd4"] },
+      "cream-bg": { "role": "neutral", "displayName": "Crème", "canonical": "#f5f2e8" },
+      "surface": { "role": "neutral", "displayName": "Surface", "canonical": "#fcfbf7" },
+      "white": { "role": "neutral", "displayName": "Blanc", "canonical": "#ffffff" },
+      "border": { "role": "neutral", "displayName": "Bordure", "canonical": "#e2ded2" },
+      "border-soft": { "role": "neutral", "displayName": "Bordure douce", "canonical": "#f0ece0" },
+      "ink": { "role": "neutral", "displayName": "Encre", "canonical": "#1c1c1a" },
+      "muted": { "role": "neutral", "displayName": "Sourdine", "canonical": "#8a8478" }
+    },
+    "typographyMeta": {
+      "headline": { "displayName": "Headline", "purpose": "Titres d'écran client (Sora 800)." },
+      "title": { "displayName": "Title", "purpose": "Titres de cartes et pages admin, bas-de-casse (Sora 700)." },
+      "body": { "displayName": "Body", "purpose": "Contenu, formulaires, tables (DM Sans)." },
+      "label": { "displayName": "Label", "purpose": "Libellés de champs, uppercase 11px (Sora 600)." }
+    },
+    "shadows": [
+      { "name": "card-client", "value": "0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,75,50,0.06)", "purpose": "Cartes de formulaire et de contenu de l'espace client." },
+      { "name": "card-kpi", "value": "0 1px 2px rgba(0,75,50,0.04), 0 16px 30px -24px rgba(0,75,50,0.4)", "purpose": "Cartes KPI du dashboard admin." }
+    ],
+    "motion": [
+      { "name": "state-fast", "value": "0.2s ease", "purpose": "Transitions d'état (hover, focus). 150-250 ms, transform/opacity uniquement." }
+    ],
+    "breakpoints": [
+      { "name": "mobile", "value": "600px" },
+      { "name": "tablet", "value": "900px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Bouton primaire",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Action primaire unique d'un écran : pilule verte pleine largeur en formulaire.",
+      "html": "<button class=\"ds-btn-primary\">Créer mon compte</button>",
+      "css": ".ds-btn-primary { background: var(--green, #004b32); color: #fff; border: none; border-radius: 99px; padding: 14px 28px; font-family: Sora, system-ui, sans-serif; font-weight: 700; font-size: 14.5px; cursor: pointer; transition: background 0.2s ease; } .ds-btn-primary:hover { background: var(--green-hover, #00603f); } .ds-btn-primary:focus-visible { outline: 2px solid #004b32; outline-offset: 2px; } .ds-btn-primary:disabled { opacity: 0.6; cursor: progress; }"
+    },
+    {
+      "name": "Pilule de choix",
+      "kind": "chip",
+      "refersTo": "pill-toggle",
+      "description": "Sélecteur multi-choix des formulaires (activité, langue).",
+      "html": "<span><button class=\"ds-pill\">Podologie</button> <button class=\"ds-pill ds-pill-active\">Orthopédie</button></span>",
+      "css": ".ds-pill { background: #fff; border: 1.5px solid var(--border, #e2ded2); border-radius: 99px; padding: 8px 16px; font-family: 'DM Sans', system-ui, sans-serif; font-size: 13px; font-weight: 600; color: var(--text, #1c1c1a); cursor: pointer; transition: background 0.2s ease, border-color 0.2s ease; } .ds-pill:hover { border-color: var(--green, #004b32); } .ds-pill:focus-visible { outline: 2px solid #004b32; outline-offset: 2px; } .ds-pill-active { background: var(--green, #004b32); border-color: var(--green, #004b32); color: #fff; }"
+    },
+    {
+      "name": "Champ de saisie",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Champ standard des formulaires client et admin.",
+      "html": "<label class=\"ds-field\"><span class=\"ds-label\">Adresse e-mail</span><input class=\"ds-input\" type=\"email\" placeholder=\"prenom.nom@exemple.com\" /></label>",
+      "css": ".ds-field { display: block; font-family: 'DM Sans', system-ui, sans-serif; } .ds-label { display: block; font-family: Sora, system-ui, sans-serif; font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: #6f6a5e; margin-bottom: 6px; } .ds-input { display: block; width: 100%; padding: 11px 13px; border: 1.5px solid #e2ded2; border-radius: 10px; font-size: 14px; color: #1c1c1a; background: #fcfbf7; outline: none; transition: border-color 0.2s ease; } .ds-input:focus { border-color: #004b32; }"
+    },
+    {
+      "name": "Carte",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "Conteneur blanc à ombre verte douce sur fond crème.",
+      "html": "<div class=\"ds-card\"><h3 class=\"ds-card-title\">informations de livraison</h3><p class=\"ds-card-body\">Adresse, transporteur et délai estimé de la commande.</p></div>",
+      "css": ".ds-card { background: #fff; border-radius: 18px; padding: 28px; box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,75,50,0.06); } .ds-card-title { font-family: Sora, system-ui, sans-serif; font-weight: 700; font-size: 18px; color: #004b32; margin: 0 0 8px; } .ds-card-body { font-family: 'DM Sans', system-ui, sans-serif; font-size: 14px; line-height: 1.5; color: #1c1c1a; margin: 0; }"
+    },
+    {
+      "name": "Nav admin",
+      "kind": "nav",
+      "description": "Bouton de la sidebar verte ; l'état actif passe en lime.",
+      "html": "<nav class=\"ds-adminnav\"><button class=\"ds-navbtn ds-navbtn-active\">Dashboard</button><button class=\"ds-navbtn\">Commandes</button></nav>",
+      "css": ".ds-adminnav { display: inline-flex; flex-direction: column; gap: 4px; background: #004b32; padding: 14px 10px; border-radius: 16px; } .ds-navbtn { width: 84px; padding: 11px 4px; border-radius: 15px; background: transparent; border: none; color: rgba(255,255,255,0.72); font-family: 'DM Sans', system-ui, sans-serif; font-size: 11px; font-weight: 600; cursor: pointer; transition: background 0.2s ease, color 0.2s ease; } .ds-navbtn:hover { background: rgba(255,255,255,0.08); color: #fff; } .ds-navbtn:focus-visible { outline: 2px solid #aae66e; outline-offset: 2px; } .ds-navbtn-active { background: #aae66e; color: #004b32; }"
+    },
+    {
+      "name": "Bandeau d'état",
+      "kind": "custom",
+      "description": "Retour de formulaire : erreur ou succès.",
+      "html": "<div><div class=\"ds-alert ds-alert-error\">Adresse e-mail ou mot de passe incorrect.</div><div class=\"ds-alert ds-alert-success\">Votre compte a été créé.</div></div>",
+      "css": ".ds-alert { border-radius: 10px; padding: 11px 13px; font-family: 'DM Sans', system-ui, sans-serif; font-size: 13px; margin-bottom: 8px; } .ds-alert-error { background: #fdeaea; color: #c62828; } .ds-alert-success { background: #e8f5e9; color: #004b32; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "L'atelier de précision",
+    "overview": "ONE PRINT emprunte au monde de l'atelier industriel maîtrisé : un fond crème calme, un vert profond qui porte l'identité OneOrtho, un lime qui signale l'action et l'état actif. Le système sert trois briques (configurateur, espace client, back-office admin) avec un seul vocabulaire : mêmes tokens, mêmes pilules, mêmes cartes blanches à ombre douce teintée de vert. Le système rejette le SaaS sombre à glows néon, la décoration gratuite et toute divergence visuelle entre les briques.",
+    "keyCharacteristics": [
+      "Fond crème + surfaces blanches, profondeur par ombres douces teintées vert",
+      "Vert profond = identité et actions primaires ; lime = état actif ; orange = bascule et alertes commerciales",
+      "Titres Sora (700-800, souvent bas-de-casse), corps DM Sans 13-14px",
+      "Pilules pour boutons et toggles, cartes 16-18px, inputs 10px"
+    ],
+    "rules": [
+      { "name": "The One Green Rule", "body": "Le vert #004b32 est la seule couleur autorisée pour une action primaire. Un écran n'a qu'une action primaire visible à la fois.", "section": "colors" },
+      { "name": "The Lime-Is-A-State Rule", "body": "Le lime signale un état (actif, sélectionné, validé), jamais une surface décorative.", "section": "colors" },
+      { "name": "The Lowercase Title Rule", "body": "Les titres de pages admin sont en bas-de-casse ; c'est une signature, pas une négligence.", "section": "typography" },
+      { "name": "The Green Shadow Rule", "body": "Toute ombre visible est teintée du vert de marque. Une ombre grise neutre est un corps étranger.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do utiliser les tokens de app/globals.css pour toute nouvelle surface.",
+      "Do donner à chaque composant interactif ses états complets : hover, focus visible, disabled, loading, erreur.",
+      "Do garder le texte courant en encre #1c1c1a ; la sourdine #8a8478 est réservée aux libellés secondaires courts.",
+      "Do teinter toute ombre avec le vert de marque."
+    ],
+    "donts": [
+      "Don't introduire de dark mode à glows néon ni de glassmorphism décoratif.",
+      "Don't utiliser border-left > 1px comme bandeau d'accent sur une carte ou une alerte.",
+      "Don't animer width/height/padding ; transform et opacity uniquement, avec alternative prefers-reduced-motion.",
+      "Don't créer un deuxième style de bouton primaire.",
+      "Don't mettre du lime en fond de texte long ni en surface décorative."
+    ]
+  }
+}

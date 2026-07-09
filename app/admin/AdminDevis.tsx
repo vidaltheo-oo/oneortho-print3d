@@ -395,7 +395,7 @@ export default function AdminDevis({
 
       <div className={styles.tableTools}>
         <span className={styles.count}>
-          {rows.length} devis{rows.length > 1 ? "s" : ""}
+          {rows.length} devis
         </span>
         <button
           type="button"

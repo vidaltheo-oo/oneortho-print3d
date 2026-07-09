@@ -313,6 +313,10 @@ export default function CartView() {
 
           {pending && (
             <div
+              role="progressbar"
+              aria-valuenow={progress}
+              aria-valuemin={0}
+              aria-valuemax={100}
               aria-label={`${progress}%`}
               style={{
                 height: 7,
@@ -325,10 +329,12 @@ export default function CartView() {
               <div
                 style={{
                   height: "100%",
-                  width: `${progress}%`,
+                  width: "100%",
                   borderRadius: 999,
                   background: "linear-gradient(90deg,#004B32,#AAE66E)",
-                  transition: "width .2s ease",
+                  transform: `scaleX(${progress / 100})`,
+                  transformOrigin: "left",
+                  transition: "transform .2s ease",
                 }}
               />
             </div>
