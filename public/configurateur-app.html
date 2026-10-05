@@ -1705,6 +1705,8 @@ const show=el=>el.classList.remove('hidden');
 const hide=el=>el.classList.add('hidden');
 function eur(n){ return n.toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2})+' EUR'; }
 function fvol(v){ return Math.round(v).toLocaleString('fr-FR'); }
+// Echappe une chaine non fiable (ex. nom de fichier) avant insertion en innerHTML.
+function escHtml(s){ return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 
 // ── 3D Viewer ────────────────────────────────────────────────────────────────
 
@@ -2159,7 +2161,7 @@ function renderPiecesList() {
         '<path d="M13 2v6h5" stroke="#004B32" stroke-width="1.5" stroke-linecap="round"/>' +
       '</svg>' +
       '<div style="flex:1;min-width:0">' +
-        '<div style="font-family:\'Sora\',sans-serif;font-weight:600;font-size:.82rem;color:var(--green);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + piece.name + '</div>' +
+        '<div style="font-family:\'Sora\',sans-serif;font-weight:600;font-size:.82rem;color:var(--green);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + escHtml(piece.name) + '</div>' +
         '<div style="font-size:.75rem;color:var(--muted);margin-top:.1rem">' + fvol(piece.vol) + ' mm3</div>' +
         priceHtml +
       '</div>' +
