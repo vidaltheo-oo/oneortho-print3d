@@ -293,6 +293,9 @@ header{
 .pill input:checked+label{background:var(--green);border-color:var(--green);color:var(--white)}
 .pill input:checked+label .plus{color:var(--lime)}
 .pill label:hover{border-color:var(--green);color:var(--green)}
+.pill input:disabled+label{cursor:not-allowed;color:var(--muted);background:var(--bg)}
+.pill input:disabled+label:hover{border-color:var(--border);color:var(--muted)}
+.pill label .soon{background:#C62828;color:#fff;font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.03em;padding:.15rem .5rem;border-radius:100px}
 .pill input:checked+label:hover{color:var(--white)}
 .cdot{width:11px;height:11px;border-radius:50%;border:1.5px solid rgba(0,0,0,.15);flex-shrink:0}
 
@@ -647,8 +650,9 @@ footer strong{color:var(--orange)}
             <label for="fmicro"><span id="c_micro_el"></span> <span class="tag" id="c_included_el"></span></label>
           </div>
           <div class="pill">
-            <input type="radio" name="fin" id="flissage" value="lissage">
-            <label for="flissage"><span id="c_lissage_el"></span> <span class="tag plus">2&euro;/pc</span></label>
+            <!-- Lissage vapeur pas encore disponible : option desactivee, prix masque. -->
+            <input type="radio" name="fin" id="flissage" value="lissage" disabled>
+            <label for="flissage" aria-disabled="true"><span id="c_lissage_el"></span> <span class="soon" id="c_soon_el"></span></label>
           </div>
         </div>
       </div>
@@ -925,6 +929,7 @@ const TRANSLATIONS = {
     c_finish:    "Finition de surface",
     c_micro:     "Microbillee",
     c_lissage:   "Lissage vapeur",
+    c_soon:      "Bientôt disponible",
     c_included:  "inclus",
     c_color:     "Teinte",
     c_blanc:     "Blanc",
@@ -1036,6 +1041,7 @@ const TRANSLATIONS = {
     c_finish:    "Surface finish",
     c_micro:     "Shot-blasted",
     c_lissage:   "Vapour smoothing",
+    c_soon:      "Coming soon",
     c_included:  "included",
     c_color:     "Colour",
     c_blanc:     "White",
@@ -1147,6 +1153,7 @@ const TRANSLATIONS = {
     c_finish:    "Acabado superficial",
     c_micro:     "Granallado",
     c_lissage:   "Pulido por vapor",
+    c_soon:      "Próximamente",
     c_included:  "incluido",
     c_color:     "Color",
     c_blanc:     "Blanco",
@@ -1258,6 +1265,7 @@ const TRANSLATIONS = {
     c_finish:    "Finitura superficiale",
     c_micro:     "Pallinatura",
     c_lissage:   "Levigatura a vapore",
+    c_soon:      "Prossimamente",
     c_included:  "incluso",
     c_color:     "Colore",
     c_blanc:     "Bianco",
@@ -1369,6 +1377,7 @@ const TRANSLATIONS = {
     c_finish:    "Oberflachenfinish",
     c_micro:     "Kugelgestrahlt",
     c_lissage:   "Dampfglattung",
+    c_soon:      "Demnächst verfügbar",
     c_included:  "inklusive",
     c_color:     "Farbe",
     c_blanc:     "Weiss",
@@ -1480,6 +1489,7 @@ const TRANSLATIONS = {
     c_finish:    "Acabamento superficial",
     c_micro:     "Granalhagem",
     c_lissage:   "Polimento a vapor",
+    c_soon:      "Brevemente disponível",
     c_included:  "incluido",
     c_color:     "Cor",
     c_blanc:     "Branco",
@@ -1587,7 +1597,7 @@ const I18N_MAP = [
   ['c_title','c_title_el'],['c_apptype','c_apptype_el'],
   ['c_app_md','c_app_md_el'],['c_app_proto','c_app_proto_el'],['c_app_other','c_app_other_el'],
   ['c_mat','c_mat_el'],
-  ['c_finish','c_finish_el'],['c_micro','c_micro_el'],['c_lissage','c_lissage_el'],['c_included','c_included_el'],
+  ['c_finish','c_finish_el'],['c_micro','c_micro_el'],['c_lissage','c_lissage_el'],['c_soon','c_soon_el'],['c_included','c_included_el'],
   ['c_color','c_color_el'],['c_blanc','c_blanc_el'],
   ['c_gris','c_gris_el'],['c_bleu','c_bleu_el'],['c_noir','c_noir_el'],
   ['c_rouge','c_rouge_el'],['c_vert','c_vert_el'],['c_orange','c_orange_el'],

@@ -40,6 +40,12 @@
   color: var(--orange);
 }
 
+.brandLogo {
+  display: block;
+  height: 42px;
+  width: auto;
+}
+
 .brandSub {
   font-size: 11px;
   color: rgba(170, 230, 110, 0.85);

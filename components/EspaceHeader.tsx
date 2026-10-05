@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
@@ -88,9 +89,15 @@ export default function EspaceHeader() {
     <header className={styles.header}>
       <div className={styles.left}>
         <Link href="/configurateur" className={styles.brand}>
-          <div className={styles.brandTitle}>
-            ONE <span className={styles.accent}>PRINT</span>
-          </div>
+          {/* Meme logotype que l'en-tete du configurateur. */}
+          <Image
+            src="/Oneortho_logotype_2023_grege.png"
+            alt="OneOrtho Medical"
+            width={4013}
+            height={938}
+            priority
+            className={styles.brandLogo}
+          />
           <div className={styles.brandSub}>{t("header.brandSub")}</div>
         </Link>
         <nav className={styles.nav}>
