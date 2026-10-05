@@ -1,5 +1,29 @@
 # Changelog ONE PRINT
 
+## 2026-10-05 — Audit de sécurité (AUD-SEC-2026-10-05)
+
+Rapport : `docs/audit/Rapport_audit_securite_ONEPRINT_2026-10-05.docx`.
+
+### Sécurité
+
+- **RLS** : le client ne peut plus modifier ni supprimer devis, pièces et commandes ; création imposée aux statuts initiaux (`envoye`, `en_attente`) ; pièces uniquement sur un devis non commandé ; suppression de fiche client réservée aux admins ; chemins Storage limités au préfixe `{user_id}/` (`supabase/migrations/20261005010000_*`, `20261005020000_*`).
+- **Storage** : bucket `stl-files` limité à `model/stl` et `application/pdf`, 50 Mo.
+- **Base** : `search_path` figé sur `set_updated_at`, `TRUNCATE` révoqué pour anon/authenticated, unicité de `commandes.devis_id`.
+- **Emails** : `/api/emails/order-created` limité aux commandes de moins de 15 min (50 ids max).
+- **En-têtes HTTP** : `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy`, `Strict-Transport-Security`.
+- **Dépendances** : Next.js 16.2.9 → 16.3.8 (vulnérabilité critique), `npm audit` à 0.
+- Risque accepté : tarification calculée côté navigateur, maîtrisée par la validation manuelle admin.
+
+## 2026-10-05 — Bon de commande client au checkout
+
+### Ajouté
+
+- **Panier** : saisie facultative du n° de commande client et dépôt d'un bon de commande PDF (glisser-déposer ou sélection, 10 Mo max), traduits en 6 langues. Les deux valent pour tout le panier.
+- **Checkout** : le PDF est uploadé une seule fois avant toute écriture en base (`{user_id}/bons-commande/…` dans `stl-files`) ; la référence et le chemin sont enregistrés sur chaque commande (`commandes.ref_client`, `commandes.bon_commande_path`).
+- **Admin** : référence affichée sous le n° de commande et incluse dans la recherche ; section « Bon de commande client » avec téléchargement du PDF dans le panneau de détail.
+- **Email interne** : n° de commande client et présence du PDF indiqués dans la notification.
+- Migration à appliquer : `supabase/migrations/20261005000000_commandes_bon_commande.sql`.
+
 ## 2026-07-06 — Passe d'audit et de fiabilisation
 
 ### Corrigé (bloquant)

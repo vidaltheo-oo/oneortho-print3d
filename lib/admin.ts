@@ -51,6 +51,8 @@ export type AdminCommande = {
   devisId: string | null;
   // Statut du devis lie : le lancement en production exige un devis valide.
   devisStatut: DevisStatut | null;
+  // N° de commande saisi par le client au checkout (optionnel).
+  refClient: string | null;
 };
 
 type BadgeMeta = { label: string; bg: string; fg: string };
@@ -242,6 +244,7 @@ type CommandeRow = {
   created_at: string;
   updated_at: string;
   devis_id: string | null;
+  ref_client: string | null;
   clients: DevisJoin | DevisJoin[] | null;
   devis:
     | {
@@ -294,7 +297,7 @@ export async function fetchAdminData(): Promise<AdminFetchResult> {
   const commandesQuery = supabase
     .from("commandes")
     .select(
-      "id, statut, created_at, updated_at, devis_id, clients:client_id ( raison_sociale, email ), devis:devis_id ( numero, statut, montant_ht, montant_ttc, delai, nature_application, devis_pieces ( quantite ) )"
+      "id, statut, created_at, updated_at, devis_id, ref_client, clients:client_id ( raison_sociale, email ), devis:devis_id ( numero, statut, montant_ht, montant_ttc, delai, nature_application, devis_pieces ( quantite ) )"
     )
     .order("created_at", { ascending: false })
     .limit(MAX_ROWS);
@@ -348,6 +351,7 @@ export async function fetchAdminData(): Promise<AdminFetchResult> {
       updatedAt: r.updated_at,
       devisId: r.devis_id,
       devisStatut: d?.statut ?? null,
+      refClient: r.ref_client,
     };
   });
 
@@ -618,6 +622,9 @@ export type AdminDevisDetail = {
   finition: string | null;
   couleur: string | null;
   pieces: AdminPiece[];
+  // Bon de commande client, porte par la commande liee au devis.
+  refClient: string | null;
+  bonCommandePath: string | null;
 };
 
 type DevisDetailRow = {
@@ -635,6 +642,10 @@ type DevisDetailRow = {
   nettoyage: boolean | null;
   dossier_lot: boolean | null;
   livraison: string | null;
+  commandes:
+    | { ref_client: string | null; bon_commande_path: string | null }
+    | { ref_client: string | null; bon_commande_path: string | null }[]
+    | null;
 };
 
 // Charge l'en-tete du devis (options, tarification, infos) et ses pieces en
@@ -646,7 +657,7 @@ export async function fetchDevisDetail(
     supabase
       .from("devis")
       .select(
-        "numero, statut, montant_ht, tva, montant_ttc, remise, delai, langue, nature_application, created_at, teinture_total, nettoyage, dossier_lot, livraison"
+        "numero, statut, montant_ht, tva, montant_ttc, remise, delai, langue, nature_application, created_at, teinture_total, nettoyage, dossier_lot, livraison, commandes ( ref_client, bon_commande_path )"
       )
       .eq("id", devisId)
       .maybeSingle(),
@@ -656,6 +667,7 @@ export async function fetchDevisDetail(
   if (devisRes.error || !devisRes.data) return null;
   const r = devisRes.data as DevisDetailRow;
   const firstPiece = pieces[0] ?? null;
+  const commande = one(r.commandes);
 
   return {
     numero: r.numero ?? devisId.slice(0, 8),
@@ -675,6 +687,8 @@ export async function fetchDevisDetail(
     finition: firstPiece?.finition ?? null,
     couleur: firstPiece?.couleur ?? null,
     pieces,
+    refClient: commande?.ref_client ?? null,
+    bonCommandePath: commande?.bon_commande_path ?? null,
   };
 }
 

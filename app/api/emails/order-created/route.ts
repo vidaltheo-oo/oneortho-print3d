@@ -29,9 +29,14 @@ type DevisJoin = {
 };
 type Row = {
   id: string;
+  ref_client: string | null;
+  bon_commande_path: string | null;
   devis: DevisJoin | DevisJoin[] | null;
   clients: Join | Join[] | null;
 };
+
+const NOTIFY_WINDOW_MS = 15 * 60 * 1000;
+const MAX_IDS = 50;
 
 function one<T>(v: T | T[] | null): T | null {
   return Array.isArray(v) ? v[0] ?? null : v ?? null;
@@ -59,12 +64,16 @@ export async function POST(request: Request) {
   // fonctionne pas de maniere fiable dans la fonction serverless).
   const supa = supabaseFromToken(token);
 
+  // Anti-rejeu : seules les commandes creees depuis moins de NOTIFY_WINDOW_MS
+  // declenchent un email (borne les envois repetes vers l'adresse interne).
+  const since = new Date(Date.now() - NOTIFY_WINDOW_MS).toISOString();
   const { data, error } = await supa
     .from("commandes")
     .select(
-      "id, devis:devis_id ( numero, montant_ht, tva, montant_ttc, delai, langue, nature_application, devis_pieces ( nom_fichier, quantite, finition, couleur, volume_mm3 ) ), clients:client_id ( raison_sociale, email, telephone )"
+      "id, ref_client, bon_commande_path, devis:devis_id ( numero, montant_ht, tva, montant_ttc, delai, langue, nature_application, devis_pieces ( nom_fichier, quantite, finition, couleur, volume_mm3 ) ), clients:client_id ( raison_sociale, email, telephone )"
     )
-    .in("id", ids);
+    .in("id", ids.slice(0, MAX_IDS))
+    .gte("created_at", since);
 
   if (error) return Response.json({ error: error.message }, { status: 500 });
 
@@ -87,6 +96,8 @@ export async function POST(request: Request) {
         couleur: p.couleur,
         volume_mm3: p.volume_mm3,
       })),
+      refClient: r.ref_client,
+      hasBonCommande: !!r.bon_commande_path,
     };
   });
 

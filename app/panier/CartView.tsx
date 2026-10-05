@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   loadCart,
   saveCart,
@@ -11,7 +11,12 @@ import {
   CART_CHANGED_EVENT,
   type CartEntry,
 } from "@/lib/cart";
-import { submitCart } from "@/lib/checkout";
+import {
+  submitCart,
+  isPdfFile,
+  PO_MAX_BYTES,
+  PO_REF_MAX,
+} from "@/lib/checkout";
 import { notifyOrderCreated } from "@/lib/notifications";
 import { useT } from "@/lib/i18n/provider";
 import styles from "./panier.module.css";
@@ -58,6 +63,32 @@ export default function CartView() {
   const [pending, setPending] = useState(false);
   const [progress, setProgress] = useState(0);
   const [feedback, setFeedback] = useState<Feedback | null>(null);
+  // Bon de commande client (optionnel), commun a tout le panier.
+  const [poRef, setPoRef] = useState("");
+  const [poFile, setPoFile] = useState<File | null>(null);
+  const [poError, setPoError] = useState<string | null>(null);
+  const [dragOver, setDragOver] = useState(false);
+  const poInputRef = useRef<HTMLInputElement>(null);
+
+  function pickPoFile(file: File | undefined) {
+    if (!file) return;
+    if (!isPdfFile(file)) {
+      setPoError(t("cart.po.errType"));
+      return;
+    }
+    if (file.size > PO_MAX_BYTES) {
+      setPoError(t("cart.po.errSize"));
+      return;
+    }
+    setPoError(null);
+    setPoFile(file);
+  }
+
+  function clearPoFile() {
+    setPoFile(null);
+    setPoError(null);
+    if (poInputRef.current) poInputRef.current.value = "";
+  }
 
   useEffect(() => {
     // Lecture client-only du panier (localStorage indisponible au SSR) puis
@@ -87,7 +118,10 @@ export default function CartView() {
     setFeedback(null);
     setProgress(0);
     setPending(true);
-    const result = await submitCart(cart, setProgress);
+    const result = await submitCart(cart, setProgress, {
+      ref: poRef,
+      file: poFile,
+    });
     setPending(false);
 
     if (result.ok) {
@@ -95,6 +129,8 @@ export default function CartView() {
       void notifyOrderCreated(result.commandeIds);
       saveCart([]);
       setCart([]);
+      setPoRef("");
+      clearPoFile();
       setFeedback({
         kind: "ok",
         text: t("cart.fb.sent", { n: result.count }),
@@ -299,6 +335,90 @@ export default function CartView() {
             <div className={styles.totalVal}>{formatEUR(subHt)}</div>
             <div className={styles.totalTtc}>
               ({formatEUR(ttc)} {t("common.ttc")})
+            </div>
+          </div>
+
+          <div className={styles.po}>
+            <label className={styles.poLabel}>
+              {t("cart.po.ref")}{" "}
+              <span className={styles.poOpt}>({t("cart.po.optional")})</span>
+              <input
+                className={styles.poInput}
+                value={poRef}
+                maxLength={PO_REF_MAX}
+                onChange={(e) => setPoRef(e.target.value)}
+                disabled={pending}
+                autoComplete="off"
+              />
+            </label>
+
+            <div>
+              <span className={styles.poLabel} id="po-file-label">
+                {t("cart.po.file")}{" "}
+                <span className={styles.poOpt}>({t("cart.po.optional")})</span>
+              </span>
+              <input
+                ref={poInputRef}
+                type="file"
+                accept="application/pdf,.pdf"
+                hidden
+                onChange={(e) => pickPoFile(e.target.files?.[0])}
+              />
+              {poFile ? (
+                <div className={styles.poFile}>
+                  <span className={styles.poFileName} title={poFile.name}>
+                    {poFile.name}
+                  </span>
+                  <button
+                    type="button"
+                    className={styles.remove}
+                    title={t("cart.remove")}
+                    aria-label={t("cart.remove")}
+                    onClick={clearPoFile}
+                    disabled={pending}
+                  >
+                    <svg
+                      width="14"
+                      height="14"
+                      viewBox="0 0 20 20"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.8"
+                      strokeLinecap="round"
+                    >
+                      <path d="M6 6l8 8M14 6l-8 8" />
+                    </svg>
+                  </button>
+                </div>
+              ) : (
+                <div
+                  role="button"
+                  tabIndex={0}
+                  aria-labelledby="po-file-label"
+                  className={`${styles.poDrop} ${dragOver ? styles.poDropActive : ""}`}
+                  onClick={() => poInputRef.current?.click()}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      poInputRef.current?.click();
+                    }
+                  }}
+                  onDragOver={(e) => {
+                    e.preventDefault();
+                    setDragOver(true);
+                  }}
+                  onDragLeave={() => setDragOver(false)}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    setDragOver(false);
+                    pickPoFile(e.dataTransfer.files?.[0]);
+                  }}
+                >
+                  <span>{t("cart.po.drop")}</span>
+                  <span className={styles.poHint}>{t("cart.po.hint")}</span>
+                </div>
+              )}
+              {poError && <div className={styles.poErr}>{poError}</div>}
             </div>
           </div>
 

@@ -28,6 +28,9 @@ export type EmailOrder = {
   tva: number;
   montantTtc: number;
   pieces: EmailPiece[];
+  // Bon de commande client saisi au checkout (commun au panier).
+  refClient?: string | null;
+  hasBonCommande?: boolean;
 };
 
 // Langue des emails client : celle choisie au moment du devis (devis.langue).
@@ -414,11 +417,19 @@ export function internalNotificationHtml(
   orders: EmailOrder[]
 ): string {
   const total = orders.reduce((s, o) => s + o.montantTtc, 0);
+  const refClient = orders.find((o) => o.refClient)?.refClient ?? null;
+  const hasBon = orders.some((o) => o.hasBonCommande);
+  const poLine =
+    refClient || hasBon
+      ? `<br>N° de commande client : <strong>${escapeHtml(refClient ?? "—")}</strong>${
+          hasBon ? " · bon de commande PDF joint (téléchargeable dans l'admin)" : ""
+        }`
+      : "";
   return shell(
     "Nouvelle commande à traiter",
     `<div style="background:#F0F7EC;border:1px solid #AAE66E;border-radius:10px;padding:12px 14px;margin-bottom:14px;font-size:13.5px;">
        <strong>${escapeHtml(client.raison_sociale ?? "Client")}</strong><br>
-       ${escapeHtml(client.email ?? "—")}${client.telephone ? " · " + escapeHtml(client.telephone) : ""}
+       ${escapeHtml(client.email ?? "—")}${client.telephone ? " · " + escapeHtml(client.telephone) : ""}${poLine}
      </div>
      ${orders.map((o) => orderBlock(o, "fr")).join("")}
      <p style="font-size:14px;">Total : <strong style="color:#004B32;">${formatEUR(

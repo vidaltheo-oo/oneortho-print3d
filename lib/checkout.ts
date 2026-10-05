@@ -4,6 +4,16 @@ import { getStl, deleteStl } from "./stlStore";
 
 export const STL_BUCKET = "stl-files";
 
+// Bon de commande client (optionnel) : PDF uniquement, 10 Mo max.
+export const PO_MAX_BYTES = 10 * 1024 * 1024;
+export const PO_REF_MAX = 50;
+
+export type PurchaseOrder = { ref: string; file: File | null };
+
+export function isPdfFile(file: File): boolean {
+  return file.type === "application/pdf" || /\.pdf$/i.test(file.name);
+}
+
 export type CheckoutResult =
   | { ok: true; count: number; commandeIds: string[] }
   | {
@@ -38,9 +48,16 @@ function safeFileName(name: string): string {
 // donc chaque entree entierement persistee est retiree du panier localStorage
 // immediatement. Un echec en milieu de panier laisse uniquement les entrees non
 // soumises ; re-cliquer ne cree pas de doublon.
+//
+// Bon de commande : la reference et le PDF saisis au checkout valent pour tout
+// le panier. Le PDF est uploade une seule fois, avant toute ecriture en base
+// (un echec d'upload ne laisse ainsi aucun devis orphelin), sous
+// {user_id}/bons-commande/{horodatage}-{nom_fichier}, et son chemin est
+// enregistre sur chaque commande (commandes.bon_commande_path).
 export async function submitCart(
   cart: CartEntry[],
-  onProgress?: (pct: number) => void
+  onProgress?: (pct: number) => void,
+  po?: PurchaseOrder
 ): Promise<CheckoutResult> {
   const commandeIds: string[] = [];
   let persistedCount = 0;
@@ -66,14 +83,31 @@ export async function submitCart(
 
   // Progression : uploads de binaires + 3 etapes DB par entree (devis, pieces,
   // commande), pour que la barre ne stagne pas a 100 % pendant les insertions.
+  const poFile = po?.file ?? null;
+  const refClient = po?.ref.trim().slice(0, PO_REF_MAX) || null;
   const totalUnits =
-    cart.reduce((s, e) => s + e.pieces.length, 0) + cart.length * 3;
+    cart.reduce((s, e) => s + e.pieces.length, 0) +
+    cart.length * 3 +
+    (poFile ? 1 : 0);
   let doneUnits = 0;
   const bump = () => {
     doneUnits += 1;
     onProgress?.(Math.min(100, Math.round((doneUnits / totalUnits) * 100)));
   };
   onProgress?.(0);
+
+  let bonCommandePath: string | null = null;
+  if (poFile) {
+    if (!isPdfFile(poFile) || poFile.size > PO_MAX_BYTES)
+      return fail("db", "invalid purchase order file");
+    const path = `${user.id}/bons-commande/${Date.now()}-${safeFileName(poFile.name)}`;
+    const { error: poErr } = await supabase.storage
+      .from(STL_BUCKET)
+      .upload(path, poFile, { contentType: "application/pdf", upsert: false });
+    if (poErr) return fail("db", poErr.message);
+    bonCommandePath = path;
+    bump();
+  }
 
   for (const entry of cart) {
     const { data: devis, error: devisError } = await supabase
@@ -150,6 +184,8 @@ export async function submitCart(
         devis_id: devis.id,
         client_id: client.id,
         statut: "en_attente",
+        ref_client: refClient,
+        bon_commande_path: bonCommandePath,
       })
       .select("id")
       .single();

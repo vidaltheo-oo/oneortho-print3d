@@ -86,7 +86,7 @@ export default function AdminCommandes({
     if (status !== "tous" && step !== status) return false;
     if (!isInPeriod(c.createdAt, period, now)) return false;
     if (q) {
-      const hay = `${c.numero} ${c.client?.raison_sociale ?? ""} ${
+      const hay = `${c.numero} ${c.refClient ?? ""} ${c.client?.raison_sociale ?? ""} ${
         c.client?.email ?? ""
       }`.toLowerCase();
       if (!hay.includes(q)) return false;
@@ -275,7 +275,14 @@ export default function AdminCommandes({
                   c.devisId && setFilesOf({ devisId: c.devisId, numero: c.numero })
                 }
               >
-                <div className={`${styles.td} ${styles.cellStrong}`}>{c.numero}</div>
+                <div className={styles.td} style={{ minWidth: 0 }}>
+                  <div className={styles.cellStrong}>{c.numero}</div>
+                  {c.refClient && (
+                    <div className={styles.cellEmail} title="N° de commande client">
+                      Réf. {c.refClient}
+                    </div>
+                  )}
+                </div>
                 <div className={styles.td}>{formatShort(c.createdAt)}</div>
                 <div className={styles.td} style={{ display: "flex", alignItems: "center", gap: 10 }}>
                   <span className={styles.sideAvatar} style={{ width: 30, height: 30, fontSize: 11 }}>

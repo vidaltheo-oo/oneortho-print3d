@@ -86,6 +86,21 @@ export default function StlFilesPanel({
     }
   }
 
+  async function telechargerBonCommande(path: string) {
+    setBusy(path);
+    const name = path.split("/").pop() ?? "bon-commande.pdf";
+    const url = await signedStlUrl(path, { expiresIn: 3600, download: name });
+    setBusy(null);
+    if (url) {
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = name;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    }
+  }
+
   const pieces = detail?.pieces ?? [];
   // Le configurateur applique finition/couleur a toutes les pieces : niveau devis.
   const teinture = (detail?.teintureTotal ?? 0) > 0;
@@ -158,6 +173,30 @@ export default function StlFilesPanel({
                 ))}
               </div>
             )}
+
+            {/* ---------- Bon de commande client ---------- */}
+            <div className={styles.drawerSection}>Bon de commande client</div>
+            <div className={styles.infoList}>
+              <div className={styles.optRow}>
+                <span className={styles.infoLabel}>N° de commande</span>
+                <span className={styles.infoValue}>{detail.refClient || "—"}</span>
+              </div>
+              <div className={styles.optRow}>
+                <span className={styles.infoLabel}>PDF</span>
+                {detail.bonCommandePath ? (
+                  <button
+                    type="button"
+                    className={styles.actBtn}
+                    disabled={busy === detail.bonCommandePath}
+                    onClick={() => telechargerBonCommande(detail.bonCommandePath!)}
+                  >
+                    Télécharger
+                  </button>
+                ) : (
+                  <span className={styles.infoValue}>—</span>
+                )}
+              </div>
+            </div>
 
             {/* ---------- Options ---------- */}
             <div className={styles.drawerSection}>Options</div>
