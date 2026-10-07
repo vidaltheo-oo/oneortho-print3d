@@ -69,21 +69,23 @@ export const COMMANDE_STATUT_META: Record<CommandeStatut, BadgeMeta> = {
   en_attente: { label: "À lancer", bg: "#FFF3E0", fg: "#FF6C4F" },
   en_production: { label: "En production", bg: "#E3F2FD", fg: "#1565C0" },
   expediee: { label: "Expédiée", bg: "#F3E5F5", fg: "#6A1B9A" },
-  livree: { label: "Livrée", bg: "#E8F5E9", fg: "#004B32" },
+  // Etape retiree (valeur conservee dans l'enum SQL) : affichee comme expediee.
+  livree: { label: "Expédiée", bg: "#F3E5F5", fg: "#6A1B9A" },
   annulee: { label: "Annulée", bg: "#FDEAEA", fg: "#C62828" },
 };
 
 // ---------- Workflow unifie (devis + commande) ----------
 // Le checkout cree un devis (envoye) ET une commande (en_attente). Le cycle de
-// vie reel se lit en combinant les deux statuts en 5 etapes :
-//   nouveau -> valide -> en_production -> expediee -> livree
-// Etapes 1-2 pilotees dans /admin/devis (validation), 3-5 dans /admin/commandes.
+// vie reel se lit en combinant les deux statuts en 4 etapes :
+//   nouveau -> valide -> en_production -> expediee
+// Etapes 1-2 pilotees dans /admin/devis (validation), 3-4 dans /admin/commandes.
+// L'etape "livree" a ete retiree (2026-10-07) : expediee est l'etat final. La
+// valeur reste dans l'enum SQL ; une ancienne ligne livree s'affiche expediee.
 export type WorkflowStep =
   | "nouveau"
   | "valide"
   | "en_production"
   | "expediee"
-  | "livree"
   | "refuse"
   | "annulee";
 
@@ -92,20 +94,18 @@ export const WORKFLOW_META: Record<WorkflowStep, BadgeMeta> = {
   valide: { label: "Validé", bg: "#E8F5E9", fg: "#004B32" },
   en_production: { label: "En production", bg: "#E3F2FD", fg: "#1565C0" },
   expediee: { label: "Expédiée", bg: "#F3E5F5", fg: "#6A1B9A" },
-  livree: { label: "Livrée", bg: "#E8F5E9", fg: "#004B32" },
   refuse: { label: "Refusé", bg: "#FDEAEA", fg: "#C62828" },
   annulee: { label: "Annulée", bg: "#FDEAEA", fg: "#C62828" },
 };
 
 // Etape effective a partir des deux statuts. Une commande avancee (production,
-// expediee, livree, annulee) prime ; sinon l'etat depend de la validation devis.
+// expediee, annulee) prime ; sinon l'etat depend de la validation devis.
 export function workflowStep(
   devisStatut: DevisStatut | null,
   commandeStatut: CommandeStatut | null
 ): WorkflowStep {
   if (commandeStatut === "en_production") return "en_production";
-  if (commandeStatut === "expediee") return "expediee";
-  if (commandeStatut === "livree") return "livree";
+  if (commandeStatut === "expediee" || commandeStatut === "livree") return "expediee";
   if (commandeStatut === "annulee") return "annulee";
   if (devisStatut === "refuse") return "refuse";
   if (devisStatut === "accepte") return "valide";
@@ -118,9 +118,8 @@ export const WORKFLOW_ORDER: Record<WorkflowStep, number> = {
   valide: 1,
   en_production: 2,
   expediee: 3,
-  livree: 4,
-  refuse: 5,
-  annulee: 6,
+  refuse: 4,
+  annulee: 5,
 };
 
 // Ordre des delais pour le tri (Standard < Priority < Express).
@@ -500,6 +499,10 @@ export type AdminStlFile = {
   clientRaisonSociale: string | null;
   createdAt: string;
   commandeNumero: string | null;
+  // Zone tampon : date du premier telechargement admin, et date de suppression
+  // du fichier dans le bucket (null = toujours sur la plateforme).
+  telechargeLe: string | null;
+  supprimeLe: string | null;
 };
 
 type StlClientJoin = { raison_sociale: string | null };
@@ -514,6 +517,8 @@ type StlPieceRow = {
   nom_fichier: string;
   storage_path: string | null;
   volume_mm3: number | null;
+  stl_telecharge_le: string | null;
+  stl_supprime_le: string | null;
   devis: StlDevisJoin | StlDevisJoin[] | null;
 };
 
@@ -525,7 +530,7 @@ export async function fetchAdminStl(): Promise<AdminStlResult> {
   const { data, error } = await supabase
     .from("devis_pieces")
     .select(
-      "id, nom_fichier, storage_path, volume_mm3, devis:devis_id ( numero, created_at, clients:client_id ( raison_sociale ), commandes ( id ) )"
+      "id, nom_fichier, storage_path, volume_mm3, stl_telecharge_le, stl_supprime_le, devis:devis_id ( numero, created_at, clients:client_id ( raison_sociale ), commandes ( id ) )"
     )
     .limit(MAX_STL_ROWS);
 
@@ -551,6 +556,8 @@ export async function fetchAdminStl(): Promise<AdminStlResult> {
         createdAt: d?.created_at ?? "",
         // La commande herite du numero de devis (convention du reste de l'app).
         commandeNumero: linked ? (d?.numero ?? null) : null,
+        telechargeLe: r.stl_telecharge_le,
+        supprimeLe: r.stl_supprime_le,
       };
     }
   );
@@ -564,6 +571,7 @@ export async function fetchAdminStl(): Promise<AdminStlResult> {
 // ---------- Fichiers STL d'un devis (panneau detail admin) ----------
 
 export type AdminPiece = {
+  id: string;
   nomFichier: string;
   storagePath: string | null;
   volumeMm3: number | null;
@@ -571,9 +579,12 @@ export type AdminPiece = {
   prixHt: number;
   couleur: string | null;
   finition: string | null;
+  telechargeLe: string | null;
+  supprimeLe: string | null;
 };
 
 type PieceRow = {
+  id: string;
   nom_fichier: string;
   storage_path: string | null;
   volume_mm3: number | null;
@@ -581,17 +592,20 @@ type PieceRow = {
   prix_ht: number | null;
   couleur: string | null;
   finition: string | null;
+  stl_telecharge_le: string | null;
+  stl_supprime_le: string | null;
 };
 
 export async function fetchDevisPieces(devisId: string): Promise<AdminPiece[]> {
   const { data, error } = await supabase
     .from("devis_pieces")
     .select(
-      "nom_fichier, storage_path, volume_mm3, quantite, prix_ht, couleur, finition"
+      "id, nom_fichier, storage_path, volume_mm3, quantite, prix_ht, couleur, finition, stl_telecharge_le, stl_supprime_le"
     )
     .eq("devis_id", devisId);
   if (error) return [];
   return ((data as PieceRow[] | null) ?? []).map((r) => ({
+    id: r.id,
     nomFichier: r.nom_fichier,
     storagePath: r.storage_path,
     volumeMm3: r.volume_mm3,
@@ -599,6 +613,8 @@ export async function fetchDevisPieces(devisId: string): Promise<AdminPiece[]> {
     prixHt: r.prix_ht ?? 0,
     couleur: r.couleur,
     finition: r.finition,
+    telechargeLe: r.stl_telecharge_le,
+    supprimeLe: r.stl_supprime_le,
   }));
 }
 
@@ -704,6 +720,86 @@ export async function signedStlUrl(
       download: opts?.download,
     });
   return data?.signedUrl ?? null;
+}
+
+// ---------- Zone STL tampon ----------
+// Les STL ne sont pas archives ici : l'atelier les telecharge puis les supprime
+// du bucket. La ligne devis_pieces reste (tracabilite du devis).
+
+// Horodate le premier telechargement (les suivants ne l'ecrasent pas).
+export async function markStlDownloaded(pieceId: string): Promise<void> {
+  const { error } = await supabase
+    .from("devis_pieces")
+    .update({ stl_telecharge_le: new Date().toISOString() })
+    .eq("id", pieceId)
+    .is("stl_telecharge_le", null);
+  if (error) console.error("markStlDownloaded:", error.message);
+}
+
+export type StlToDelete = { id: string; storagePath: string | null };
+
+// Supprime les fichiers du bucket puis horodate stl_supprime_le. Un objet deja
+// absent du bucket n'est pas une erreur (remove l'ignore) : la ligne est quand
+// meme marquee supprimee pour refleter l'etat reel.
+export async function deleteStlFiles(
+  files: StlToDelete[]
+): Promise<{ ok: boolean; message?: string }> {
+  if (files.length === 0) return { ok: true };
+  const paths = files
+    .map((f) => f.storagePath)
+    .filter((p): p is string => !!p);
+  if (paths.length > 0) {
+    const { error } = await supabase.storage.from(STL_BUCKET).remove(paths);
+    if (error) return { ok: false, message: error.message };
+  }
+  const { error } = await supabase
+    .from("devis_pieces")
+    .update({ stl_supprime_le: new Date().toISOString() })
+    .in(
+      "id",
+      files.map((f) => f.id)
+    );
+  if (error) return { ok: false, message: error.message };
+  return { ok: true };
+}
+
+// ---------- Capacite Supabase (tableau de bord) ----------
+// Quotas du plan Free (organisation Supabase en "free" au 2026-10-07). A mettre
+// a jour en cas de passage au plan Pro (100 Go stockage, 8 Go base).
+export const STORAGE_QUOTA_BYTES = 1024 ** 3; // 1 Go
+export const DB_QUOTA_BYTES = 500 * 1024 ** 2; // 500 Mo
+
+export type StorageUsage = {
+  stockageOctets: number;
+  fichiers: number;
+  baseOctets: number;
+};
+
+export async function fetchStorageUsage(): Promise<StorageUsage | null> {
+  const { data, error } = await supabase.rpc("admin_storage_usage");
+  if (error) {
+    console.error("fetchStorageUsage:", error.message);
+    return null;
+  }
+  const row = (Array.isArray(data) ? data[0] : data) as
+    | { stockage_octets: number; fichiers: number; base_octets: number }
+    | undefined;
+  if (!row) return null;
+  return {
+    stockageOctets: Number(row.stockage_octets) || 0,
+    fichiers: Number(row.fichiers) || 0,
+    baseOctets: Number(row.base_octets) || 0,
+  };
+}
+
+export function formatBytes(bytes: number): string {
+  if (bytes >= 1024 ** 3) {
+    return `${(bytes / 1024 ** 3).toLocaleString("fr-FR", { maximumFractionDigits: 2 })} Go`;
+  }
+  if (bytes >= 1024 ** 2) {
+    return `${(bytes / 1024 ** 2).toLocaleString("fr-FR", { maximumFractionDigits: 1 })} Mo`;
+  }
+  return `${Math.round(bytes / 1024).toLocaleString("fr-FR")} Ko`;
 }
 
 // ---------- KPI / agrégations ----------

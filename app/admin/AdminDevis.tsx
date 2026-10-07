@@ -48,7 +48,6 @@ const STATUS_FILTERS: { key: "tous" | WorkflowStep; label: string }[] = [
   { key: "valide", label: "Validé" },
   { key: "en_production", label: "En production" },
   { key: "expediee", label: "Expédiée" },
-  { key: "livree", label: "Livrée" },
   { key: "refuse", label: "Refusé" },
 ];
 

@@ -123,7 +123,7 @@ function Tracker({ order }: { order: Order }) {
   }
 
   const curIdx = meta.trackerIdx;
-  const fillRatio = meta.delivered ? 1 : curIdx / (TRACKER_STEPS.length - 1);
+  const fillRatio = meta.done ? 1 : curIdx / (TRACKER_STEPS.length - 1);
   const fillWidth = `calc((100% - 16%) * ${fillRatio})`;
 
   return (
@@ -132,8 +132,8 @@ function Tracker({ order }: { order: Order }) {
         <div className={styles.trackBg} />
         <div className={styles.trackFill} style={{ width: fillWidth }} />
         {TRACKER_STEPS.map((step, i) => {
-          const done = meta.delivered || i < curIdx;
-          const current = !meta.delivered && i === curIdx;
+          const done = meta.done || i < curIdx;
+          const current = !meta.done && i === curIdx;
           return (
             <div key={step} className={styles.step}>
               <span
@@ -311,14 +311,14 @@ export default function MesCommandesView() {
     );
   }
 
-  // En cours = ni livrée ni annulée (statut effectif tenant compte du devis).
+  // En cours = ni expédiée ni annulée (statut effectif tenant compte du devis).
   const current = orders.filter((o) => {
     const m = clientStatusMeta(o);
-    return !m.cancelled && !m.delivered;
+    return !m.cancelled && !m.done;
   });
   const past = orders.filter((o) => {
     const m = clientStatusMeta(o);
-    return m.cancelled || m.delivered;
+    return m.cancelled || m.done;
   });
 
   return (

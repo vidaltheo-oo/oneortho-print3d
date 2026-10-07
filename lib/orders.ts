@@ -41,14 +41,16 @@ type StatutMeta = {
   fg: string;
   trackerIdx: number;
   cancelled?: boolean;
-  delivered?: boolean;
+  // Etat final (expediee) : tracker complet, commande classee dans "passees".
+  done?: boolean;
 };
 
 export const STATUT_META: Record<CommandeStatut, StatutMeta> = {
   en_attente: { key: "processing", label: "En traitement", bg: "#FFF3E0", fg: "#B26A00", trackerIdx: 0 },
   en_production: { key: "production", label: "En fabrication", bg: "#E3F2FD", fg: "#1565C0", trackerIdx: 2 },
-  expediee: { key: "shipped", label: "Expédiée", bg: "#F3E5F5", fg: "#6A1B9A", trackerIdx: 3 },
-  livree: { key: "delivered", label: "Livrée", bg: "#E8F5E9", fg: "#004B32", trackerIdx: 3, delivered: true },
+  expediee: { key: "shipped", label: "Expédiée", bg: "#F3E5F5", fg: "#6A1B9A", trackerIdx: 3, done: true },
+  // Etape retiree le 2026-10-07 (valeur conservee dans l'enum SQL) : affichee comme expediee.
+  livree: { key: "shipped", label: "Expédiée", bg: "#F3E5F5", fg: "#6A1B9A", trackerIdx: 3, done: true },
   annulee: { key: "cancelled", label: "Annulée", bg: "#FDEAEA", fg: "#C62828", cancelled: true, trackerIdx: 0 },
 };
 
@@ -57,7 +59,7 @@ export function statutMeta(statut: CommandeStatut): StatutMeta {
 }
 
 // Statut effectif cote client a partir du workflow devis + commande :
-//   Nouveau (recue) -> Confirmée (devis validé) -> En fabrication -> Expédiée -> Livrée
+//   Nouveau (recue) -> Confirmée (devis validé) -> En fabrication -> Expédiée
 // La commande nait "en_attente" : tant que le devis n'est pas accepté on reste a
 // l'etape "Commande reçue" ; une fois accepté (mais pas encore en production) on
 // passe a "Confirmée" (tracker index 1, jusque-la jamais atteint).
@@ -71,10 +73,6 @@ export function clientStatusMeta(order: Order): StatutMeta {
   return statutMeta(order.statut);
 }
 
-// En cours : non terminees ; Passees : livrees ou annulees.
-export function isCurrent(statut: CommandeStatut): boolean {
-  return statut === "en_attente" || statut === "en_production" || statut === "expediee";
-}
 
 export function formatDate(iso: string, locale = "fr-FR"): string {
   const d = new Date(iso);

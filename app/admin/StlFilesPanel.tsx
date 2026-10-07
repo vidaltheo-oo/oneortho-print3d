@@ -14,6 +14,7 @@ import {
 } from "@/lib/cart";
 import {
   fetchDevisDetail,
+  markStlDownloaded,
   signedStlUrl,
   formatDateFr,
   type AdminPiece,
@@ -83,6 +84,7 @@ export default function StlFilesPanel({
       document.body.appendChild(a);
       a.click();
       a.remove();
+      if (!p.telechargeLe) void markStlDownloaded(p.id);
     }
   }
 
@@ -147,7 +149,11 @@ export default function StlFilesPanel({
                         /u
                       </div>
                     </div>
-                    {p.storagePath ? (
+                    {p.supprimeLe ? (
+                      <span className={styles.cellEmail}>
+                        Supprimé de la plateforme le {formatDateFr(p.supprimeLe)}
+                      </span>
+                    ) : p.storagePath ? (
                       <div className={styles.fileBtns}>
                         <button
                           type="button"
@@ -307,8 +313,8 @@ export default function StlFilesPanel({
             <circle cx="10" cy="10" r="8" />
             <path d="M10 9v4M10 6.5v.5" />
           </svg>
-          Les fichiers STL sont conservés tant que la commande est active. Ils
-          peuvent être supprimés une fois la commande livrée ou annulée.
+          La plateforme est une zone tampon : une fois téléchargés et archivés,
+          les fichiers STL se suppriment depuis l&apos;onglet STL.
         </div>
       </aside>
 

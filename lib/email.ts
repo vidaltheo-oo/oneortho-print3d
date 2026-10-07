@@ -92,7 +92,6 @@ const EMAIL_I18N: Record<Lang, EmailDict> = {
         "Bonne nouvelle : votre commande est maintenant en production. Nos équipes impriment vos pièces en PA2200.",
       expediee:
         "Votre commande a été expédiée. Vous la recevrez à l'adresse de livraison indiquée.",
-      livree: "Votre commande a été livrée. Merci de votre confiance.",
     },
   },
   en: {
@@ -122,7 +121,6 @@ const EMAIL_I18N: Record<Lang, EmailDict> = {
         "Good news: your order is now in production. Our teams are printing your parts in PA2200.",
       expediee:
         "Your order has been shipped. You will receive it at the delivery address provided.",
-      livree: "Your order has been delivered. Thank you for your trust.",
     },
   },
   es: {
@@ -152,7 +150,6 @@ const EMAIL_I18N: Record<Lang, EmailDict> = {
         "Buenas noticias: su pedido está ahora en producción. Nuestros equipos imprimen sus piezas en PA2200.",
       expediee:
         "Su pedido ha sido enviado. Lo recibirá en la dirección de entrega indicada.",
-      livree: "Su pedido ha sido entregado. Gracias por su confianza.",
     },
   },
   it: {
@@ -182,7 +179,6 @@ const EMAIL_I18N: Record<Lang, EmailDict> = {
         "Buone notizie: il tuo ordine è ora in produzione. I nostri team stampano i tuoi pezzi in PA2200.",
       expediee:
         "Il tuo ordine è stato spedito. Lo riceverai all'indirizzo di consegna indicato.",
-      livree: "Il tuo ordine è stato consegnato. Grazie per la fiducia.",
     },
   },
   de: {
@@ -212,7 +208,6 @@ const EMAIL_I18N: Record<Lang, EmailDict> = {
         "Gute Nachrichten: Ihre Bestellung ist jetzt in Fertigung. Unsere Teams drucken Ihre Teile in PA2200.",
       expediee:
         "Ihre Bestellung wurde versendet. Sie erhalten sie an der angegebenen Lieferadresse.",
-      livree: "Ihre Bestellung wurde geliefert. Vielen Dank für Ihr Vertrauen.",
     },
   },
   pt: {
@@ -242,7 +237,6 @@ const EMAIL_I18N: Record<Lang, EmailDict> = {
         "Boas notícias: a sua encomenda está agora em produção. As nossas equipas imprimem as suas peças em PA2200.",
       expediee:
         "A sua encomenda foi expedida. Irá recebê-la na morada de entrega indicada.",
-      livree: "A sua encomenda foi entregue. Obrigado pela sua confiança.",
     },
   },
 };
@@ -442,7 +436,6 @@ export function internalNotificationHtml(
 export const STATUT_EMAIL: Record<string, { labelKey: string } | undefined> = {
   en_production: { labelKey: "status.production" },
   expediee: { labelKey: "status.shipped" },
-  livree: { labelKey: "status.delivered" },
 };
 
 export function statusLabel(statut: string, lang: Lang): string {

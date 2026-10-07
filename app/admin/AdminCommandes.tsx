@@ -26,11 +26,9 @@ type SortDir = "asc" | "desc";
 
 const STATUS_FILTERS: { key: "tous" | WorkflowStep; label: string }[] = [
   { key: "tous", label: "Toutes" },
-  { key: "nouveau", label: "Nouveau" },
   { key: "valide", label: "Validé" },
   { key: "en_production", label: "En production" },
   { key: "expediee", label: "Expédiée" },
-  { key: "livree", label: "Livrée" },
 ];
 
 function initials(name: string | null | undefined): string {
@@ -63,7 +61,10 @@ export default function AdminCommandes({
   const [sortDir, setSortDir] = useState<SortDir>("desc");
 
   const now = new Date();
-  const kpis = computeCommandeKpis(commandes, now);
+  // Une commande n'existe vraiment qu'une fois son devis validé : les devis
+  // nouveaux ou refusés restent dans la vue Devis.
+  const validees = commandes.filter((c) => c.devisStatut === "accepte");
+  const kpis = computeCommandeKpis(validees, now);
 
   function toggleSort(key: SortKey) {
     if (sortKey === key) {
@@ -81,7 +82,7 @@ export default function AdminCommandes({
   }
 
   const q = query.trim().toLowerCase();
-  const filtered = commandes.filter((c) => {
+  const filtered = validees.filter((c) => {
     const step = workflowStep(c.devisStatut, c.statut);
     if (status !== "tous" && step !== status) return false;
     if (!isInPeriod(c.createdAt, period, now)) return false;
@@ -256,16 +257,13 @@ export default function AdminCommandes({
           rows.map((c) => {
             const step = workflowStep(c.devisStatut, c.statut);
             const meta = WORKFLOW_META[step];
-            // Action gardee : on ne saute pas d'etape. Le lancement en production
-            // n'est propose qu'apres validation du devis (etape "valide").
+            // Action gardee : on ne saute pas d'etape. Expediee est l'etat final.
             const next: { to: CommandeStatut; label: string } | null =
               step === "valide"
                 ? { to: "en_production", label: "Lancer la production" }
                 : c.statut === "en_production"
                   ? { to: "expediee", label: "Marquer expédiée" }
-                  : c.statut === "expediee"
-                    ? { to: "livree", label: "Marquer livrée" }
-                    : null;
+                  : null;
             return (
               <div
                 key={c.id}
@@ -307,7 +305,7 @@ export default function AdminCommandes({
                 <div className={styles.td}>{formatShort(c.updatedAt)}</div>
                 <div className={styles.td}>
                   <div className={styles.rowActions}>
-                    {next ? (
+                    {next && (
                       <button
                         type="button"
                         className={styles.actBtn}
@@ -319,11 +317,7 @@ export default function AdminCommandes({
                       >
                         {next.label}
                       </button>
-                    ) : step === "nouveau" ? (
-                      <span className={styles.cellEmail}>
-                        À valider dans Devis
-                      </span>
-                    ) : null}
+                    )}
                   </div>
                 </div>
               </div>

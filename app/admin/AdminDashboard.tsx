@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import {
   computeCa12Months,
   computeDashboardKpis,
@@ -7,7 +8,12 @@ import {
   formatEURk,
   formatEUR2,
   DEVIS_STATUT_META,
+  DB_QUOTA_BYTES,
+  STORAGE_QUOTA_BYTES,
+  fetchStorageUsage,
+  formatBytes,
   type AdminDevis,
+  type StorageUsage,
 } from "@/lib/admin";
 import styles from "./admin.module.css";
 
@@ -24,6 +30,20 @@ export default function AdminDashboard({
   const chart = computeCa12Months(devis, now);
   const maxBar = Math.max(1, ...chart.map((c) => c.value));
   const recent = devis.slice(0, 6);
+  const [usage, setUsage] = useState<StorageUsage | null>(null);
+  const [usageError, setUsageError] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetchStorageUsage().then((u) => {
+      if (cancelled) return;
+      if (u) setUsage(u);
+      else setUsageError(true);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   return (
     <>
@@ -165,6 +185,61 @@ export default function AdminDashboard({
           )}
         </div>
       </div>
+
+      <div className={styles.panel} style={{ marginTop: 20 }}>
+        <div className={styles.panelTitle}>Capacité Supabase (plan Free)</div>
+        {usageError ? (
+          <div className={styles.emptyMsg}>Indicateur indisponible.</div>
+        ) : !usage ? (
+          <div className={styles.emptyMsg}>Chargement…</div>
+        ) : (
+          <>
+            <CapacityRow
+              label="Fichiers"
+              used={usage.stockageOctets}
+              quota={STORAGE_QUOTA_BYTES}
+              detail={`${usage.fichiers} fichier${usage.fichiers > 1 ? "s" : ""}`}
+            />
+            <CapacityRow
+              label="Base de données"
+              used={usage.baseOctets}
+              quota={DB_QUOTA_BYTES}
+            />
+          </>
+        )}
+      </div>
     </>
+  );
+}
+
+// Vert < 70 %, orange < 90 %, rouge au-dela : purger les STL deja telecharges.
+function CapacityRow({
+  label,
+  used,
+  quota,
+  detail,
+}: {
+  label: string;
+  used: number;
+  quota: number;
+  detail?: string;
+}) {
+  const pct = Math.min(100, (used / quota) * 100);
+  const color = pct >= 90 ? "#C62828" : pct >= 70 ? "#FF6C4F" : "#004B32";
+  return (
+    <div className={styles.repRow}>
+      <span className={styles.repLbl}>{label}</span>
+      <span className={styles.repTrack}>
+        <span
+          className={styles.repFill}
+          style={{ display: "block", width: `${Math.max(pct, 0.5)}%`, background: color }}
+        />
+      </span>
+      <span style={{ flex: "none", fontSize: 13, whiteSpace: "nowrap" }}>
+        <strong>{formatBytes(used)}</strong> / {formatBytes(quota)} ·{" "}
+        {pct.toLocaleString("fr-FR", { maximumFractionDigits: 1 })} %
+        {detail ? ` · ${detail}` : ""}
+      </span>
+    </div>
   );
 }

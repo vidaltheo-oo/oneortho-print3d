@@ -36,8 +36,8 @@ Aucune migration SQL n'est versionnée dans ce repo : le schéma ci-dessous est 
 
 - `clients` : `id`, `user_id` (auth.users), `raison_sociale`, `nom`, `email`, `telephone`, `siret`, `tva_intracom`, `type_activite`, `fonction`, `adresse_facturation` (texte libre), `adresse_livraison`, `created_at`
 - `devis` : `id`, `client_id`, `numero`, `statut` (`brouillon|envoye|accepte|refuse|expire`), `montant_ht`, `tva`, `montant_ttc`, `remise`, `delai` (`std|pri|exp`), `langue`, `nature_application` (`md|proto|other`), `livraison` (`std|j1`), `nettoyage`, `dossier_lot`, `teinture_total`, `created_at`
-- `devis_pieces` : `id`, `devis_id`, `nom_fichier`, `volume_mm3`, `quantite`, `prix_ht`, `finition` (`micro|lissage`), `couleur`, `storage_path`
-- `commandes` : `id`, `devis_id`, `client_id`, `statut` (`en_attente|en_production|expediee|livree|annulee`), `ref_client` (n° de commande client, 50 car. max), `bon_commande_path` (PDF dans `stl-files`), `created_at`, `updated_at` (colonnes `ref_client`/`bon_commande_path` : `supabase/migrations/20261005000000_commandes_bon_commande.sql`)
+- `devis_pieces` : `id`, `devis_id`, `nom_fichier`, `volume_mm3`, `quantite`, `prix_ht`, `finition` (`micro|lissage`), `couleur`, `storage_path`, `stl_telecharge_le`, `stl_supprime_le` (zone tampon STL, `supabase/migrations/20261007000000_stl_zone_tampon.sql`)
+- `commandes` : `id`, `devis_id`, `client_id`, `statut` (`en_attente|en_production|expediee|annulee` ; `livree` subsiste dans l'enum SQL mais n'est plus utilisé, affiché comme expédiée), `ref_client` (n° de commande client, 50 car. max), `bon_commande_path` (PDF dans `stl-files`), `created_at`, `updated_at` (colonnes `ref_client`/`bon_commande_path` : `supabase/migrations/20261005000000_commandes_bon_commande.sql`)
 - `admins` : `user_id`
 - Storage bucket `stl-files` : chemins `{user_id}/{devis_id}/{index}-{nom_fichier}` (STL) et `{user_id}/bons-commande/{horodatage}-{nom_fichier}` (bons de commande PDF, un par checkout, partagé par les commandes du panier)
 
@@ -52,19 +52,25 @@ Aucune migration SQL n'est versionnée dans ce repo : le schéma ci-dessous est 
 
 Toute l'autorisation repose sur la RLS : le code n'utilise que la clé anon, y compris dans les route handlers (client lié au token utilisateur, `lib/supabaseServer.ts`).
 
-## Workflow devis / commande (5 étapes)
+## Workflow devis / commande (4 étapes)
 
 Le checkout crée **ensemble** un `devis` (statut `envoye`) et une `commande` (statut `en_attente`). Le cycle de vie réel combine les deux statuts (`lib/admin.ts:workflowStep`) :
 
 ```
-nouveau → validé → en_production → expédiée → livrée
+nouveau → validé → en_production → expédiée
    (devis refusé → refusé ; commande annulée → annulée)
 ```
 
 - Étapes 1–2 pilotées dans /admin/devis (validation du devis, obligatoire avant production)
-- Étapes 3–5 pilotées dans /admin/commandes ; `en_production`, `expediee` et `livree` déclenchent un email client (langue du devis)
+- Étapes 3–4 pilotées dans /admin/commandes, qui n'affiche que les commandes dont le devis est validé ; `en_production` et `expediee` déclenchent un email client (langue du devis)
 
 Côté client (`/mes-commandes`), `clientStatusMeta` traduit la même combinaison en tracker 4 étapes.
+
+## Zone STL tampon et capacité
+
+La plateforme n'archive pas les STL : l'atelier les télécharge (horodatage `stl_telecharge_le` au premier téléchargement admin) puis les supprime du bucket depuis l'onglet STL, à l'unité ou en lot pour les fichiers déjà téléchargés (`stl_supprime_le`). La ligne `devis_pieces` est conservée.
+
+Le tableau de bord affiche l'occupation (fichiers, base) via la RPC `admin_storage_usage()` (security definer, réservée aux admins) comparée aux quotas du plan Free (`STORAGE_QUOTA_BYTES`, `DB_QUOTA_BYTES` dans `lib/admin.ts`).
 
 ## Checkout (lib/checkout.ts)
 

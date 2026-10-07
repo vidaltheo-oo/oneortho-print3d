@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import {
@@ -189,11 +190,18 @@ export default function AdminApp() {
   async function onUpdateCommande(id: string, statut: CommandeStatut) {
     const ok = await updateCommandeStatut(id, statut);
     if (ok) {
-      // Email client pour les statuts notifiables (en_production/expediee/livree).
+      // Email client pour les statuts notifiables (en_production/expediee).
       void notifyOrderStatus(id, statut);
       // Relit la base : la vue Devis (statut derive de la commande) reste alignee.
       await reloadData();
     }
+  }
+
+  // Relit la liste STL (apres telechargement ou suppression de fichiers).
+  async function reloadStl() {
+    const r = await fetchAdminStl();
+    if (r.ok) setStlFiles(r.files);
+    else setDataError(r.message ?? "Erreur de chargement des fichiers STL");
   }
 
   // Chargement paresseux des vues Clients et STL a leur premiere ouverture.
@@ -209,10 +217,7 @@ export default function AdminApp() {
     }
     if (view === "stl" && !loaded.has("stl")) {
       loaded.add("stl");
-      void fetchAdminStl().then((r) => {
-        if (r.ok) setStlFiles(r.files);
-        else setDataError(r.message ?? "Erreur de chargement des fichiers STL");
-      });
+      void reloadStl();
     }
   }, [phase, view]);
 
@@ -238,6 +243,14 @@ export default function AdminApp() {
       <div className={styles.gate}>
         <form className={styles.gateBox} onSubmit={onLogin}>
           <div className={styles.gateLogo}>
+            <Image
+              src="/Oneortho_logotype_2023_vert.png"
+              alt="OneOrtho Medical"
+              width={4013}
+              height={938}
+              priority
+              className={styles.gateLogoImg}
+            />
             ONE <span className={styles.accent}>PRINT</span>
           </div>
           <div className={styles.gateTitle}>Espace administrateur</div>
@@ -296,6 +309,14 @@ export default function AdminApp() {
       <div className={styles.gate}>
         <div className={styles.gateBox}>
           <div className={styles.gateLogo}>
+            <Image
+              src="/Oneortho_logotype_2023_vert.png"
+              alt="OneOrtho Medical"
+              width={4013}
+              height={938}
+              priority
+              className={styles.gateLogoImg}
+            />
             ONE <span className={styles.accent}>PRINT</span>
           </div>
           <div className={styles.gateTitle}>Accès réservé</div>
@@ -318,8 +339,16 @@ export default function AdminApp() {
     <div className={styles.app}>
       <aside className={styles.sidebar}>
         <div className={styles.logo}>
-          ONE<br />
-          <span className={styles.accent}>PRINT</span>
+          {/* Meme logotype que l'en-tete espace client (version claire sur fond vert). */}
+          <Image
+            src="/Oneortho_logotype_2023_grege.png"
+            alt="OneOrtho Medical"
+            width={4013}
+            height={938}
+            priority
+            className={styles.logoImg}
+          />
+          ONE <span className={styles.accent}>PRINT</span>
         </div>
         {NAV.map((n) => {
           const active = n.enabled && n.key === view;
@@ -379,7 +408,7 @@ export default function AdminApp() {
             <AdminCommandes commandes={data.commandes} onUpdate={onUpdateCommande} />
           )}
           {view === "clients" && <AdminClients clients={clients} />}
-          {view === "stl" && <AdminStl files={stlFiles} />}
+          {view === "stl" && <AdminStl files={stlFiles} onChanged={reloadStl} />}
         </main>
       </div>
     </div>
