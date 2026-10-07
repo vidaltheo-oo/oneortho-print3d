@@ -95,6 +95,8 @@ header{
   background:#fff;border-radius:12px;box-shadow:0 4px 24px rgba(0,0,0,.18);
   padding:6px;display:flex;flex-direction:column;z-index:55;
 }
+/* display:flex ci-dessus l'emporte sur [hidden] du navigateur : menu toujours visible sans cette regle. */
+.user-menu[hidden]{display:none}
 .user-menu-head{
   font-family:'Sora',sans-serif;font-weight:700;font-size:.8rem;color:var(--green);
   padding:8px 12px 6px;border-bottom:1px solid #f0ece0;margin-bottom:4px;
